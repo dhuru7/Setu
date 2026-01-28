@@ -1,0 +1,51 @@
+/* Inline Editing Styles */
+.inline-input {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 0.95rem;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+    padding: 2px 0;
+}
+
+.inline-input:focus {
+    border-bottom-color: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+.confirm-tick-btn {
+    background: var(--accent-primary);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    margin-left: 10px;
+    flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 10px rgba(244, 31, 78, 0.3);
+}
+
+.confirm-tick-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 14px rgba(244, 31, 78, 0.4);
+}
+
+.confirm-tick-btn:active {
+    transform: scale(0.95);
+}
+
+.confirm-tick-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 3;
+}

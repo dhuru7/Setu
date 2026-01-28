@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login – Setu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/set1_style.css">
+    <link rel="stylesheet" href="../static/css/set1_loginstyle.css">
+
+    <script>
+        // Simple Theme Loader (No Loops!)
+        (function () {
+            try {
+                const theme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { }
+        })();
+    </script>
+</head>
+
+<body class="antialiased">
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] w-full max-w-sm space-y-3"></div>
+
+    <!-- Navigation Header -->
+    <header class="nav-header sticky top-0 z-50">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex items-center justify-between">
+                <a href="index.html" class="logo notranslate">
+                    <span id="animated-name">Setu</span>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-2">
+                    <a href="about.html" class="btn btn-ghost">About</a>
+
+                    <div class="language-dropdown">
+                        <button id="language-btn" class="btn btn-ghost flex items-center">
+                            <span class="language-text notranslate">English</span>
+                            <span id="current-lang" class="language-indicator notranslate">EN</span>
+                            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="language-dropdown" class="dropdown-content">
+                            <!-- Language options will be dynamically populated by JS -->
+                        </div>
+                    </div>
+
+                    <button id="theme-toggle" class="theme-toggle theme-toggle-btn" aria-label="Toggle theme">
+                        <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                        <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div id="mobile-menu-btn" class="md:hidden menu-wrapper" aria-label="Open menu">
+                    <div class="hamburger-menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden mobile-menu">
+                <div class="space-y-3">
+                    <a href="about.html" class="btn btn-ghost w-full justify-start">About</a>
+
+                    <div class="language-dropdown w-full">
+                        <button id="mobile-language-btn"
+                            class="btn btn-ghost text-left w-full flex justify-between items-center">
+                            <span class="mobile-language-text notranslate">English</span>
+                            <span id="mobile-current-lang" class="language-indicator notranslate">EN</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="mobile-language-dropdown" class="dropdown-content w-full">
+                            <!-- Language options will be dynamically populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-3">
+                        <span class="text-sm font-medium text-[var(--text-secondary)]">Switch Theme</span>
+                        <button id="mobile-theme-toggle" class="theme-toggle theme-toggle-btn"
+                            aria-label="Toggle theme">
+                            <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                                </path>
+                            </svg>
+                            <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="login-container relative z-10 w-full min-h-screen flex flex-col justify-center px-6 py-8">
+        <div
+            class="desktop-wrapper step-container md:bg-[var(--bg-secondary)] md:p-10 md:rounded-2xl md:shadow-2xl md:max-w-md md:w-full md:mx-auto md:border md:border-[var(--border-light)]">
+
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-[var(--text-primary)] leading-tight">Welcome Back</h1>
+            </div>
+
+            <form id="login-form" novalidate>
+                <div class="space-y-6">
+
+                    <div>
+                        <input type="tel" id="email" class="custom-input" placeholder="Enter your mobile number"
+                            required>
+                    </div>
+
+                    <div>
+                        <input type="password" id="password" class="custom-input" placeholder="Enter your password"
+                            required>
+                    </div>
+
+                    <button type="submit" id="login-btn" class="btn-login-submit">
+                        Login
+                    </button>
+
+                </div>
+            </form>
+
+            <div class="text-center mt-8 text-sm text-[var(--text-secondary)]">
+                Don't have an account?
+                <a href="signup.html" class="font-bold text-[var(--accent-primary)] hover:underline ml-1">Sign up</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Google Translate Element (Hidden but functional) -->
+    <div id="google_translate_element"></div>
+
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
+    <script>
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,hi,bn,te,mr,ta,ur,gu,kn,ml,pa,or,as,ne',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+
+    <script type="module" src="../static/js/login.js"></script>
+</body>
+
+</html>

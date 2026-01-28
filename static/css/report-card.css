@@ -1,0 +1,454 @@
+/* Shared Report Card Design */
+
+:root {
+    --card-radius: 1.5rem;
+    --transition-speed: 0.4s;
+    --primary-color: #6366f1;
+}
+
+.report-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--card-radius);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+    max-width: 100%;
+}
+
+.report-card:active {
+    transform: scale(0.995);
+}
+
+/* Layers */
+.report-front,
+.report-back {
+    width: 100%;
+    height: 100%;
+    transition: opacity var(--transition-speed) ease, visibility var(--transition-speed);
+}
+
+.report-front {
+    opacity: 1;
+    visibility: visible;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.report-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: var(--bg-secondary);
+    opacity: 0;
+    visibility: hidden;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.5rem;
+    z-index: 10;
+}
+
+.report-card.revealed .report-front {
+    opacity: 0.1;
+    filter: blur(4px);
+}
+
+.report-card.revealed .report-back {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.avatar-circle.object-cover {
+    object-fit: cover;
+}
+
+.user-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.time-ago {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.status-pill {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-pill.resolved {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.status-pill.pending {
+    background-color: #ffedd5;
+    color: #c2410c;
+}
+
+/* Image */
+.card-image {
+    width: 100%;
+    height: 350px;
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: grab;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.report-card.revealed .card-image img {
+    transform: scale(1.05);
+}
+
+/* Actions */
+.card-actions {
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    gap: 1.5rem;
+    border-top: 1px solid var(--border-light);
+    align-items: center;
+    min-height: 60px;
+    /* Ensure space for buttons */
+}
+
+/* BASE ACTION ITEM (Generic) */
+.action-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: none;
+    border: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* MODERN FOLLOW BUTTON */
+.follow-btn {
+    background-color: var(--bg-primary);
+    /* Use a light bg by default */
+    border: 1px solid var(--border-light);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    min-width: 120px;
+    /* Fixed minimal width to prevent jargon jump */
+    justify-content: center;
+}
+
+.follow-btn:hover {
+    background-color: #f3f4f6;
+    /* Light gray hover */
+    transform: translateY(-1px);
+}
+
+[data-theme='dark'] .follow-btn:hover {
+    background-color: #374151;
+}
+
+/* Active State (Following) */
+.follow-btn.text-\[\#6366f1\] {
+    background-color: rgba(99, 102, 241, 0.1);
+    /* Light indigo tint */
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.follow-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Animation Text Wrapper */
+.follow-text {
+    display: inline-block;
+    transition: opacity 0.3s ease;
+}
+
+.animating-count {
+    animation: fadeInOut 5s forwards;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+}
+
+.issue-tag {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Back Content */
+.back-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+}
+
+.back-content {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.detail-group {
+    border-left: 3px solid #6366f1;
+    padding-left: 1rem;
+}
+
+/* Mobile & Global Swipe Hint */
+.swipe-instruction {
+    text-align: center;
+    padding: 0.75rem;
+    background-color: var(--bg-primary);
+    border-top: 1px solid var(--border-light);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: default;
+}
+
+.chevrons {
+    display: inline-block;
+    letter-spacing: -2px;
+    animation: slideRight 1.5s infinite;
+    color: #6366f1;
+}
+
+@keyframes slideRight {
+    0% {
+        transform: translateX(0);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translateX(5px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 0.5;
+    }
+}
+
+/* Desktop Styles */
+.desktop-reveal-btn {
+    display: none;
+    width: 100%;
+    padding: 0.75rem;
+    text-align: center;
+    background-color: transparent;
+    border: none;
+    border-top: 1px solid var(--border-light);
+    color: #6366f1;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.desktop-reveal-btn:hover {
+    background-color: rgba(99, 102, 241, 0.05);
+}
+
+/* Responsive Overrides */
+@media (max-width: 640px) {
+    .report-card {
+        border-left: none;
+        border-right: none;
+        margin-bottom: 1rem;
+    }
+
+    .card-image {
+        height: 300px;
+    }
+
+    .swipe-instruction {
+        padding-top: 0;
+        padding-bottom: 0.5rem;
+        background: transparent;
+        border-top: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .swipe-instruction {
+        display: none;
+    }
+
+    .desktop-reveal-btn {
+        display: block;
+    }
+
+    .report-card:active {
+        transform: none;
+    }
+}
+
+/* Skeleton Loading */
+.skeleton-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--card-radius);
+    margin-bottom: 2rem;
+    min-height: 450px;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.skeleton-header {
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-accent);
+}
+
+.skeleton-text-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.skeleton-line {
+    height: 12px;
+    background: var(--bg-accent);
+    border-radius: 4px;
+}
+
+.skeleton-line.short {
+    width: 40%;
+}
+
+.skeleton-line.medium {
+    width: 70%;
+}
+
+.skeleton-image {
+    width: 100%;
+    height: 350px;
+    background: var(--bg-accent-light, #e2e8f0);
+}
+
+.skeleton-actions {
+    padding: 0.75rem 1.25rem;
+    height: 60px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+}
+
+.animate-pulse {
+    animation: skeletonPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes skeletonPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .5;
+    }
+}
+
+[data-theme='dark'] .skeleton-image {
+    background-color: #1e293b;
+}

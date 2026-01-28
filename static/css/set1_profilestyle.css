@@ -1,0 +1,527 @@
+/* Profile Page Styles */
+/* Integrating with Global Theme in set1_style.css */
+
+/* Container */
+.profile-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    /* Optional: Add a subtle page border/shadow on desktop */
+}
+
+@media (min-width: 640px) {
+    .profile-container {
+        background-color: var(--bg-secondary);
+        border-radius: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-top: 2rem;
+        padding: 3rem;
+        border: 1px solid var(--border-medium);
+    }
+}
+
+/* Main Edit Toggle Button (Now Relative in Flux) */
+.main-edit-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.625rem;
+    height: 2.625rem;
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--accent-primary);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.main-edit-toggle:hover {
+    background-color: var(--accent-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(244, 31, 78, 0.25);
+}
+
+.main-edit-toggle:active {
+    transform: scale(0.95);
+}
+
+.main-edit-toggle svg {
+    width: 1.69rem;
+    height: 1.69rem;
+    /* Ensure icon is perfectly centered */
+    display: block;
+}
+
+/* Profile Elements */
+.profile-name {
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+    text-align: center;
+    line-height: 1.2;
+    position: relative;
+}
+
+/* Image Container */
+.profile-image-container {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    border-radius: 1.5rem;
+    background-color: var(--bg-secondary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    border: 4px solid var(--bg-secondary);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.profile-image-container:hover {
+    transform: scale(1.02);
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+    padding: 0.5rem;
+    pointer-events: none;
+    backdrop-filter: blur(2px);
+}
+
+.profile-image-container:hover .image-overlay {
+    opacity: 1;
+}
+
+/* Details List - Card Style */
+.profile-details-list {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-secondary);
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-medium);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse-glow-border {
+    0% {
+        box-shadow: 0 0 0 0 rgba(244, 31, 78, 0.4);
+        border-color: var(--accent-primary);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(244, 31, 78, 0);
+        border-color: var(--accent-primary);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(244, 31, 78, 0);
+        border-color: var(--accent-primary);
+    }
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.input-gradient-animation {
+    background: linear-gradient(-45deg, var(--bg-primary), var(--bg-accent), var(--accent-primary), var(--bg-accent));
+    background-size: 400% 400%;
+    animation: gradientBG 0.5s ease infinite;
+    color: var(--text-primary);
+    border-color: var(--accent-primary);
+}
+
+.detect-location-btn {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%) !important;
+    /* Force vertical center */
+    margin: 0 !important;
+    background: var(--bg-accent);
+    color: var(--accent-primary);
+    border: none;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.detect-location-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.modal-input-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    /* Ensure it behaves as a container */
+}
+
+
+.detail-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border-color: var(--accent-primary);
+}
+
+.detail-icon-label {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.detail-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-right: 0.75rem;
+    fill: currentColor;
+    color: var(--accent-primary);
+    opacity: 0.9;
+}
+
+.detail-value-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.detail-value {
+    text-align: left;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    word-break: break-word;
+}
+
+/* Swipe Structure - Overlay Mode */
+.swipe-card {
+    position: relative;
+    overflow: hidden;
+    padding: 0 !important;
+    border: 1px solid var(--border-medium);
+}
+
+.swipe-content {
+    position: relative;
+    z-index: 1;
+    /* Below overlay */
+    background-color: var(--bg-secondary);
+    width: 100%;
+    height: 100%;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.swipe-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    /* Top layer */
+    background: linear-gradient(135deg, var(--accent-primary), #ff4b2b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transform: translateX(100%);
+    /* Start hidden to the right */
+    transition: transform 0.1s linear;
+    cursor: grab;
+}
+
+.swipe-overlay:active {
+    cursor: grabbing;
+}
+
+.swipe-overlay.swiped-open {
+    /* Class to handle snap state if needed, primarily handled by inline style in JS */
+}
+
+
+/* Field Edit Buttons (Square) */
+.field-edit-btn {
+    display: none;
+    background-color: var(--bg-accent);
+    border: 1px solid var(--accent-primary);
+    color: var(--accent-primary);
+    cursor: pointer;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.field-edit-btn:hover {
+    background-color: var(--accent-primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+.field-edit-btn svg {
+    width: 1.4rem;
+    height: 1.4rem;
+    display: block;
+}
+
+.profile-container.edit-active .field-edit-btn {
+    display: flex;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Edit Modal */
+.edit-modal-overlay,
+.preview-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.edit-modal-overlay.open,
+.preview-modal-overlay.open {
+    display: flex;
+    opacity: 1;
+}
+
+/* Shared Modal Styles */
+.edit-modal,
+.preview-modal {
+    background-color: var(--bg-secondary);
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 360px;
+    padding: 2rem;
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 2px solid var(--accent-primary);
+    text-align: center;
+    position: relative;
+    color: var(--text-primary);
+}
+
+.edit-modal-overlay.open .edit-modal,
+.preview-modal-overlay.open .preview-modal {
+    transform: scale(1);
+}
+
+/* Preview Modal Specifics */
+.preview-modal-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+    border: 2px solid var(--border-medium);
+}
+
+.modal-close-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--text-secondary);
+    border-radius: 50%;
+    cursor: pointer;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+.modal-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 0.85rem 3rem 0.85rem 0.85rem;
+    /* Make space for button on right */
+    border: 2px solid var(--border-medium);
+    border-radius: 0.75rem;
+    font-size: 1.05rem;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, background 0.3s;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+}
+
+.modal-input:focus {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-secondary);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.modal-btn {
+    padding: 0.75rem 2rem;
+    border-radius: 2rem;
+    /* Pill shape */
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s;
+    font-size: 0.95rem;
+}
+
+.modal-btn:active {
+    transform: scale(0.95);
+}
+
+.btn-save {
+    background-color: var(--accent-primary);
+    color: white;
+    box-shadow: 0 4px 10px rgba(244, 31, 78, 0.3);
+}
+
+.btn-cancel {
+    background-color: var(--bg-secondary);
+    color: var(--text-muted);
+    border: 1px solid var(--border-medium);
+}
+
+.btn-cancel:hover {
+    border-color: var(--text-secondary);
+    color: var(--text-secondary);
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translate(-50%, 150%);
+    background-color: #1F2937;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.toast.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}

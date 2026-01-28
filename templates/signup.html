@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            try {
+                const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { }
+        })();
+    </script>
+    <title>Sign Up – Setu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Link to the new common stylesheet -->
+    <link rel="stylesheet" href="../static/css/set1_style.css">
+    <!-- Signup Page specific styles -->
+    <link rel="stylesheet" href="../static/css/set1_signupstyle.css">
+</head>
+
+<body class="antialiased">
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] w-full max-w-sm space-y-3"></div>
+
+    <!-- Navigation Header -->
+    <header class="nav-header sticky top-0 z-50">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex items-center justify-between">
+                <!-- === MODIFIED: Added 'notranslate' class to logo === -->
+                <a href="signup.html" class="logo notranslate">
+                    <span id="animated-name">Setu</span>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-2">
+                    <a href="about.html" class="btn btn-ghost">About</a>
+
+                    <div class="language-dropdown">
+                        <!-- === MODIFIED: Added 'notranslate' class to language button spans === -->
+                        <button id="language-btn" class="btn btn-ghost flex items-center">
+                            <span class="language-text notranslate">English</span>
+                            <span id="current-lang" class="language-indicator notranslate">EN</span>
+                            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="language-dropdown" class="dropdown-content">
+                            <!-- Language options will be dynamically populated by JS -->
+                        </div>
+                    </div>
+
+                    <button id="theme-toggle" class="theme-toggle theme-toggle-btn" aria-label="Toggle theme">
+                        <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                        <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- === MODIFIED: NEW MOBILE MENU BUTTON === -->
+                <div id="mobile-menu-btn" class="md:hidden menu-wrapper" aria-label="Open menu">
+                    <div class="hamburger-menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <!-- === END MODIFIED BUTTON === -->
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden mobile-menu">
+                <div class="space-y-3">
+                    <a href="about.html" class="btn btn-ghost w-full justify-start">About</a>
+
+                    <div class="language-dropdown w-full">
+                        <!-- === MODIFIED: Added 'notranslate' class to mobile language button spans === -->
+                        <button id="mobile-language-btn"
+                            class="btn btn-ghost text-left w-full flex justify-between items-center">
+                            <span class="mobile-language-text notranslate">English</span>
+                            <span id="mobile-current-lang" class="language-indicator notranslate">EN</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="mobile-language-dropdown" class="dropdown-content w-full">
+                            <!-- Language options will be dynamically populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-3">
+                        <span class="text-sm font-medium text-[var(--text-secondary)]">Switch Theme</span>
+                        <button id="mobile-theme-toggle" class="theme-toggle theme-toggle-btn"
+                            aria-label="Toggle theme">
+                            <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                                </path>
+                            </svg>
+                            <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Signup Page Main Content -->
+    <!-- Main Container -->
+    <main class="signup-container relative z-10 w-full min-h-screen flex flex-col justify-center px-6 py-8">
+
+        <!-- Wrapper -->
+        <div
+            class="desktop-wrapper md:bg-[var(--bg-secondary)] md:p-10 md:rounded-2xl md:shadow-2xl md:max-w-md md:w-full md:mx-auto md:border md:border-[var(--border-light)]">
+
+            <!-- Header Title -->
+            <div class="mb-10 relative">
+                <h1 class="text-4xl font-bold text-[var(--text-primary)] leading-tight">
+                    Create Account
+                </h1>
+            </div>
+
+            <form id="signup-form" novalidate class="space-y-6">
+
+                <!-- STEP 1 -->
+                <div id="step-1" class="step-container space-y-4">
+                    <div class="input-group">
+                        <input type="text" id="fullname" name="fullname" class="custom-input" placeholder="Name"
+                            required>
+                        <span id="fullname-error" class="error-message"></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="id-card" name="id-card" class="custom-input uppercase"
+                            placeholder="Aadhaar (12 digits) or Emp ID (ABCD12345678)" required>
+                        <span id="id-error" class="error-message"></span>
+                    </div>
+                    <div class="input-group">
+                        <!-- Using text type with onfocus to handle placeholder better or keep date -->
+                        <input type="text" onfocus="(this.type='date')" onblur="(this.type='text')" id="dob" name="dob"
+                            class="custom-input" placeholder="Date of Birth" required>
+                        <span id="dob-error" class="error-message"></span>
+                    </div>
+
+                    <!-- Step 1 Next Button & Login Link -->
+                    <div class="flex justify-between items-center mt-8">
+                        <div id="auth-note-container" class="transition-opacity duration-300">
+                            <p class="text-[var(--text-secondary)] text-sm font-medium">
+                                Already have an account?
+                                <a href="login.html"
+                                    class="font-bold text-[var(--accent-primary)] hover:underline ml-1">
+                                    Log in
+                                </a>
+                            </p>
+                        </div>
+
+                        <button type="button" id="to-step-2-btn" class="arrow-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2 (Hidden Initially) -->
+                <div id="step-2" class="step-container space-y-4 hidden">
+                    <div class="input-group">
+                        <input type="tel" id="mobile" name="mobile" class="custom-input" placeholder="Mobile Number"
+                            maxlength="10" required>
+                        <span id="mobile-error" class="error-message"></span>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="password" id="password" class="custom-input" placeholder="Password" required>
+                        <span id="password-error" class="error-message"></span>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="confirm-password" class="custom-input" placeholder="Confirm Password"
+                            required>
+                        <span id="confirm-password-error" class="error-message"></span>
+                    </div>
+
+                    <!-- Step 2 Navigation Area -->
+                    <!-- Step 2 Navigation Area -->
+                    <div class="flex justify-end items-center mt-8">
+                        <button type="submit" id="signup-btn" class="arrow-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="section-bg py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="text-xl font-bold mb-2 text-[var(--accent-primary)]">Setu</div>
+            <p class="text-sm text-[var(--text-secondary)]">&copy; A Bridge Between Citizens & Authorities.</p>
+        </div>
+    </footer>
+
+    <!-- Google Translate Element (Hidden but functional) -->
+    <div id="google_translate_element"></div>
+
+    <!-- Scripts -->
+    <script type="module" src="../static/js/signup.js"></script>
+
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
+    <script>
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,hi,bn,te,mr,ta,ur,gu,kn,ml,pa,or,as,ne',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+</body>

@@ -1,0 +1,64 @@
+/* Search Page Specific Styles */
+.search-result-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 4px 16px var(--shadow-light);
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    animation: fadeInResult 0.5s ease-out forwards;
+}
+
+.search-result-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px var(--shadow-medium);
+    border-color: var(--accent-primary);
+}
+
+@keyframes fadeInResult {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#filter-buttons {
+    transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease, margin-bottom 0.3s ease, visibility 0s 0.3s;
+    transform: translateY(-10px);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    margin-bottom: 0 !important;
+}
+
+#filter-buttons.visible {
+    transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease, margin-bottom 0.3s ease, visibility 0s;
+    transform: translateY(0);
+    opacity: 1;
+    max-height: 10rem;
+    /* Adjust if more space is needed */
+    visibility: visible;
+    margin-bottom: 1.5rem !important;
+    /* Corresponds to Tailwind's mb-6 */
+}
+
+.filter-btn {
+    background-color: var(--bg-accent);
+    color: var(--text-muted);
+    border: 2px solid transparent;
+}
+
+.filter-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-medium);
+}
+
+.filter-btn.active {
+    background-color: var(--accent-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}

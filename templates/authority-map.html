@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // CRITICAL OPTIMIZATION: Instant Auth Redirect
+        (function () {
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.replace("login.html");
+            }
+        })();
+    </script>
+    <script>
+        (function () {
+            try {
+                const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { }
+        })();
+    </script>
+    <title>404 Not Found</title>
+    <style>
+        @-webkit-keyframes cursor-blink {
+            0% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes cursor-blink {
+            0% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        body {
+            background-color: black;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .four-oh-four {
+            position: relative;
+            top: 0;
+            left: 0;
+            min-height: 100vh;
+            min-width: 100vw;
+            z-index: 2;
+            background-color: black;
+            transition: opacity 300ms ease-out;
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+
+        .four-oh-four .dJAX_internal {
+            opacity: 0.0;
+        }
+
+        .four-oh-four form,
+        .four-oh-four input {
+            position: fixed;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            background-color: black;
+        }
+
+        .terminal {
+            position: relative;
+            padding: 4rem;
+        }
+
+        .terminal .prompt {
+            color: #1ff042;
+            display: block;
+            font-family: 'Andale Mono', monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.15em;
+            white-space: pre-wrap;
+            text-shadow: 0 0 2px rgba(31, 240, 66, 0.75);
+            line-height: 1;
+            margin-bottom: 0.75em;
+        }
+
+        .terminal .prompt:before {
+            content: '> ';
+            display: inline-block;
+        }
+
+        .terminal .new-output {
+            display: inline-block;
+        }
+
+        .terminal .new-output:after {
+            display: inline-block;
+            vertical-align: -0.15em;
+            width: 0.75em;
+            height: 1em;
+            margin-left: 5px;
+            background: #1ff042;
+            box-shadow: 1px 1px 1px rgba(31, 240, 66, 0.65), -1px -1px 1px rgba(31, 240, 66, 0.65), 1px -1px 1px rgba(31, 240, 66, 0.65), -1px 1px 1px rgba(31, 240, 66, 0.65);
+            -webkit-animation: cursor-blink 1.25s steps(1) infinite;
+            animation: cursor-blink 1.25s steps(1) infinite;
+            content: '';
+        }
+
+        .four-oh-four-form {
+            opacity: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <form class="four-oh-four-form">
+            <input type="text" class="404-input">
+        </form>
+
+        <div class="terminal">
+            <p class="prompt">The page you requested cannot be found right meow. This page is under development. Try
+                typing 'Meow Meow'.</p>
+            <p class="prompt output new-output"></p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.5.2/velocity.min.js"></script>
+    <script>
+        var input = $('.404-input');
+        input.focus();
+
+        $('.container').on('click', function (e) {
+            input.focus();
+        });
+
+        input.on('keyup', function (e) {
+            $('.new-output').text(input.val());
+        });
+
+        $('.four-oh-four-form').on('submit', function (e) {
+            e.preventDefault();
+            var val = $(this).children($('.404-input')).val().toLowerCase();
+            if (val === 'meow meow') {
+                window.location.href = 'https://youtu.be/L8XbI9aJOXk?si=yURPf74GI_PRyu4q';
+            } else {
+                resetForm();
+            }
+        });
+
+        function resetForm() {
+            var message = "Sorry that command is not recognized.";
+            var input = $('.404-input');
+
+            $('.new-output').removeClass('new-output');
+            input.val('');
+            $('.terminal').append('<p class="prompt">' + message + '</p><p class="prompt output new-output"></p>');
+
+            $('.new-output').velocity('scroll', { duration: 100 });
+        }
+    </script>
+</body>
+
+</html>

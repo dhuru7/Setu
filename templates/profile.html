@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // CRITICAL OPTIMIZATION: Instant Auth Redirect
+        (function () {
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.replace("login.html");
+            }
+        })();
+    </script>
+    <script>
+        (function () {
+            try {
+                const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { }
+        })();
+    </script>
+    <title>Profile - Setu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <!-- Link to the new common stylesheet -->
+    <link rel="stylesheet" href="../static/css/set1_style.css">
+    <link rel="stylesheet" href="../static/css/set1_profilestyle.css">
+    <link rel="stylesheet" href="../static/css/set1_profilestyle_layout.css">
+    <link rel="stylesheet" href="../static/css/navigation.css">
+    <link rel="stylesheet" href="../static/css/settings.css">
+    <link rel="stylesheet" href="../static/css/inline_edit.css">
+    <link rel="stylesheet" href="../static/css/notifications.css">
+    <script src="../static/js/notifications.js" defer></script>
+    <script src="../static/js/settings.js" defer></script>
+    <script src="../static/js/navigation.js" defer></script>
+    <script src="../static/js/setu-ai.js" defer></script>
+</head>
+
+<body class="antialiased pb-28 sm:pb-0">
+
+    <!-- Desktop Vertical Navbar -->
+    <nav class="hidden sm:flex desktop-sidebar">
+        <div class="flex-shrink-0 flex justify-center pt-2 pb-6">
+            <!-- === MODIFIED: Added 'notranslate' class to logo === -->
+            <a href="index.html" class="logo !text-xl notranslate"><span
+                    id="animated-name-desktop-sidebar">Setu</span></a>
+        </div>
+        <div class="flex-grow flex flex-col items-center justify-start space-y-1">
+            <a href="index.html" title="Home" class="desktop-nav-link" id="desktop-home-link">
+                <svg class="flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" />
+                </svg>
+                <span class="desktop-nav-text">Home</span>
+            </a>
+            <a href="search.html" title="Search" class="desktop-nav-link" id="desktop-search-link">
+                <svg class="flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <span class="desktop-nav-text">Search</span>
+            </a>
+            <a href="updates.html" title="Updates" class="desktop-nav-link" id="desktop-updates-link">
+                <svg class="flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
+                </svg>
+                <span class="desktop-nav-text">Updates</span>
+            </a>
+
+            <button id="notification-btn-desktop" title="Notifications" class="desktop-nav-link w-full relative">
+                <svg class="flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                </svg>
+                <span class="desktop-nav-text">Notifications</span>
+                <span id="notification-unread-dot-desktop"
+                    class="notification-unread-dot !top-3 !left-7 !right-auto hidden"></span>
+            </button>
+            <a href="profile.html" title="Profile" class="desktop-nav-link active" id="desktop-profile-link">
+                <svg class="flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="desktop-nav-text">Profile</span>
+            </a>
+
+
+        </div>
+        <div class="flex-shrink-0 w-full flex flex-col items-center space-y-2 pb-2 mt-auto">
+            <!-- Footer space -->
+        </div>
+    </nav>
+
+    <div id="app" class="min-h-screen sm:pl-28">
+        <!-- Mobile Header -->
+        <header id="mobile-header" class="sm:hidden sticky top-0 z-40 py-2 px-2">
+            <div class="nav-content-wrapper rounded-xl max-w-7xl mx-auto relative">
+                <div class="flex justify-between items-center py-2 px-4">
+                    <!-- === MODIFIED: Added 'notranslate' class to logo === -->
+                    <a href="index.html" class="logo w-24 transition-all duration-300 notranslate"><span
+                            id="animated-name-mobile">Setu</span></a>
+                    <div id="mobile-header-buttons" class="flex items-center space-x-2 transition-all duration-300">
+
+                        <button id="setu-ai-btn-mobile" title="Setu AI Assistant"
+                            class="btn btn-cta !p-2 !rounded-full ai-widget-container">
+                            <svg class="w-5 h-5 flex-shrink-0 text-white original-icon" viewBox="0 0 24 24"
+                                fill="currentColor">
+                                <path
+                                    d="M12.0001 1.99219L3.45911 12.0002L12.0001 22.0082L20.5411 12.0002L12.0001 1.99219Z" />
+                            </svg>
+                        </button>
+                        <button id="notification-btn-mobile" class="btn btn-secondary !p-2 relative !rounded-full"
+                            title="Notifications">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                            </svg>
+                            <span id="notification-unread-dot" class="notification-unread-dot hidden"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="min-h-screen py-8 flex justify-center items-start sm:pl-28">
+            <div id="profile-container" class="profile-container">
+
+
+
+                <!-- Header Card (Avatar + Name) -->
+                <div class="profile-header-card">
+                    <div id="avatar-container" class="profile-image-container group"
+                        title="Click to Preview, Long Press to Edit">
+                        <img id="profile-avatar"
+                            src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                            alt="Profile" class="profile-avatar" draggable="false"
+                            style="background-color: var(--bg-accent);">
+                        <div class="image-overlay hidden">
+                            <!-- Preview Removed -->
+                        </div>
+                    </div>
+
+                    <div class="profile-name-container">
+                        <span id="profile-fullname"
+                            class="text-xl font-bold text-[var(--text-primary)] animate-pulse bg-[var(--bg-accent)] h-8 w-32 rounded inline-block"></span>
+                    </div>
+                </div>
+                <input type="file" id="avatar-input" class="hidden" accept="image/*">
+
+                <!-- Details List Container -->
+                <div class="profile-details-card">
+
+                    <!-- Mobile (Not Editable, No Swipe) -->
+                    <div class="detail-item" id="mobile-card">
+                        <div class="detail-icon-label" id="mobile-icon-wrapper">
+                            <svg id="mobile-icon-svg" class="detail-icon text-red-500 hidden"
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 5.25V4.5z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span id="mobile-icon-flag" class="hidden text-2xl">🇮🇳</span>
+                        </div>
+                        <div class="detail-value-container justify-start w-full">
+                            <span id="view-mobile"
+                                class="detail-value text-sm w-full block h-5 bg-[var(--bg-accent)] rounded animate-pulse"></span>
+                        </div>
+                    </div>
+
+                    <!-- DOB (Swipe Interaction) -->
+                    <div class="detail-item cursor-grab active:cursor-grabbing" id="dob-card">
+                        <div class="detail-icon-label">
+                            <svg class="detail-icon text-red-500 hidden" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM7.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM8.25 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM9.75 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM10.5 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM12.75 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM14.25 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 13.5a.75.75 0 100-1.5.75.75 0 000 1.5z" />
+                                <path fill-rule="evenodd"
+                                    d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="detail-value-container justify-start w-full">
+                            <span id="view-dob"
+                                class="detail-value text-sm transition-opacity duration-300 w-full block h-5 bg-[var(--bg-accent)] rounded animate-pulse"></span>
+                        </div>
+                    </div>
+
+                    <!-- City (Swipe to Detect) -->
+                    <div class="detail-item swipe-card" id="city-card" data-swipe-edit="city"
+                        data-swipe-text="Auto Detect">
+                        <div class="swipe-content">
+                            <div class="detail-icon-label">
+                                <svg class="detail-icon text-red-500 hidden" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="detail-value-container justify-start w-full">
+                                <span id="view-city"
+                                    class="detail-value text-sm text-accent-primary cursor-pointer w-full block h-5 bg-[var(--bg-accent)] rounded animate-pulse"></span>
+                            </div>
+                            <!-- Loading Spinner -->
+                            <div id="city-loader" class="hidden ml-auto">
+                                <svg class="animate-spin h-5 w-5 text-[var(--accent-primary)]"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="swipe-overlay" id="city-swipe-text">Auto locate</div>
+                    </div>
+
+                    <!-- Email (Swipe to Inline Edit) -->
+                    <div class="detail-item swipe-card" id="email-card" data-swipe-edit="email"
+                        data-swipe-text="Edit Email">
+                        <div class="swipe-content">
+                            <div class="detail-icon-label">
+                                <svg class="detail-icon text-red-500 hidden" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
+                                    <path
+                                        d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
+                                </svg>
+                            </div>
+                            <div class="detail-value-container justify-start relative w-full">
+                                <span id="view-email"
+                                    class="detail-value text-sm cursor-pointer text-accent-primary w-full block h-5 bg-[var(--bg-accent)] rounded animate-pulse"></span>
+                                <input type="email" id="edit-email-inline" class="inline-input hidden" value=""
+                                    placeholder="Enter email address">
+                                <button id="save-email-inline-btn" class="confirm-tick-btn hidden" title="Save Email">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="swipe-overlay">Edit Email</div>
+                    </div>
+
+                    <!-- Open Settings Card -->
+                    <div class="detail-item cursor-pointer" onclick="openSettingsPanel()">
+                        <div class="detail-icon-label">
+                            <svg class="detail-icon text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 5.343c-.2.07-.394.158-.581.261l-1.61-.842a1.925 1.925 0 00-2.438.75l-1.026 1.778a1.925 1.925 0 00.41 2.385l1.373 1.156a9.059 9.059 0 000 1.336l-1.373 1.156a1.925 1.925 0 00-.41 2.385l1.026 1.778c.451.78 1.417 1.082 2.187.75l1.61-.842c.187.103.381.191.581.261l.178 1.526c.15.904.933 1.567 1.85 1.567h2.053c.917 0 1.699-.663 1.85-1.567l.178-1.526c.2-.07.394-.158.581-.261l1.61.842c.77.332 1.737.03 2.187-.75l1.026-1.778a1.925 1.925 0 00-.41-2.385l-1.373-1.156a9.059 9.059 0 000-1.336l1.373-1.156a1.925 1.925 0 00.41-2.385l-1.026-1.778a1.925 1.925 0 00-2.438-.75l-1.61.842c-.187-.103-.381-.191-.581-.261l-.178-1.526a1.925 1.925 0 00-1.85-1.567h-2.053zM12 9.75a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="detail-value-container justify-start">
+                            <span class="detail-value font-semibold">Open Settings</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <!-- Edit Modal Overlay -->
+    <div id="edit-modal-overlay" class="edit-modal-overlay">
+        <div class="edit-modal">
+            <h3 id="modal-title" class="modal-title">Edit Field</h3>
+
+            <div id="modal-input-wrapper" class="modal-input-container">
+                <input type="text" id="modal-input" class="modal-input">
+            </div>
+
+            <div class="modal-actions">
+                <button id="modal-cancel" class="modal-btn btn-cancel">Cancel</button>
+                <button id="modal-save" class="modal-btn btn-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <div class="mobile-floating-nav-container sm:hidden">
+        <nav class="mobile-floating-nav">
+            <!-- Home -->
+            <a href="index.html" id="bottom-nav-home" class="mobile-nav-item">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" />
+                </svg>
+                <span class="label">Home</span>
+            </a>
+
+            <!-- Search -->
+            <a href="search.html" id="bottom-nav-search" class="mobile-nav-item">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <span class="label">Search</span>
+            </a>
+
+
+
+            <!-- Updates (Was Menu) -->
+            <a href="updates.html" id="updates-nav-link" class="mobile-nav-item">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
+                </svg>
+                <span class="label">Updates</span>
+            </a>
+
+            <!-- Profile (Active) -->
+            <a href="profile.html" id="bottom-nav-profile" class="mobile-nav-item active">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="label">Profile</span>
+            </a>
+        </nav>
+    </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Empty stub for backwards compatibility if needed? No, just remove it.
+        });
+    </script>
+    </div>
+
+    <!-- Settings Panel Removed (Loaded via settings.js) -->
+
+    <div id="setu-ai-container-desktop" class="hidden sm:block">
+        <button id="setu-ai-btn" title="Setu AI Assistant"
+            class="btn btn-cta !p-4 !rounded-full shadow-lg transform hover:scale-110 transition-transform duration-200 ai-widget-container">
+            <svg class="w-8 h-8 flex-shrink-0 text-white original-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.0001 1.99219L3.45911 12.0002L12.0001 22.0082L20.5411 12.0002L12.0001 1.99219Z" />
+            </svg>
+        </button>
+    </div>
+
+    <div id="ai-info-modal-overlay"
+        class="fixed inset-0 bg-black bg-opacity-60 backdrop-filter backdrop-blur-sm z-[130] hidden items-center justify-center p-4">
+        <div id="ai-info-modal"
+            class="bg-[var(--bg-secondary)] rounded-2xl shadow-xl max-w-sm w-full p-6 text-center transform scale-95 opacity-0 transition-all duration-300 ease-out">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-[var(--bg-accent)] mb-4">
+                <svg class="w-8 h-8 text-[var(--accent-primary)]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.0001 1.99219L3.45911 12.0002L12.0001 22.0082L20.5411 12.0002L12.0001 1.99219Z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-[var(--text-primary)] mb-2">Setu AI is Evolving!</h3>
+            <p class="text-sm text-[var(--text-muted)] mb-6">
+                Thank you for trying our new AI assistant! This feature is currently under active development. While it
+                can perform some basic tasks, we're working hard to unlock its full potential. Stay tuned for exciting
+                updates!
+            </p>
+            <button id="ai-info-got-it-btn" class="btn btn-primary w-full">Got it</button>
+        </div>
+    </div>
+
+    <div id="toast-notification" class="toast"></div>
+
+    <div id="google_translate_element"></div>
+
+    <script>
+        function googleTranslateElementInit() { new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,hi,bn,te,mr,ta,ur,gu,kn,ml,pa,or,as,ne', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false }, 'google_translate_element'); }
+        function getCookie(name) { let value = "; " + document.cookie; let parts = value.split("; " + name + "="); if (parts.length === 2) return parts.pop().split(';').shift(); return null; }
+        function setCookie(name, value, days = 365) { let expires = ""; if (days) { const date = new Date(); date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000)); expires = "; expires=" + date.toUTCString(); } document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax"; }
+
+        window.addEventListener('load', () => {
+            const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+            const googCookie = getCookie('googtrans') || '';
+            const expectedCookie = savedLang === 'en' ? '' : '/en/' + savedLang;
+            if (googCookie.replace(/"/g, '') !== expectedCookie) { if (savedLang === 'en') { document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/'; } else { setCookie('googtrans', expectedCookie); } setTimeout(() => window.location.reload(), 200); return; }
+        });
+    </script>
+    <script type="module" src="../static/js/profile.js"></script>
+    <script type="module" src="../static/js/logout.js"></script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
+</body>
+
+</html>

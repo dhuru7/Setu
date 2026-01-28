@@ -1,0 +1,41 @@
+/* Notification Panel Styles */
+#notification-panel {
+    background-color: var(--bg-secondary);
+    border-left: 1px solid var(--border-light);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+    z-index: 121;
+    /* Slightly higher than settings if needed, or same */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#notification-backdrop {
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 110;
+    transition: opacity 0.3s ease;
+}
+
+.notification-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: start;
+    gap: 0.75rem;
+    transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: var(--bg-accent);
+}
+
+.notification-bg-unread {
+    background-color: var(--bg-primary);
+    /* Slight distinction for unread */
+}
+
+/* Remove ring animation if it was purely CSS, though it was likely JS driven class injection */
+.animate-ring {
+    /* Intentionally overriding/disabling if needed, or can be removed from JS */
+    animation: none !important;
+}

@@ -1,0 +1,633 @@
+/*
+  It contains styles for about.html
+*/
+
+:root {
+    /* New color theme based on homepage */
+    --bg-primary: #f3f4f6; /* Softer Gray Background */
+    --bg-secondary: #FFFFFF;
+    --bg-secondary-translucent: rgba(255, 255, 255, 0.85);
+    --bg-accent: #fee2e2; /* Light Red Accent */
+    --text-primary: #1f2937; /* Dark Slate Gray */
+    --text-secondary: #374151;
+    --text-muted: #6b7280;
+    --border-light: #e5e7eb;
+    --border-medium: #d1d5db;
+    --accent-primary: #f41f4e; /* UPDATED: New Red */
+    --accent-primary-hover: #d81b45; /* UPDATED: Darker Red */
+    --accent-secondary: #1f2937; /* Dark Slate Gray */
+    --accent-secondary-hover: #000000;
+    --shadow-light: rgba(0, 0, 0, 0.07);
+    --shadow-medium: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+    /* New dark theme based on homepage */
+    --bg-primary: #111827; /* Dark Slate 900 */
+    --bg-secondary: #1f2937; /* Dark Slate 800 */
+    --bg-secondary-translucent: rgba(31, 41, 55, 0.85);
+    --bg-accent: #374151; /* Dark Slate 700 */
+    --text-primary: #f9fafb; /* Off-white */
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --border-light: #374151;
+    --border-medium: #4b5563;
+    --accent-primary: #f41f4e; /* UPDATED: New Red */
+    --accent-primary-hover: #f64c71; /* UPDATED: Lighter Red */
+    --accent-secondary: #f9fafb;
+    --accent-secondary-hover: #FFFFFF;
+    --shadow-light: rgba(0, 0, 0, 0.2);
+    --shadow-medium: rgba(0, 0, 0, 0.3);
+}
+
+/* Google Translate Widget Hiding */
+#google_translate_element, .skiptranslate {
+    display: none !important;
+}
+body { top: 0 !important; }
+.goog-te-banner-frame { display: none !important; }
+
+@keyframes animated-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+* {
+    transition: background-color 0.2s cubic-bezier(0.4, 0.0, 0.2, 1), 
+               color 0.2s cubic-bezier(0.4, 0.0, 0.2, 1), 
+               border-color 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    scroll-behavior: smooth;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    font-size: 0.825rem;
+    padding: 0.6rem 1.3rem;
+    overflow: hidden;
+    will-change: transform, box-shadow, background-color;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    transition: left 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.btn:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease-out;
+}
+
+.btn-primary {
+    background-color: var(--accent-primary);
+    color: #FFFFFF;
+    font-weight: 700;
+    border: 2px solid transparent;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-primary-hover);
+    transform: scale(1.03);
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+/* --- Old CTA button style removed --- */
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-primary);
+    border: 2px solid var(--border-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-secondary:hover {
+    color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+    transform: scale(1.02);
+}
+
+.btn-ghost {
+    background-color: transparent;
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ghost::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background-color: var(--bg-accent);
+    transition: width 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    z-index: -1;
+}
+
+.btn-ghost:hover {
+    color: var(--text-primary);
+    transform: scale(1.02);
+}
+
+.btn-ghost:hover::after {
+    width: 100%;
+}
+
+.nav-header {
+    background-color: var(--bg-secondary-translucent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-light);
+}
+
+[data-theme="dark"] .nav-header {
+     background-color: var(--bg-secondary-translucent);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.logo:hover {
+    transform: scale(1.08) rotate(2deg);
+}
+
+#animated-name {
+     transition: opacity 0.3s ease-in-out;
+}
+
+.language-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    min-width: 12.5rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 32px var(--shadow-medium);
+    z-index: 1000;
+    padding: 0.5rem 0;
+    margin-top: 0.25rem;
+    max-height: 18.75rem;
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s cubic-bezier(0.4, 0.0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.dropdown-content.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.dropdown-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-accent);
+    transition: left 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    z-index: -1;
+}
+
+.dropdown-item:hover {
+    color: var(--accent-primary);
+    transform: translateX(5px);
+}
+
+.dropdown-item:hover::before {
+    left: 0;
+}
+
+.language-indicator {
+    font-size: 0.75rem;
+    background-color: var(--accent-primary);
+    color: #FFFFFF;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 0.375rem;
+    margin-left: 0.5rem;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.hero-slider {
+    position: relative;
+    width: 100%;
+    height: 65vh; /* Adjusted for better balance */
+    max-height: 550px;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: 0 20px 60px var(--shadow-medium);
+}
+
+.slide {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0;
+    transition: opacity 1.2s ease-in-out;
+}
+
+.slide.active { opacity: 1; }
+.slide img { width: 100%; height: 100%; object-fit: cover; }
+
+.slide-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    color: white;
+    /* Padding is now handled by Tailwind classes on the element for responsiveness */
+}
+
+.section-bg { background-color: var(--bg-secondary); }
+
+.feature-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: 1rem;
+    padding: 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    box-shadow: 0 4px 16px var(--shadow-light);
+    will-change: transform, box-shadow;
+    overflow: hidden;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--accent-primary);
+}
+
+.feature-details {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0.0, 0.2, 1), 
+                opacity 0.4s cubic-bezier(0.4, 0.0, 0.2, 1),
+                margin-top 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    margin-top: 0;
+}
+
+.feature-card:hover .feature-details {
+    max-height: 200px; /* Increased height to accommodate content */
+    opacity: 1;
+    margin-top: 1rem;
+}
+
+.step-number {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.step-number.authority {
+    background: var(--accent-secondary);
+    color: #FFFFFF;
+}
+[data-theme="dark"] .step-number.authority {
+     background: var(--accent-secondary);
+     color: var(--bg-primary);
+}
+
+
+.step-number:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.mobile-menu {
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-toggle {
+    background-color: var(--bg-accent);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    border: 2px solid transparent;
+    will-change: transform, background-color;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(10deg);
+    border-color: var(--accent-primary);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Update Note Modal Styles */
+#update-note-modal.show {
+    display: flex;
+}
+
+#update-note-modal.show #update-note-content {
+    transform: scale(1);
+    opacity: 1;
+}
+/* End Update Note Modal Styles */
+
+
+@media (max-width: 768px) {
+    .btn {
+        padding: 0.7rem 1.4rem;
+        font-size: 0.85rem;
+        min-height: 44px;
+        border-radius: 0.6rem;
+    }
+
+    .btn:hover {
+        transform: none;
+    }
+
+    .btn:active {
+        transform: scale(0.96);
+        transition: transform 0.1s ease-out;
+    }
+    
+    .hero-slider {
+        height: 55vh; /* Adjusted for mobile */
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+    }
+}
+
+/* --- NEW BLOB BUTTON STYLES (Phase 1) --- */
+
+.blob-btn {
+  z-index: 1;
+  position: relative;
+  /* Match the padding from the original .btn-cta for consistency, but blob looks better with more padding */
+  padding: 20px 46px; 
+  margin: 0.5rem 0; /* Added margin to match old .btn-cta layout */
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  font-size: 16px;
+  font-weight: bold;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  transition: color 0.5s;
+  cursor: pointer;
+  border-radius: 30px;
+}
+
+.blob-btn:before {
+  content: "";
+  z-index: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--accent-primary);
+  border-radius: 30px;
+}
+
+.blob-btn:after {
+  content: "";
+  z-index: -2;
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 100%;
+  height: 100%;
+  transition: all 0.3s 0.2s;
+  border-radius: 30px;
+}
+
+.blob-btn:hover {
+  color: var(--bg-secondary); /* This will be white */
+  border-radius: 30px;
+}
+
+.blob-btn:hover:after {
+  transition: all 0.3s;
+  left: 0;
+  top: 0;
+  border-radius: 30px;
+}
+
+.blob-btn__inner {
+  z-index: -1;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 30px;
+  background: var(--bg-secondary); /* This is white */
+}
+
+.blob-btn__blobs {
+  position: relative;
+  display: block;
+  height: 100%;
+  filter: url('#goo');
+}
+
+.blob-btn__blob {
+  position: absolute;
+  top: 2px;
+  width: 25%; /* 100% / 4 blobs */
+  height: 100%;
+  background: var(--accent-primary);
+  border-radius: 100%;
+  transform: translate3d(0, 150%, 0) scale(1.7);
+  transition: transform 0.45s;
+}
+
+@supports(filter: url('#goo')) {
+  .blob-btn__blob {
+    transform: translate3d(0, 150%, 0) scale(1.4);
+  }
+}
+
+.blob-btn__blob:nth-child(1) {
+  left: 0%;
+  transition-delay: 0s;
+}
+.blob-btn__blob:nth-child(2) {
+  left: 30%;
+  transition-delay: 0.08s;
+}
+.blob-btn__blob:nth-child(3) {
+  left: 60%;
+  transition-delay: 0.16s;
+}
+.blob-btn__blob:nth-child(4) {
+  left: 90%;
+  transition-delay: 0.24s;
+}
+
+.blob-btn:hover .blob-btn__blob {
+  transform: translateZ(0) scale(1.7);
+}
+
+@supports(filter: url('#goo')) {
+  .blob-btn:hover .blob-btn__blob {
+    transform: translateZ(0) scale(1.4);
+  }
+}
+
+/* --- NEW HAMBURGER MENU STYLES --- */
+.menu-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  /* OPTIMIZED: Match site border radius and background */
+  border-radius: 0.75rem; 
+  background-color: var(--bg-accent);
+}
+
+.menu-wrapper:hover {
+  /* OPTIMIZED: Use theme-aware hover color */
+  background-color: var(--border-light);
+}
+
+.hamburger-menu {
+  width: 30px;
+  height: 20px;
+  position: relative;
+}
+
+.hamburger-menu span {
+  display: block;
+  position: absolute;
+  height: 3px;
+  width: 100%;
+  /* OPTIMIZED: Use theme-aware color */
+  background: var(--text-primary);
+  border-radius: 3px;
+  opacity: 1;
+  left: 0;
+  transform: rotate(0deg);
+  transition: all 0.25s ease-in-out;
+}
+
+.hamburger-menu span:nth-child(1) {
+  top: 0px;
+}
+
+.hamburger-menu span:nth-child(2) {
+  top: 8px;
+}
+
+.hamburger-menu span:nth-child(3) {
+  top: 16px;
+}
+
+.menu-wrapper:hover .hamburger-menu span {
+  /* OPTIMIZED: Use theme-aware accent color on hover */
+  background: var(--accent-primary);
+}
+
+.menu-wrapper.open .hamburger-menu span {
+    /* OPTIMIZED: Make sure open (X) icon is also accent color */
+    background: var(--accent-primary);
+}
+
+.menu-wrapper.open .hamburger-menu span:nth-child(1) {
+  top: 8px;
+  transform: rotate(135deg);
+}
+
+.menu-wrapper.open .hamburger-menu span:nth-child(2) {
+  opacity: 0;
+  left: -60px;
+}
+
+.menu-wrapper.open .hamburger-menu span:nth-child(3) {
+  top: 8px;
+  transform: rotate(-135deg);
+}
+/* --- END NEW HAMBURGER MENU STYLES --- */

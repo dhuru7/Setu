@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // CRITICAL OPTIMIZATION: Instant Auth Redirect
+        (function () {
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.replace("login.html");
+            } else {
+                // Role Check
+                const userType = localStorage.getItem('userType');
+                if (userType === 'authority') {
+                    window.location.replace("authority-dashboard.html");
+                }
+            }
+        })();
+    </script>
+    <script>
+        (function () {
+            try {
+                const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { }
+        })();
+    </script>
+    <title>Report Feed - Setu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="../static/css/set1_style.css">
+    <!-- RESPECTIVE CSS PAGE -->
+    <link rel="stylesheet" href="../static/css/report-card.css">
+    <link rel="stylesheet" href="../static/css/navigation.css">
+    <link rel="stylesheet" href="../static/css/settings.css">
+    <link rel="stylesheet" href="../static/css/notifications.css">
+
+    <!-- Viewer.js for Image Preview -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.css"
+        integrity="sha512-za6IYQz7tR0pzniM/EAkgjV1gzvqK14eG1esb4yVGPkOpj09r4Yob78Xp158ybmO2p4ageZ10RP6G+TjBL9tLg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.js"
+        integrity="sha512-EC3CQ+2OkM+ZKsM12Y6O6vlDazTj+PM9qTGDsoWib6jWqaCx3Q1XM3x5xhgF6AgIFgMXHMNZq3k0xL50Fz0qEw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="../static/js/notifications.js" defer></script>
+    <script src="../static/js/settings.js" defer></script>
+    <script src="../static/js/navigation.js" defer></script>
+    <script src="../static/js/setu-ai.js" defer></script>
+</head>
+
+<body
+    class="antialiased pb-28 sm:pb-0 bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
+    <div id="app" class="min-h-screen">
+        <header class="sticky top-0 z-40 py-4 px-4 bg-[var(--bg-primary)] border-b border-[var(--border-light)]">
+            <div class="max-w-7xl mx-auto flex items-center">
+                <a href="index.html" class="mr-4 p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-6 h-6 text-[var(--text-primary)]">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                </a>
+                <h1 class="text-xl font-bold text-[var(--text-primary)] flex-grow">Reports in your area</h1>
+                <button id="filter-btn"
+                    class="p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 18H7.5M3.75 12H9m-5.25 0H12m0 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="max-w-3xl mx-auto px-4 py-6">
+            <!-- Feed Container -->
+            <div id="feed-container">
+                <!-- Loaded via JS -->
+                <p class="text-center text-[var(--text-muted)] mt-10">Loading reports...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Google Translate -->
+    <div id="google_translate_element"></div>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
+    <script>
+        function googleTranslateElementInit() { new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false }, 'google_translate_element'); }
+    </script>
+    <script type="module" src="../static/js/reportfeed.js"></script>
+    <script type="module" src="../static/js/logout.js"></script>
+</body>
+
+</html>

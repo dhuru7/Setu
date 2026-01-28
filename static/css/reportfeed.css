@@ -1,0 +1,462 @@
+/* Report Feed Card Design - Social Media Style */
+
+:root {
+    --card-radius: 1.5rem;
+    --transition-speed: 0.4s;
+}
+
+.report-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--card-radius);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    /* Important for containing the absolute back layer */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: auto;
+    /* Ensure enough height for the back content */
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+}
+
+/* Interaction: Visual cue that it's interactive */
+.report-card:active {
+    transform: scale(0.995);
+}
+
+/* LAYERS SYSTEM */
+.report-front,
+.report-back {
+    width: 100%;
+    height: 100%;
+    transition: opacity var(--transition-speed) ease, visibility var(--transition-speed);
+}
+
+/* FRONT VIEW: Standard Social Media Post Look */
+.report-front {
+    opacity: 1;
+    visibility: visible;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* BACK VIEW: The hidden details */
+.report-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: var(--bg-secondary);
+    /* Match card bg */
+    opacity: 0;
+    visibility: hidden;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.5rem;
+    z-index: 10;
+    /* Glassmorphism / Modern feel backdrop if needed, but solid is safer for readability */
+}
+
+/* State: Revealed */
+.report-card.revealed .report-front {
+    opacity: 0.1;
+    /* Fade out mostly, or 0 if we want complete replacement */
+    filter: blur(4px);
+}
+
+.report-card.revealed .report-back {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/* --- FRONT CONTENT STYLING --- */
+
+/* 1. Header: User & Meta */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    /* Modern gradient placeholder */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.user-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.time-ago {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.status-pill {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-pill.resolved {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.status-pill.pending {
+    background-color: #ffedd5;
+    color: #c2410c;
+}
+
+/* 2. Main Image: Full Bleed */
+.card-image {
+    width: 100%;
+    height: 350px;
+    /* Taller, more immersive */
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: grab;
+    /* Suggests swipe */
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Modern cover style, change to contain if details matter more */
+    transition: transform 0.3s ease;
+}
+
+.report-card.revealed .card-image img {
+    transform: scale(1.05);
+}
+
+/* 3. Action Bar */
+.card-actions {
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    gap: 1.5rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.action-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.action-item:hover {
+    color: #6366f1;
+    /* Brand color */
+}
+
+.action-item svg {
+    width: 24px;
+    height: 24px;
+}
+
+.vote-active {
+    color: #ef4444 !important;
+}
+
+.vote-active svg {
+    fill: currentColor;
+    animation: heartPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes heartPop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 4. Issue Type Tag (Instagram location style) */
+.issue-tag {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+
+/* --- BACK CONTENT STYLING --- */
+.back-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+}
+
+.back-content {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.detail-group {
+    border-left: 3px solid #6366f1;
+    /* Accent hint */
+    padding-left: 1rem;
+}
+
+.swipe-hint {
+    margin-top: auto;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    animation: bounceX 2s infinite;
+}
+
+@keyframes bounceX {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .report-card {
+        /* Full freshness on mobile */
+        border-left: none;
+        border-right: none;
+        margin-bottom: 1rem;
+    }
+
+    .card-image {
+        height: 300px;
+    }
+
+    /* Ensure swipe instruction is visible */
+    .swipe-instruction {
+        display: flex;
+        padding-top: 0;
+        padding-bottom: 0.5rem;
+        background: transparent;
+        border-top: none;
+    }
+}
+
+/* --- FOOTER INSTRUCTIONS (New) --- */
+
+/* Mobile: Swipe Hint */
+.swipe-instruction {
+    text-align: center;
+    padding: 0.75rem;
+    background-color: var(--bg-primary);
+    /* Slight contrast from card bg */
+    border-top: 1px solid var(--border-light);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: default;
+}
+
+.chevrons {
+    display: inline-block;
+    letter-spacing: -2px;
+    animation: slideRight 1.5s infinite;
+    color: #6366f1;
+    /* Brand color accent */
+}
+
+@keyframes slideRight {
+    0% {
+        transform: translateX(0);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translateX(5px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 0.5;
+    }
+}
+
+/* Desktop: Details Button */
+.desktop-reveal-btn {
+    display: none;
+    /* Hidden by default (mobile first) */
+    width: 100%;
+    padding: 0.75rem;
+    text-align: center;
+    background-color: transparent;
+    border: none;
+    border-top: 1px solid var(--border-light);
+    color: #6366f1;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.desktop-reveal-btn:hover {
+    background-color: rgba(99, 102, 241, 0.05);
+    /* subtle tint */
+}
+
+/* Hidden on desktop usually, but we want to swap them */
+@media (min-width: 768px) {
+    .swipe-instruction {
+        display: none;
+    }
+
+    .desktop-reveal-btn {
+        display: block;
+    }
+
+    /* Disable hover transform on card to prevent jitter when clicking button */
+    .report-card:active {
+        transform: none;
+    }
+}
+
+/* --- SKELETON LOADING --- */
+.skeleton-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--card-radius);
+    margin-bottom: 2rem;
+    min-height: 450px;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.skeleton-header {
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-accent);
+}
+
+.skeleton-text-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.skeleton-line {
+    height: 12px;
+    background: var(--bg-accent);
+    border-radius: 4px;
+}
+
+.skeleton-line.short {
+    width: 40%;
+}
+
+.skeleton-line.medium {
+    width: 70%;
+}
+
+.skeleton-image {
+    width: 100%;
+    height: 350px;
+    background: var(--bg-accent-light, #e2e8f0);
+}
+
+.skeleton-actions {
+    padding: 0.75rem 1.25rem;
+    height: 60px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+}
+
+.animate-pulse {
+    animation: skeletonPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes skeletonPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .5;
+    }
+}
+
+/* Dark mode adjustments for skeleton if variables aren't enough */
+[data-theme='dark'] .skeleton-image {
+    background-color: #1e293b;
+}

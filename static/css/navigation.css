@@ -1,0 +1,257 @@
+/* Navigation Styles - Extracted & Refined */
+
+/* --- Logo --- */
+.logo {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.logo:hover {
+    transform: scale(1.08) rotate(2deg);
+}
+
+#animated-name-desktop-sidebar,
+#animated-name-mobile {
+    transition: opacity 0.4s ease-in-out;
+}
+
+.fade-out {
+    opacity: 0;
+}
+
+/* --- Desktop Sidebar --- */
+.desktop-sidebar {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    bottom: 1rem;
+    width: 5rem;
+    /* Collapsed width */
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    transition: width 0.4s cubic-bezier(0.2, 0, 0, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0.75rem;
+}
+
+.desktop-sidebar:hover {
+    width: 17rem;
+    /* Expanded width */
+    background-color: var(--bg-secondary);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+}
+
+.desktop-nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0.875rem;
+    width: 100%;
+    border-radius: 1rem;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.desktop-nav-link svg {
+    min-width: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0;
+    transition: color 0.2s ease;
+}
+
+.desktop-nav-text {
+    margin-left: 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+
+.desktop-sidebar:hover .desktop-nav-text {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    transition-delay: 0.1s;
+}
+
+.desktop-nav-link:hover {
+    background-color: var(--bg-accent);
+    color: var(--text-primary);
+}
+
+.desktop-nav-link.active {
+    background-color: var(--text-primary);
+    color: var(--bg-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.desktop-nav-link.active svg,
+.desktop-nav-link.active span {
+    color: var(--bg-primary);
+}
+
+/* Active Icon Color Override if needed (from set1_style) */
+.desktop-nav-link.active svg {
+    color: var(--accent-primary) !important;
+}
+
+/* --- Mobile Header --- */
+.nav-content-wrapper {
+    background-color: var(--bg-secondary-translucent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 4px 16px var(--shadow-light);
+}
+
+/* --- Mobile Floating Navigation --- */
+/* Mobile Floating Navigation - Optimized */
+.mobile-floating-nav-container {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    width: auto;
+    max-width: 90vw;
+}
+
+.mobile-floating-nav {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: var(--bg-secondary-translucent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-light);
+    border-radius: 9999px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 0.85rem;
+    color: var(--text-muted);
+    border-radius: 9999px;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+    /* Use margin on label for spacing animation instead of gap to prevent ghost space */
+    gap: 0;
+
+    /* Unified smooth transition */
+    transition:
+        background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+        color 0.4s ease,
+        padding 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+        box-shadow 0.4s ease,
+        transform 0.1s ease;
+    /* Fast transform for click */
+
+    will-change: padding, background-color;
+}
+
+.mobile-nav-item .icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    stroke-width: 1.5;
+    /* Explicit default */
+    /* Transition: color normal, stroke-width delayed for "last frame" effect */
+    transition:
+        color 0.4s ease,
+        stroke-width 0.2s ease-in 0.2s;
+}
+
+.mobile-nav-item .label {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-left: 0;
+    font-weight: 500;
+    /* Start normal/medium */
+    font-size: 0.9rem;
+    white-space: nowrap;
+
+    /* Collapse: Width takes 0.4s, Opacity fades out continuously */
+    transition:
+        max-width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 0.2s ease-out,
+        margin-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+        font-weight 0.2s ease 0s;
+    /* Revert quickly */
+}
+
+/* Hover only on non-touch devices */
+@media (hover: hover) {
+    .mobile-nav-item:not(.active):hover {
+        background-color: var(--bg-accent);
+        color: var(--text-primary);
+    }
+}
+
+.mobile-nav-item:active {
+    transform: scale(0.92);
+}
+
+/* Active State */
+.mobile-nav-item.active {
+    background-color: #111827;
+    color: #ffffff;
+    /* Adjusted padding for tighter look */
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+    /* No gap on parent, strictly margin on child */
+    gap: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-nav-item.active .icon {
+    color: #ffffff;
+    stroke-width: 2;
+    /* Bold on active */
+    transition:
+        color 0.4s ease,
+        stroke-width 0.1s ease-in 0.32s;
+}
+
+.mobile-nav-item.active .label {
+    max-width: 140px;
+    /* Sufficient for specific labels */
+    opacity: 1;
+    margin-left: 0.35rem;
+    font-weight: 600;
+    /* Bold on active */
+    /* Explicit margin when active */
+    /* Expand: Wait 0.1s for container to start opening, then fade in */
+    transition:
+        max-width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 0.3s ease-out 0.15s,
+        margin-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+        font-weight 0.1s ease-in 0.32s;
+    /* Delayed thickening to very last frames */
+}

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        // CRITICAL OPTIMIZATION: Instant Auth Redirect
+        (function () {
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.replace("login.html");
+            } else {
+                // Role Check
+                const userType = localStorage.getItem('userType');
+                if (userType !== 'authority') {
+                    window.location.replace("index.html");
+                }
+            }
+        })();
+    </script>
+    <script>
+        (function () {
+            try {
+                const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { }
+        })();
+    </script>
+    <title>Setu Authority Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <style>
+        :root {
+            /* New color theme based on your palette */
+            --bg-primary: #f8f9fa;
+            /* A very light grey */
+            --bg-secondary: #FFFFFF;
+            --bg-secondary-translucent: rgba(255, 255, 255, 0.85);
+            --bg-accent: #fff5eb;
+            /* Very light orange */
+            --text-primary: #1D2228;
+            /* Dark */
+            --text-secondary: #343a40;
+            /* Slightly lighter dark */
+            --text-muted: #6c757d;
+            /* Muted gray */
+            --border-light: #E1E2E2;
+            /* Light Gray */
+            --border-medium: #ced4da;
+            /* Medium Gray */
+            --accent-primary: #FB8122;
+            /* Orange */
+            --accent-primary-hover: #e0721d;
+            /* Darker Orange */
+            --accent-secondary: #1D2228;
+            /* Dark color as secondary accent */
+            --accent-secondary-hover: #343a40;
+            /* Lighter dark */
+            --shadow-light: rgba(29, 34, 40, 0.07);
+            --shadow-medium: rgba(29, 34, 40, 0.12);
+        }
+
+        [data-theme="dark"] {
+            /* New dark theme based on your palette */
+            --bg-primary: #1D2228;
+            /* Dark */
+            --bg-secondary: #252b31;
+            /* Slightly lighter dark */
+            --bg-secondary-translucent: rgba(37, 43, 49, 0.85);
+            --bg-accent: #373d42;
+            /* Even lighter dark for accents */
+            --text-primary: #E1E2E2;
+            /* Light Gray */
+            --text-secondary: #adb5bd;
+            /* Lighter, muted gray */
+            --text-muted: #6c757d;
+            /* Muted gray */
+            --border-light: #373d42;
+            /* Corresponds to bg-accent */
+            --border-medium: #495057;
+            /* A step lighter */
+            --accent-primary: #FB8122;
+            /* Orange */
+            --accent-primary-hover: #fc9344;
+            /* Lighter Orange */
+            --accent-secondary: #E1E2E2;
+            /* Light Gray as secondary accent */
+            --accent-secondary-hover: #ffffff;
+            /* White */
+            --shadow-light: rgba(0, 0, 0, 0.2);
+            --shadow-medium: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+
+        /* Sidebar Styles */
+        .desktop-sidebar {
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-light);
+            box-shadow: 0 4px 16px var(--shadow-light);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        @media (max-width: 767px) {
+            .desktop-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .desktop-sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            text-decoration: none;
+        }
+
+        .logo:hover {
+            transform: scale(1.08) rotate(2deg);
+        }
+
+        #animated-name-desktop-sidebar {
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        #animated-name-desktop-sidebar.fade-out {
+            opacity: 0;
+        }
+
+        .desktop-nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            width: 100%;
+            border-radius: 0.75rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+        }
+
+        .desktop-nav-text {
+            margin-left: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .desktop-nav-link:hover {
+            background-color: var(--bg-accent);
+            color: var(--text-primary);
+            transform: scale(1.05);
+        }
+
+        .desktop-nav-link.active {
+            background-color: var(--bg-accent);
+            color: var(--text-primary);
+        }
+
+        .desktop-nav-link.active svg {
+            color: var(--accent-primary);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            transition: padding-left 0.3s ease-in-out;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                padding-left: 240px;
+                /* Sidebar width + padding */
+            }
+        }
+
+        .header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            box-shadow: 0 2px 8px var(--shadow-light);
+        }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 16px var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px var(--shadow-medium);
+        }
+
+        .table-container {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 16px var(--shadow-light);
+        }
+
+        th {
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background-color: var(--bg-accent);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(10deg);
+            border-color: var(--accent-primary);
+        }
+
+        .mobile-menu-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <div id="mobile-menu-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+    <nav id="sidebar" class="flex flex-col fixed top-0 left-0 h-full w-60 z-50 p-4 desktop-sidebar">
+        <div class="flex-shrink-0 flex justify-between items-center pt-2 pb-8">
+            <!-- === MODIFIED: Added 'notranslate' class to logo === -->
+            <a href="authority-dashboard.html" class="logo !text-2xl notranslate">
+                <span id="animated-name-desktop-sidebar">Setu</span>
+            </a>
+            <button id="close-menu-btn" class="md:hidden text-[var(--text-primary)] rounded-full p-1">
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex-grow flex flex-col items-start space-y-2">
+            <a href="authority-dashboard.html" title="Dashboard" class="desktop-nav-link active">
+                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+                <span class="desktop-nav-text">Dashboard</span>
+            </a>
+            <a href="authority-complaints.html" title="Complaints" class="desktop-nav-link">
+                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                <span class="desktop-nav-text">Complaints</span>
+            </a>
+            <a href="authority-map.html" title="Map View" class="desktop-nav-link">
+                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+                <span class="desktop-nav-text">Map View</span>
+            </a>
+            <a href="authority-reports.html" title="Reports" class="desktop-nav-link">
+                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12" />
+                </svg>
+                <span class="desktop-nav-text">Reports</span>
+            </a>
+            <a href="authority-profile.html" title="My Profile" class="desktop-nav-link">
+                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="desktop-nav-text">My Profile</span>
+            </a>
+        </div>
+
+        <div class="mt-auto flex flex-col items-start space-y-2 pb-2">
+            <a href="login.html" class="desktop-nav-link w-full" title="Logout">
+                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                <span class="desktop-nav-text">Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-content w-full">
+        <header class="p-4 flex justify-between items-center header">
+            <div class="flex items-center">
+                <button id="open-menu-btn" class="md:hidden mr-4 text-[var(--text-primary)]">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <h1 class="text-lg sm:text-xl font-bold text-[var(--text-primary)]">Welcome, Anita Sharma!</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="hidden sm:inline text-sm text-[var(--text-muted)]">Electricity Department</span>
+                <button id="theme-toggle-desktop" class="p-2 rounded-lg bg-[var(--bg-accent)] theme-toggle"
+                    title="Toggle Theme">
+                    <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                    <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="p-4 sm:p-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="card rounded-2xl p-6">
+                    <h3 id="total-complaints" class="text-3xl font-extrabold text-[var(--text-primary)]">0</h3>
+                    <p class="text-[var(--text-muted)]">Total Complaints Assigned</p>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <h3 id="resolved-complaints" class="text-3xl font-extrabold text-green-500">0</h3>
+                    <p class="text-[var(--text-muted)]">Resolved Complaints</p>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <h3 id="pending-complaints" class="text-3xl font-extrabold text-[var(--accent-primary)]">0</h3>
+                    <p class="text-[var(--text-muted)]">Pending Complaints</p>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <h3 class="text-3xl font-extrabold text-[var(--text-secondary)]">N/A</h3>
+                    <p class="text-[var(--text-muted)]">Avg. Resolution Time</p>
+                </div>
+            </div>
+
+            <div class="table-container rounded-2xl overflow-x-auto">
+                <table class="w-full text-sm min-w-[640px]">
+                    <thead class="font-semibold">
+                        <tr>
+                            <th class="p-4 text-left">ID</th>
+                            <th class="p-4 text-left">Issue</th>
+                            <th class="p-4 text-left">Location</th>
+                            <th class="p-4 text-left">Status</th>
+                            <th class="p-4 text-left">Date</th>
+                            <th class="p-4 text-left">Citizen</th>
+                            <th class="p-4 text-left">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be dynamically injected here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="text-center mt-8 text-sm text-[var(--text-muted)]">
+                Setu – Authority Dashboard
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const UI = {
+                themeToggles: [document.getElementById('theme-toggle-desktop')],
+                sunIcons: document.querySelectorAll('.sun-icon'),
+                moonIcons: document.querySelectorAll('.moon-icon'),
+                animatedNameDesktopSidebar: document.getElementById('animated-name-desktop-sidebar'),
+                totalComplaintsCard: document.getElementById('total-complaints'),
+                resolvedComplaintsCard: document.getElementById('resolved-complaints'),
+                pendingComplaintsCard: document.getElementById('pending-complaints'),
+                tableBody: document.querySelector('table tbody'),
+                tableContainer: document.querySelector('.table-container'),
+                sidebar: document.getElementById('sidebar'),
+                openMenuBtn: document.getElementById('open-menu-btn'),
+                closeMenuBtn: document.getElementById('close-menu-btn'),
+                backdrop: document.getElementById('mobile-menu-backdrop'),
+            };
+
+            const applyTheme = t => { const isDark = t === 'dark'; document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light'); UI.sunIcons.forEach(i => i.classList.toggle('hidden', isDark)); UI.moonIcons.forEach(i => i.classList.toggle('hidden', !isDark)); };
+            const setupTheme = () => { const i = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); applyTheme(i); UI.themeToggles.forEach(btn => btn.addEventListener('click', () => { const n = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', n); applyTheme(n); })); };
+
+            const setupLogoAnimation = () => {
+                const names = ['Setu', 'सेतु', 'সেতু', 'सेतू', 'સેતુ', 'ಸೇತು'];
+                let currentIndex = 0;
+                const logoElement = UI.animatedNameDesktopSidebar;
+                if (!logoElement) return;
+                setInterval(() => {
+                    logoElement.classList.add('fade-out');
+                    setTimeout(() => {
+                        currentIndex = (currentIndex + 1) % names.length;
+                        logoElement.textContent = names[currentIndex];
+                        logoElement.classList.remove('fade-out');
+                    }, 400);
+                }, 4000);
+            };
+
+            const getStatusHtml = (status) => {
+                if (status === 'Resolved') return '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300">Resolved</span>';
+                if (status === 'In Progress') return '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">In Progress</span>';
+                return '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300">Submitted</span>';
+            };
+
+            const formatDate = (isoString) => {
+                if (!isoString) return 'N/A';
+                const date = new Date(isoString);
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            };
+
+            const loadAndDisplayData = () => {
+                const complaintsData = localStorage.getItem('complaintsData');
+                if (!complaintsData) {
+                    UI.tableContainer.innerHTML = `<p class="text-center text-[var(--text-muted)] p-8">No complaint data found in local storage. Please use the citizen portal to report issues first.</p>`;
+                    return;
+                }
+
+                const complaints = JSON.parse(complaintsData);
+
+                // Calculate stats
+                const total = complaints.length;
+                const resolved = complaints.filter(c => c.status === 'Resolved').length;
+                const pending = total - resolved;
+
+                // Update stat cards
+                UI.totalComplaintsCard.textContent = total;
+                UI.resolvedComplaintsCard.textContent = resolved;
+                UI.pendingComplaintsCard.textContent = pending;
+
+                // Populate table
+                UI.tableBody.innerHTML = ''; // Clear existing static rows
+                if (complaints.length === 0) {
+                    UI.tableBody.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-[var(--text-muted)]">No complaints have been filed yet.</td></tr>';
+                    return;
+                }
+
+                // Sort by most recent first
+                complaints.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                complaints.forEach(complaint => {
+                    const statusHtml = getStatusHtml(complaint.status);
+                    const formattedDate = formatDate(complaint.timestamp);
+                    const row = `
+                    <tr class="border-t border-[var(--border-light)]">
+                      <td class="p-4 font-medium">#${complaint.id}</td>
+                      <td class="p-4">${complaint.issue}</td>
+                      <td class="p-4">${complaint.location}</td>
+                      <td class="p-4">${statusHtml}</td>
+                      <td class="p-4">${formattedDate}</td>
+                      <td class="p-4">${complaint.reporter || 'N/A'}</td>
+                      <td class="p-4"><a href="#" class="font-semibold text-[var(--accent-primary)] hover:underline">View</a></td>
+                    </tr>
+                `;
+                    UI.tableBody.innerHTML += row;
+                });
+            };
+
+            // Mobile Menu Toggle
+            const openMenu = () => {
+                UI.sidebar.classList.add('open');
+                UI.backdrop.classList.remove('hidden');
+            };
+            const closeMenu = () => {
+                UI.sidebar.classList.remove('open');
+                UI.backdrop.classList.add('hidden');
+            };
+
+            UI.openMenuBtn.addEventListener('click', openMenu);
+            UI.closeMenuBtn.addEventListener('click', closeMenu);
+            UI.backdrop.addEventListener('click', closeMenu);
+
+            setupTheme();
+            setupLogoAnimation();
+            loadAndDisplayData();
+        });
+    </script>
+</body>
+
+</html>

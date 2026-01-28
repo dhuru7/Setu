@@ -1,0 +1,561 @@
+/* stylesheet of the report page */
+/* 
+:root {
+    --bg-primary: #f3f4f6;
+    --bg-secondary: #FFFFFF;
+    --bg-secondary-translucent: rgba(255, 255, 255, 0.85);
+    --bg-accent: #fee2e2;
+    --text-primary: #1f2937;
+    --text-secondary: #374151;
+    --text-muted: #6b7280;
+    --border-light: #e5e7eb;
+    --border-medium: #d1d5db;
+    --accent-primary: #f41f4e;
+    --accent-primary-hover: #d81b45;
+    --accent-secondary: #1f2937;
+    --accent-secondary-hover: #000000;
+    --accent-success: #28a745;
+    --shadow-light: rgba(0, 0, 0, 0.07);
+    --shadow-medium: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-secondary-translucent: rgba(30, 30, 30, 0.85);
+    --bg-accent: #2d2d2d;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --border-light: #374151;
+    --border-medium: #4b5563;
+    --accent-primary: #f41f4e;
+    --accent-primary-hover: #f64c71;
+    --accent-secondary: #f9fafb;
+    --accent-secondary-hover: #FFFFFF;
+    --accent-success: #28a745;
+    --shadow-light: rgba(0, 0, 0, 0.2);
+    --shadow-medium: rgba(0, 0, 0, 0.3);
+}
+
+#google_translate_element,
+.skiptranslate {
+    display: none !important;
+}
+
+body {
+    top: 0 !important;
+}
+
+.goog-te-banner-frame {
+    display: none !important;
+}
+
+* {
+    transition: background-color 0.2s cubic-bezier(0.4, 0.0, 0.2, 1),
+        color 0.2s cubic-bezier(0.4, 0.0, 0.2, 1),
+        border-color 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+body {
+    font-family: 'Inter', 'Roboto', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-secondary);
+} 
+*/
+
+/* NEW Heading Style */
+.wizard-heading {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: scale(1) !important;
+    background-image: none !important;
+    background-color: var(--border-medium) !important;
+    color: var(--text-muted) !important;
+}
+
+.btn-primary {
+    background-color: var(--accent-primary);
+    color: #FFFFFF;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-primary-hover);
+    transform: scale(1.03);
+}
+
+.btn-secondary {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid var(--border-medium);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+    background-color: var(--bg-accent);
+}
+
+@keyframes animated-gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.btn-cta {
+    background-image: linear-gradient(120deg, #f41f4e 0%, #c3193f 100%);
+    background-size: 200% 200%;
+    animation: animated-gradient 3s ease-in-out infinite;
+    color: white;
+}
+
+/* NEW Form Styles */
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: 0.5rem;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    color: var(--text-primary);
+    transition: all 0.2s ease-in-out;
+    width: 100%;
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
+}
+
+.form-input:focus {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-secondary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+    outline: none;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.modal-box {
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* Wizard Styles */
+#wizard-container {
+    background-color: var(--bg-secondary);
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px -5px var(--shadow-medium);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+}
+
+.wizard-step {
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.wizard-step.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Progress Bar */
+.progress-bar {
+    display: flex;
+    background-color: var(--bg-accent);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.progress-step {
+    flex: 1;
+    text-align: center;
+    color: var(--text-muted);
+    position: relative;
+    font-weight: 500;
+}
+
+.progress-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 11px;
+    right: -50%;
+    width: 100%;
+    height: 2px;
+    background-color: var(--border-medium);
+    transition: background-color 0.3s;
+    z-index: 1;
+}
+
+.progress-step .step-circle {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-medium);
+    margin: 0 auto 0.5rem;
+    transition: all 0.3s;
+    font-size: 0.8rem;
+}
+
+.progress-step.active .step-circle {
+    border-color: var(--accent-primary);
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.progress-step.active .step-name {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.progress-step.completed .step-circle {
+    border-color: var(--accent-secondary);
+    background-color: var(--accent-secondary);
+    color: white;
+}
+
+.progress-step.completed::after {
+    background-color: var(--accent-secondary);
+}
+
+[data-theme="dark"] .progress-step.completed .step-circle {
+    color: var(--bg-primary);
+}
+
+/* Redesigned Upload Options */
+.upload-option {
+    background-color: var(--bg-primary);
+    border: 2px dashed var(--border-medium);
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-option:hover {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-accent);
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px var(--shadow-light);
+}
+
+/* Redesigned Issue Types - Caption Style */
+.issue-type-option {
+    border: 2px solid var(--border-light);
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    border-radius: 0.75rem;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    /* Important for containing the image */
+}
+
+.issue-type-option:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 20px var(--shadow-medium);
+    border-color: var(--accent-primary);
+}
+
+.issue-type-option.selected {
+    transform: translateY(0);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+}
+
+.issue-type-option.selected .check-icon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.check-icon {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background-color: var(--accent-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 3;
+}
+
+.check-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* MODIFIED: Styles for issue type icons */
+.issue-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* This makes the image fill the container */
+    pointer-events: none;
+    z-index: 1;
+    transition: transform 0.3s ease-in-out;
+}
+
+.issue-type-option:hover .issue-icon {
+    transform: scale(1.1);
+}
+
+/* MODIFIED: Style for the text - Caption Box */
+.issue-type-option .issue-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1.5rem 0.75rem 0.75rem;
+    text-align: center;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* NEW: Styles for the location button */
+#location-btn-container {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+#get-location-btn {
+    outline: none;
+    height: 40px;
+    text-align: center;
+    width: 200px;
+    /* Adjusted width */
+    border-radius: 40px;
+    background: #fff;
+    border: 2px solid var(--accent-primary);
+    color: var(--accent-primary);
+    letter-spacing: 1px;
+    text-shadow: 0;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* Needed for icon positioning */
+}
+
+#location-btn-success-icon {
+    display: none;
+    /* Hide icon by default */
+}
+
+#get-location-btn:hover {
+    color: white;
+    background: var(--accent-primary);
+}
+
+#get-location-btn.loading {
+    width: 40px;
+    border-color: #bbbbbb;
+    border-width: 3px;
+    font-size: 0;
+    border-left-color: var(--accent-primary);
+    animation: rotating 2s 0.25s linear infinite;
+}
+
+#get-location-btn.loading>* {
+    display: none;
+}
+
+/* New Success State for Location Button */
+#get-location-btn.success {
+    width: 40px;
+    background: var(--accent-success);
+    border-color: var(--accent-success);
+    color: white;
+    /* Set color for the SVG icon */
+}
+
+#get-location-btn.success #location-btn-text {
+    display: none;
+}
+
+#get-location-btn.success #location-btn-success-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+
+@keyframes rotating {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* NEW: Styles for the animated submit button */
+.submit-button-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.submit-button {
+    background-image: linear-gradient(120deg, #f41f4e 0%, #c3193f 100%);
+    background-size: 200% 200%;
+    animation: animated-gradient 3s ease-in-out infinite;
+    height: 48px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 640px) {
+    .submit-button {
+        width: auto;
+        min-width: 150px;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+.submit-text {
+    font-weight: 600;
+    font-size: 1rem;
+    color: white;
+    line-height: 48px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    transition: opacity 0.2s ease;
+}
+
+.submit-button .progress-bar-animated {
+    position: absolute;
+    height: 100%;
+    width: 0;
+    top: 0;
+    left: 0;
+    border-radius: 8px;
+    background: var(--accent-success);
+}
+
+.submit-button svg {
+    width: 30px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+}
+
+.submit-button .check {
+    fill: none;
+    stroke: white;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* NEW: Animation for auto-filled inputs */
+.input-filled-animation {
+    animation: input-glow 1.5s ease-out;
+}
+
+@keyframes input-glow {
+    0% {
+        border-color: var(--border-medium);
+        box-shadow: none;
+    }
+
+    50% {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px var(--bg-accent);
+    }
+
+    100% {
+        border-color: var(--border-medium);
+        box-shadow: none;
+    }
+}
+
+.required-marker {
+    color: var(--accent-primary);
+}
