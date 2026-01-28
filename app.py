@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import requests
 import json
 
 app = Flask(__name__)
+CORS(app) # Enable CORS for all routes (allows Frontend on 5500 to talk to 5000)
 
 # Config
 GEMINI_API_KEY = "AIzaSyCpL97jDcmEStMOPJ6gTHdT93ScKugdvzQ"

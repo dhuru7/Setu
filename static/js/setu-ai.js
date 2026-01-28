@@ -6,7 +6,7 @@
 export async function generateResponse(prompt) {
     const url = "/ask-ai";
 
-    console.log(`[Setu AI] Sending query to local server proxy...`);
+    console.log(`[Setu AI] Sending query to ${url}...`);
 
     try {
         const response = await fetch(url, {
