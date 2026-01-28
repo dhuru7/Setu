@@ -607,12 +607,25 @@
             };
 
             const determineDepartment = (issueType) => {
+                const debugIssue = issueType ? issueType : "UNDEFINED_ISSUE";
+                console.log(`Determining Dept for: ${debugIssue}`);
+
                 if (!issueType) return "General Administration";
                 const lower = issueType.toLowerCase();
-                if (lower.includes("road") || lower.includes("pothole")) return "Public Works Department (PWD)";
-                if (lower.includes("garbage") || lower.includes("dustbin") || lower.includes("waste")) return "Solid Waste Management (SWM)";
-                if (lower.includes("light") || lower.includes("electric")) return "Electrical Department";
-                if (lower.includes("sewage") || lower.includes("water") || lower.includes("drain")) return "Water Supply & Sewerage Board";
+
+                // Public Works
+                if (lower.includes("road") || lower.includes("pothole") || lower.includes("broken") || lower.includes("street")) return "Public Works Department (PWD)";
+
+                // Sanitation
+                if (lower.includes("garbage") || lower.includes("dustbin") || lower.includes("waste") || lower.includes("dump") || lower.includes("clean")) return "Solid Waste Management (SWM)";
+
+                // Electrical
+                if (lower.includes("light") || lower.includes("electric") || lower.includes("lamp") || lower.includes("pole")) return "Electrical Department";
+
+                // Water/Sewage
+                if (lower.includes("sewage") || lower.includes("water") || lower.includes("drain") || lower.includes("pipe") || lower.includes("leak")) return "Water Supply & Sewerage Board";
+
+                console.warn("No dept match found, defaulting to General Admin");
                 return "General Administration";
             };
 
@@ -699,6 +712,10 @@
                                 const authority = villageDatabase[villageName] || { name: "Zone Officer", department: "General" };
                                 const assignedDept = determineDepartment(reportData.issue);
 
+                                console.log("Submitting Report:", { issue: reportData.issue, dept: assignedDept, auth: authority });
+                                // alert(`Debug: Submitting Report for Issue: ${reportData.issue}\nAssigned Department: ${assignedDept}`);
+                                // Uncomment the above line if you need to verify the department on submission.
+
                                 await addDoc(collection(db, "reports"), {
                                     userId: currentUser.uid,
                                     userName: currentUser.displayName || "Anonymous",
@@ -708,7 +725,7 @@
                                     imageUrl: reportData.image,
                                     location: reportData.location,
                                     authorityName: authority.name,
-                                    department: assignedDept,
+                                    assignedDepartment: assignedDept,
                                     status: "Pending",
                                     votes: 0,
                                     votedBy: [],

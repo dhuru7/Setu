@@ -17,10 +17,10 @@ const db = getFirestore(app);
 
 // --- HELPER: Jurisdiction Match ---
 function isReportInJurisdiction(report, officerJurisdiction) {
-    if (!officerJurisdiction) return true; // Default to showing if no specific restriction found? Or maybe stricter?
-
-    // If strict jurisdiction is required:
-    // User requirement: "sort them if the village or subdistrict or district falls in the officer jurisdriction"
+    if (!officerJurisdiction) {
+        console.log("Jurisdiction Check: Allowed (No jurisdiction set)");
+        return true;
+    }
 
     const j = officerJurisdiction;
     const loc = report.location || {};
@@ -28,44 +28,72 @@ function isReportInJurisdiction(report, officerJurisdiction) {
     // 1. Village Match
     if (j.villages && Array.isArray(j.villages) && j.villages.length > 0) {
         const reportVillage = (loc.village || '').trim().toLowerCase();
-        if (!reportVillage) return false;
         const officerVillages = j.villages.map(v => v.trim().toLowerCase());
-        if (officerVillages.includes(reportVillage)) return true;
-        return false;
+
+        if (reportVillage && officerVillages.includes(reportVillage)) {
+            console.log("Jurisdiction Match: Village");
+            return true;
+        }
     }
 
     // 2. Sub-district Match
     if (j.subDistrict) {
         const reportSub = (loc.subdistrict || '').trim().toLowerCase();
         const officerSub = j.subDistrict.trim().toLowerCase();
-        if (reportSub === officerSub) return true;
-        return false;
+        if (reportSub === officerSub) {
+            console.log("Jurisdiction Match: SubDistrict");
+            return true;
+        }
     }
 
     // 3. District Match
     if (j.district) {
         const reportDist = (loc.district || '').trim().toLowerCase();
         const officerDist = j.district.trim().toLowerCase();
-        if (reportDist === officerDist) return true;
-        return false;
+        if (reportDist === officerDist) {
+            console.log("Jurisdiction Match: District");
+            return true;
+        }
     }
 
     // 4. State Match
     if (j.state) {
         const reportState = (loc.state || '').trim().toLowerCase();
         const officerState = j.state.trim().toLowerCase();
-        if (reportState === officerState) return true;
+        if (reportState === officerState) {
+            console.log("Jurisdiction Match: State");
+            return true;
+        }
     }
 
-    // If jurisdiction is set but empty? 
-    // Assume if they have a profile but empty J fields, they might be top level?
+    console.log("Jurisdiction Check: Failed for report", report.id);
     return false;
+}
+
+// --- HELPER: Determine Dept from Issue (For Data Recovery) ---
+function determineDepartment(issueType) {
+    if (!issueType) return "General Administration";
+    const lower = issueType.toLowerCase();
+
+    // Public Works
+    if (lower.includes("road") || lower.includes("pothole") || lower.includes("broken") || lower.includes("street")) return "Public Works Department (PWD)";
+
+    // Sanitation
+    if (lower.includes("garbage") || lower.includes("dustbin") || lower.includes("waste") || lower.includes("dump") || lower.includes("clean")) return "Solid Waste Management (SWM)";
+
+    // Electrical
+    if (lower.includes("light") || lower.includes("electric") || lower.includes("lamp") || lower.includes("pole")) return "Electrical Department";
+
+    // Water/Sewage
+    if (lower.includes("sewage") || lower.includes("water") || lower.includes("drain") || lower.includes("pipe") || lower.includes("leak")) return "Water Supply & Sewerage Board";
+
+    return "General Administration";
 }
 
 // --- CORE FUNCTION: Fetch Reports ---
 export async function fetchOfficerReports(userUid) {
     try {
-        console.log("Fetching reports for officer:", userUid);
+        console.log("Fetching reports for officer (v2 - Dual Query):", userUid);
         const userDoc = await getDoc(doc(db, "users", userUid));
 
         if (!userDoc.exists()) {
@@ -77,12 +105,10 @@ export async function fetchOfficerReports(userUid) {
         let officerDept = userData.department;
         const officerJurisdiction = userData.jurisdiction;
 
-        console.log("Officer Dept (Raw):", officerDept);
-        console.log("Officer Jurisdiction:", officerJurisdiction);
+        console.log("Officer Dept:", officerDept);
 
-        // Fallback: Infer department if missing (Self-healing from ID Card)
+        // Fallback: Infer department
         if (!officerDept && userData.idCard) {
-            console.warn("Officer has no department assigned. Inferring from ID...");
             const prefix = userData.idCard.substring(0, 4).toUpperCase();
             if (prefix === 'GPWD') officerDept = 'Public Works Department (PWD)';
             else if (prefix === 'GSWM') officerDept = 'Solid Waste Management (SWM)';
@@ -91,38 +117,84 @@ export async function fetchOfficerReports(userUid) {
             else officerDept = 'General Administration';
         }
 
-        if (!officerDept) {
-            console.warn("Could not determine officer department.");
-            return [];
-        }
+        if (!officerDept) return [];
 
-        // Department Aliasing (Handle Legacy Data Mismatches)
+        // Aliases
         let deptAliases = [officerDept];
         if (officerDept === "Solid Waste Management (SWM)") deptAliases.push("Department of Sanitation");
         if (officerDept === "Department of Sanitation") deptAliases.push("Solid Waste Management (SWM)");
         if (officerDept === "Electrical Department") deptAliases.push("Electricity Board");
 
-        // 1. Fetch ALL reports for the department(s)
-        console.log("Querying reports for departments:", deptAliases);
-        const q = query(collection(db, "reports"), where("department", "in", deptAliases));
-        const querySnapshot = await getDocs(q);
+        // Include General for Rescue (only if not admin)
+        if (officerDept !== "General Administration") {
+            deptAliases.push("General Administration");
+            deptAliases.push("General");
+        }
 
-        const reports = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            data.id = doc.id;
+        console.log("Querying for:", deptAliases);
 
-            // 2. Client-side Jurisdiction Filter
-            if (isReportInJurisdiction(data, officerJurisdiction)) {
-                reports.push(data);
+        // DUAL QUERY STRATEGY: Fetch both 'assignedDepartment' (New) and 'department' (Old)
+        let mergedReports = new Map();
+
+        // Query 1: New Field (assignedDepartment)
+        // If index is missing for assignedDepartment, this will log a warning and return empty, 
+        // but new reports created after this deployed code will work eventually.
+        try {
+            const q1 = query(collection(db, "reports"), where("assignedDepartment", "in", deptAliases));
+            const snap1 = await getDocs(q1);
+            snap1.forEach(d => mergedReports.set(d.id, { id: d.id, ...d.data() }));
+        } catch (e) {
+            console.warn("Query 1 (assignedDepartment) returned error (possibly missing index or empty):", e.message);
+        }
+
+        // Query 2: Old Field (department) - for legacy support
+        try {
+            const q2 = query(collection(db, "reports"), where("department", "in", deptAliases));
+            const snap2 = await getDocs(q2);
+            snap2.forEach(d => {
+                if (!mergedReports.has(d.id)) mergedReports.set(d.id, { id: d.id, ...d.data() });
+            });
+        } catch (e) {
+            console.warn("Query 2 (department) returned error:", e.message);
+        }
+
+        const finalReports = [];
+        mergedReports.forEach(data => {
+            // Normalize field: prefer assigned, then old department, then General fallback
+            const reportDept = data.assignedDepartment || data.department || "General";
+
+            // SMART FILTERING / RESCUE
+            let isRelevant = false;
+
+            // Direct Match
+            if (reportDept === officerDept) isRelevant = true;
+            // Alias Match
+            else if (deptAliases.includes(reportDept) && reportDept !== "General Administration" && reportDept !== "General") isRelevant = true;
+            // Rescue from General
+            else if (reportDept === "General Administration" || reportDept === "General") {
+                const inferredDept = determineDepartment(data.issueType);
+                if (inferredDept === officerDept) {
+                    console.log(`Rescued ${data.id}: General -> ${officerDept}`);
+                    data.assignedDepartment = officerDept; // Virtual Fix for display
+                    data.department = officerDept; // Legacy fix
+                    isRelevant = true;
+                } else if (officerDept === "General Administration") {
+                    isRelevant = true; // Admin sees all General
+                }
+            }
+
+            if (isRelevant) {
+                if (isReportInJurisdiction(data, officerJurisdiction)) {
+                    finalReports.push(data);
+                }
             }
         });
 
-        // 3. Sort by date desc (Newest first)
-        reports.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        // Sort
+        finalReports.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
-        console.log(`Found ${querySnapshot.size} total reports for department. Matching jurisdiction: ${reports.length}`);
-        return reports;
+        console.log(`Returning ${finalReports.length} reports.`);
+        return finalReports;
 
     } catch (error) {
         console.error("Error fetching reports:", error);
