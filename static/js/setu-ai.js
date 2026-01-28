@@ -1,40 +1,66 @@
+// static/js/setu-ai.js
+// Using Puter AI - Free, no API key required!
+
+// System prompt for Setu AI assistant
+const SYSTEM_PROMPT = `You are Setu AI, a helpful assistant for the Setu civic issue reporting platform. 
+You help citizens with:
+- Reporting civic issues (potholes, garbage, streetlights, water supply, etc.)
+- Understanding the status of their reports
+- Navigating the platform
+- Answering questions about civic services
+
+Be helpful, concise, and friendly. Keep responses brief (2-3 sentences max unless more detail is needed).
+If asked about something unrelated to civic issues, politely redirect to how you can help with civic matters.`;
+
 /**
- * Setu AI Module
- * Powered by Internal Python Proxy (Bypasses CORS/Browser Restrictions)
+ * Sends the user prompt to Puter AI.
+ * @param {string} prompt - The user's query.
+ * @param {object} db - Firestore instance (unused but kept for signature compatibility).
+ * @returns {Promise<string>} - The AI's response text.
  */
-
-export async function generateResponse(prompt) {
-    const url = "/ask-ai";
-
-    console.log(`[Setu AI] Sending query to ${url}...`);
-
+export async function generateResponse(prompt, db) {
     try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: prompt })
-        });
+        console.log("==> [setu-ai] Using Puter AI for:", prompt);
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error(`[Setu AI] Proxy Error:`, data);
-            throw new Error(data.error || "Server proxy failed.");
+        // Check if puter is available
+        if (typeof puter === 'undefined') {
+            throw new Error("Puter AI library not loaded. Please refresh the page.");
         }
 
-        if (data.response) {
-            console.log(`[Setu AI] Success via Proxy!`);
-            return data.response;
+        // Call Puter AI
+        const response = await puter.ai.chat(
+            `${SYSTEM_PROMPT}\n\nUser question: ${prompt}`
+        );
+
+        console.log("==> [setu-ai] Puter AI response:", response);
+
+        // Handle different response formats
+        let responseText;
+        if (typeof response === 'string') {
+            responseText = response;
+        } else if (response?.message?.content) {
+            responseText = response.message.content;
+        } else if (response?.content) {
+            responseText = response.content;
+        } else if (response?.text) {
+            responseText = response.text;
+        } else {
+            responseText = String(response);
         }
 
-        throw new Error("Empty response from server.");
+        console.log("==> [setu-ai] Final response text:", responseText);
+        return responseText;
 
     } catch (error) {
-        console.error("[Setu AI] Connection failed:", error);
-        throw new Error("Unable to reach Setu AI server. Ensure 'app.py' is running.");
+        console.error("Puter AI Error:", error);
+        throw error;
     }
 }
 
+/**
+ * Clears any cached keys or session data.
+ * Currently a no-op as Puter handles everything.
+ */
 export function clearKey() {
-    // No-op
+    console.log("AI Cache/Key cleared (virtual).");
 }

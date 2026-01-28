@@ -3,7 +3,8 @@
 /* Rainbow Glow Animation for Input Container */
 .ai-mode-container {
     position: relative;
-    border-radius: 0.75rem; /* rounded-xl */
+    border-radius: 0.75rem;
+    /* rounded-xl */
     z-index: 10;
 }
 
@@ -14,7 +15,8 @@
     z-index: -1;
     background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
     background-size: 400%;
-    border-radius: 0.9rem; /* slightly larger than input */
+    border-radius: 0.9rem;
+    /* slightly larger than input */
     animation: rainbowGlow 10s linear infinite;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -27,13 +29,22 @@
 /* Ensure background of input covers the inner part */
 .ai-mode-active #search-input {
     background-color: var(--bg-secondary) !important;
-    border-color: transparent !important; /* Hide original border */
+    border-color: transparent !important;
+    /* Hide original border */
 }
 
 @keyframes rainbowGlow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 /* Ask Button Transition */
@@ -42,7 +53,8 @@
 }
 
 .ai-mode-btn {
-    background: linear-gradient(45deg, #7c3aed, #db2777) !important; /* Purple to Pink */
+    background: linear-gradient(45deg, #7c3aed, #db2777) !important;
+    /* Purple to Pink */
     box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
     transform: scale(1.05);
 }
@@ -67,12 +79,22 @@
 }
 
 .ai-mode-active .swipe-hint {
-    opacity: 0; /* Hide hint when active */
+    opacity: 0;
+    /* Hide hint when active */
 }
 
 @keyframes pulseHint {
-    0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: translateX(-50%) scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.05);
+    }
 }
 
 /* Markdown Styles for AI Response */
@@ -100,6 +122,67 @@
     color: var(--text-secondary);
     line-height: 1.6;
 }
-.ai-content p { margin-bottom: 0.75rem; }
-.ai-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
-.ai-content strong { color: var(--text-primary); font-weight: 600; }
+
+.ai-content p {
+    margin-bottom: 0.75rem;
+}
+
+.ai-content ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.ai-content strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Rainbow Typing Animation */
+@keyframes rainbow-shift {
+    0% {
+        background-position: 0% center;
+        transform: scale(1);
+    }
+
+    50% {
+        background-position: 100% center;
+        transform: scale(1.05);
+    }
+
+    100% {
+        background-position: 200% center;
+        transform: scale(1);
+    }
+}
+
+.typing-word {
+    display: inline;
+    transition: all 0.3s ease;
+}
+
+/* Loading sparkle animation */
+.rainbow-loading {
+    display: inline-block;
+    animation: sparkle 1s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+
+    0%,
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 0.8;
+    }
+}
+
+/* Typing container */
+#ai-typing-container {
+    line-height: 1.8;
+    word-spacing: 0.1em;
+}

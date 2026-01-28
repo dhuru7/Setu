@@ -226,51 +226,152 @@ async function executeSearch() {
     }
 }
 
-// --- Gemini AI ---
+// --- Setu AI ---
+
+// Setu AI Persona - System Prompt
+const SETU_AI_PERSONA = `You are Setu AI, the friendly and helpful virtual assistant for the Setu civic issue reporting platform. 
+
+About Setu Platform:
+- Setu is a citizen-to-government platform for reporting civic issues like potholes, garbage dumps, broken streetlights, water supply problems, open sewage, etc.
+- Citizens can submit reports with photos, location, and descriptions
+- Reports are automatically routed to the relevant government department
+- Citizens can track their report status (Submitted → In Progress → Resolved)
+- The platform supports multiple Indian languages via Google Translate
+
+Your personality:
+- Friendly, helpful, and encouraging
+- Speak naturally like a helpful neighbor
+- Keep responses concise (2-4 sentences max)
+- Use simple language, avoid jargon
+- Celebrate when users want to report issues ("Great! Let's get that fixed!")
+
+What you can help with:
+- Explaining how to report issues
+- Describing what types of issues can be reported
+- Explaining status updates and what they mean
+- Encouraging civic participation
+- General questions about the platform
+
+For unrelated questions, politely redirect: "I'm Setu AI, here to help with civic issues. How can I help you report or track a problem in your area?"`;
 
 async function askGemini(prompt) {
-    try {
-        const responseText = await generateResponse(prompt, db);
+    // Show loading animation
+    UI.resultsContainer.innerHTML = `
+        <div class="py-8 px-4">
+            <p class="text-[var(--accent-primary)] font-semibold text-lg mb-2 flex items-center gap-2">
+                <span class="rainbow-loading">✨</span>
+                Setu AI is thinking...
+            </p>
+        </div>
+    `;
 
-        // Render AI Response
-        const html = `
-            <div class="ai-response-container">
-                <h3>
-                    <svg class="w-6 h-6 text-[var(--accent-primary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
+    try {
+        console.log("==> Calling Puter AI with Setu persona:", prompt);
+
+        // Check if Puter is loaded
+        if (typeof puter === 'undefined') {
+            throw new Error("Puter AI not loaded. Please refresh the page.");
+        }
+
+        // Call Puter AI with Setu AI persona
+        const response = await puter.ai.chat([
+            { role: 'system', content: SETU_AI_PERSONA },
+            { role: 'user', content: prompt }
+        ]);
+        console.log("==> Raw Puter response:", response);
+
+        // Extract text from response
+        let text = '';
+        if (typeof response === 'string') {
+            text = response;
+        } else if (response?.message?.content) {
+            text = response.message.content;
+        } else if (response?.content) {
+            text = response.content;
+        } else if (response?.text) {
+            text = response.text;
+        } else if (response?.choices?.[0]?.message?.content) {
+            text = response.choices[0].message.content;
+        } else {
+            text = JSON.stringify(response);
+        }
+
+        console.log("==> Extracted text:", text);
+
+        // Display container with typing animation
+        UI.resultsContainer.innerHTML = `
+            <div class="py-6 px-4">
+                <p class="text-[var(--accent-primary)] font-bold text-lg mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
                     </svg>
                     Setu AI
-                </h3>
-                <div class="ai-content">
-                    ${parseMarkdown(responseText)}
-                </div>
+                </p>
+                <div id="ai-typing-container" class="text-[var(--text-primary)] text-base leading-relaxed"></div>
             </div>
         `;
-        UI.resultsContainer.innerHTML = html;
+
+        // Start rainbow typing animation
+        await typeWithRainbow(text, document.getElementById('ai-typing-container'));
 
     } catch (error) {
-        console.error("AI Response Failed:", error);
-
-        // Friendly Error UI
-        let userMsg = error.message; // SHOW RAW ERROR FOR DEBUGGING
+        console.error("AI Error:", error);
 
         UI.resultsContainer.innerHTML = `
-            <div class="text-center py-8">
-                <p class="text-[var(--text-muted)] font-medium text-red-400">${userMsg}</p>
-                <button id="retry-ai-btn" class="mt-4 btn btn-outline btn-sm">Try Again</button>
-            </div>`;
+            <div class="py-8 px-4 text-center">
+                <p class="text-red-400 font-medium mb-2">Something went wrong</p>
+                <p class="text-[var(--text-muted)] text-sm">${error.message || 'Unknown error'}</p>
+                <button onclick="location.reload()" class="mt-4 btn btn-primary btn-sm">Refresh Page</button>
+            </div>
+        `;
+    }
+}
 
+// Rainbow Typing Animation
+async function typeWithRainbow(text, container) {
+    const words = text.split(' ');
+    let currentIndex = 0;
+
+    // Rainbow colors
+    const rainbowColors = [
+        '#ff6b6b', '#ffa06b', '#ffd93d', '#6bcf6b',
+        '#6bd4ff', '#a06bff', '#ff6bdc'
+    ];
+
+    for (const word of words) {
+        // Create word span with rainbow animation
+        const wordSpan = document.createElement('span');
+        wordSpan.className = 'typing-word';
+        wordSpan.textContent = word + ' ';
+
+        // Apply rainbow gradient to the current word
+        wordSpan.style.background = `linear-gradient(90deg, ${rainbowColors.join(', ')})`;
+        wordSpan.style.backgroundSize = '200% auto';
+        wordSpan.style.webkitBackgroundClip = 'text';
+        wordSpan.style.backgroundClip = 'text';
+        wordSpan.style.webkitTextFillColor = 'transparent';
+        wordSpan.style.animation = 'rainbow-shift 1s ease-in-out';
+
+        container.appendChild(wordSpan);
+
+        // Wait for typing effect
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        // After animation, change to normal color
         setTimeout(() => {
-            document.getElementById('retry-ai-btn')?.addEventListener('click', () => {
-                clearKey(); // Clear cache in case key was updated
-                executeSearch();
-            });
-        }, 100);
+            wordSpan.style.background = 'none';
+            wordSpan.style.webkitTextFillColor = 'var(--text-primary)';
+            wordSpan.style.color = 'var(--text-primary)';
+            wordSpan.style.animation = 'none';
+        }, 800);
+
+        currentIndex++;
     }
 }
 
 function parseMarkdown(text) {
     // Simple parser for bold and newlines
+    if (!text) return '';
     return text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\n/g, '<br>');

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AI Connection Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>AI Connection Diagnostic</h1>
+    <button onclick="testConnection()">Test Connection</button>
+    <div id="output"></div>
+
+    <script>
+        async function testConnection() {
+            const out = document.getElementById('output');
+            out.innerHTML = 'Testing...';
+
+            try {
+                // Try absolute path first to rule out port issues
+                const response = await fetch('http://localhost:5000/ask-ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: 'Hello Self Test' })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    out.innerHTML = `<div class="status success">SUCCESS! Response: ${data.response}</div>`;
+                } else {
+                    const text = await response.text();
+                    out.innerHTML = `<div class="status error">FAILED at Server. Status: ${response.status}<br>Msg: ${text}</div>`;
+                }
+            } catch (e) {
+                out.innerHTML = `<div class="status error">NETWORK ERROR: ${e.message}<br>Make sure python app.py is running!</div>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
