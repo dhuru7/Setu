@@ -255,13 +255,15 @@ What you can help with:
 For unrelated questions, politely redirect: "I'm Setu AI, here to help with civic issues. How can I help you report or track a problem in your area?"`;
 
 async function askGemini(prompt) {
-    // Show loading animation
+    // Show loading animation with spinning diamond
     UI.resultsContainer.innerHTML = `
         <div class="py-8 px-4">
-            <p class="text-[var(--accent-primary)] font-semibold text-lg mb-2 flex items-center gap-2">
-                <span class="rainbow-loading">✨</span>
-                Setu AI is thinking...
-            </p>
+            <div class="flex items-center gap-3">
+                <div class="setu-icon spinning">
+                    <span class="diamond">◆</span>
+                </div>
+                <span class="setu-ai-title">Setu AI is thinking...</span>
+            </div>
         </div>
     `;
 
@@ -298,21 +300,24 @@ async function askGemini(prompt) {
 
         console.log("==> Extracted text:", text);
 
-        // Display container with typing animation
+        // Display container with typing animation and spinning icon
         UI.resultsContainer.innerHTML = `
             <div class="py-6 px-4">
-                <p class="text-[var(--accent-primary)] font-bold text-lg mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
-                    </svg>
-                    Setu AI
-                </p>
-                <div id="ai-typing-container" class="text-[var(--text-primary)] text-base leading-relaxed"></div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="setu-icon spinning" id="setu-typing-icon">
+                        <span class="diamond">◆</span>
+                    </div>
+                    <span class="setu-ai-title">Setu AI</span>
+                </div>
+                <div id="ai-typing-container" class="text-[var(--text-primary)] text-base leading-relaxed ml-11"></div>
             </div>
         `;
 
         // Start rainbow typing animation
         await typeWithRainbow(text, document.getElementById('ai-typing-container'));
+
+        // Stop spinning when done
+        document.getElementById('setu-typing-icon')?.classList.remove('spinning');
 
     } catch (error) {
         console.error("AI Error:", error);
