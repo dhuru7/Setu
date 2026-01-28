@@ -373,9 +373,11 @@ function initSignupProcess() {
                 if (prefix === 'GPWD') {
                     department = 'Public Works Department (PWD)';
                 } else if (prefix === 'GSWM') {
-                    department = 'Department of Sanitation';
+                    department = 'Solid Waste Management (SWM)';
                 } else if (prefix === 'GDJB') {
                     department = 'Water Supply & Sewerage Board';
+                } else if (prefix === 'GOED') {
+                    department = 'Electrical Department';
                 } else {
                     department = 'General Administration'; // Fallback
                 }

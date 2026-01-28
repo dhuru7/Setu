@@ -272,13 +272,13 @@
                 </svg>
                 <span class="desktop-nav-text">Map View</span>
             </a>
-            <a href="authority-reports.html" title="Reports" class="desktop-nav-link">
+            <a href="authority-action.html" title="Action Center" class="desktop-nav-link">
                 <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                     stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12" />
+                        d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                 </svg>
-                <span class="desktop-nav-text">Reports</span>
+                <span class="desktop-nav-text">Action Center</span>
             </a>
             <a href="authority-profile.html" title="My Profile" class="desktop-nav-link">
                 <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -377,7 +377,24 @@
         </main>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { fetchOfficerReports } from "../static/js/authority-utils.js";
+
+        // Reuse config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7uvvN3Xlo64pKCkJwfjGXtdqHuHIG0mI",
+            authDomain: "setu-6932f.firebaseapp.com",
+            projectId: "setu-6932f",
+            storageBucket: "setu-6932f.firebasestorage.app",
+            messagingSenderId: "1060012410845",
+            appId: "1:1060012410845:web:13da8942457a2d4ed89834"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
         document.addEventListener('DOMContentLoaded', () => {
             const UI = {
                 themeToggles: [document.getElementById('theme-toggle-desktop')],
@@ -395,9 +412,9 @@
                 backdrop: document.getElementById('mobile-menu-backdrop'),
             };
 
+            // Theme & Logo Logic
             const applyTheme = t => { const isDark = t === 'dark'; document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light'); UI.sunIcons.forEach(i => i.classList.toggle('hidden', isDark)); UI.moonIcons.forEach(i => i.classList.toggle('hidden', !isDark)); };
             const setupTheme = () => { const i = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); applyTheme(i); UI.themeToggles.forEach(btn => btn.addEventListener('click', () => { const n = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', n); applyTheme(n); })); };
-
             const setupLogoAnimation = () => {
                 const names = ['Setu', 'सेतु', 'সেতু', 'सेतू', 'સેતુ', 'ಸೇತು'];
                 let currentIndex = 0;
@@ -419,91 +436,66 @@
                 return '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300">Submitted</span>';
             };
 
-            const formatDate = (isoString) => {
-                if (!isoString) return 'N/A';
-                const date = new Date(isoString);
-                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-            };
+            const loadDashboardData = async (user) => {
+                // Load Profile Name/Dept from local cache for speed (or fetch if critical)
+                const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                if (document.getElementById('dashboard-welcome')) document.getElementById('dashboard-welcome').textContent = userProfile.fullname || 'Authority';
+                if (document.getElementById('dashboard-dept')) document.getElementById('dashboard-dept').textContent = userProfile.department || '';
 
-            const loadAndDisplayData = () => {
-                // Load User Profile Data for Header
-                try {
-                    const userProfile = JSON.parse(localStorage.getItem('userProfile'));
-                    if (userProfile) {
-                        const welcomeName = document.getElementById('dashboard-welcome');
-                        const welcomeDept = document.getElementById('dashboard-dept');
+                // Fetch Reports
+                UI.tableBody.innerHTML = '<tr><td colspan="7" class="text-center p-8">Loading real-time data...</td></tr>';
+                const reports = await fetchOfficerReports(user.uid);
 
-                        if (welcomeName) welcomeName.textContent = userProfile.fullname || 'Authority User';
-
-                        if (welcomeDept) welcomeDept.textContent = userProfile.department || 'General Administration';
-                    }
-                } catch (e) {
-                    console.error("Error loading user profile", e);
-                }
-
-                const complaintsData = localStorage.getItem('complaintsData');
-                if (!complaintsData) {
-                    UI.tableContainer.innerHTML = `<p class="text-center text-[var(--text-muted)] p-8">No complaint data found in local storage. Please use the citizen portal to report issues first.</p>`;
-                    return;
-                }
-
-                const complaints = JSON.parse(complaintsData);
-
-                // Calculate stats
-                const total = complaints.length;
-                const resolved = complaints.filter(c => c.status === 'Resolved').length;
+                // Stats
+                const total = reports.length;
+                const resolved = reports.filter(r => r.status === 'Resolved').length;
                 const pending = total - resolved;
 
-                // Update stat cards
                 UI.totalComplaintsCard.textContent = total;
                 UI.resolvedComplaintsCard.textContent = resolved;
                 UI.pendingComplaintsCard.textContent = pending;
 
-                // Populate table
-                UI.tableBody.innerHTML = ''; // Clear existing static rows
-                if (complaints.length === 0) {
-                    UI.tableBody.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-[var(--text-muted)]">No complaints have been filed yet.</td></tr>';
+                // Table
+                UI.tableBody.innerHTML = '';
+                if (reports.length === 0) {
+                    UI.tableBody.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-[var(--text-muted)]">No active cases found for your jurisdiction.</td></tr>';
                     return;
                 }
 
-                // Sort by most recent first
-                complaints.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-                complaints.forEach(complaint => {
-                    const statusHtml = getStatusHtml(complaint.status);
-                    const formattedDate = formatDate(complaint.timestamp);
+                // Show top 5 or all? Dashboard usually has recent. Let's show top 10.
+                reports.slice(0, 10).forEach(r => {
+                    const date = r.createdAt ? new Date(r.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
                     const row = `
-                    <tr class="border-t border-[var(--border-light)]">
-                      <td class="p-4 font-medium">#${complaint.id}</td>
-                      <td class="p-4">${complaint.issue}</td>
-                      <td class="p-4">${complaint.location}</td>
-                      <td class="p-4">${statusHtml}</td>
-                      <td class="p-4">${formattedDate}</td>
-                      <td class="p-4">${complaint.reporter || 'N/A'}</td>
-                      <td class="p-4"><a href="#" class="font-semibold text-[var(--accent-primary)] hover:underline">View</a></td>
-                    </tr>
-                `;
+                        <tr class="border-t border-[var(--border-light)] hover:bg-[var(--bg-accent)] transition-colors">
+                            <td class="p-4 font-mono text-xs">${r.id.substring(0, 6)}...</td>
+                            <td class="p-4 font-medium">${r.issueType}</td>
+                            <td class="p-4 text-sm">${[r.location?.full, r.location?.district].filter(Boolean).join(', ') || 'Unknown Location'}</td>
+                            <td class="p-4">${getStatusHtml(r.status)}</td>
+                            <td class="p-4 text-sm">${date}</td>
+                            <td class="p-4 text-sm">${r.userName || 'Anonymous'}</td>
+                            <td class="p-4"><a href="#" class="font-semibold text-[var(--accent-primary)] hover:underline">View</a></td>
+                        </tr>
+                     `;
                     UI.tableBody.innerHTML += row;
                 });
             };
 
-            // Mobile Menu Toggle
-            const openMenu = () => {
-                UI.sidebar.classList.add('open');
-                UI.backdrop.classList.remove('hidden');
-            };
-            const closeMenu = () => {
-                UI.sidebar.classList.remove('open');
-                UI.backdrop.classList.add('hidden');
-            };
-
-            UI.openMenuBtn.addEventListener('click', openMenu);
-            UI.closeMenuBtn.addEventListener('click', closeMenu);
-            UI.backdrop.addEventListener('click', closeMenu);
-
+            // Init
             setupTheme();
             setupLogoAnimation();
-            loadAndDisplayData();
+
+            // Mobile Menu
+            const openMenu = () => { UI.sidebar.classList.add('open'); UI.backdrop.classList.remove('hidden'); };
+            const closeMenu = () => { UI.sidebar.classList.remove('open'); UI.backdrop.classList.add('hidden'); };
+            if (UI.openMenuBtn) UI.openMenuBtn.addEventListener('click', openMenu);
+            if (UI.closeMenuBtn) UI.closeMenuBtn.addEventListener('click', closeMenu);
+            if (UI.backdrop) UI.backdrop.addEventListener('click', closeMenu);
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    loadDashboardData(user);
+                }
+            });
         });
     </script>
 </body>

@@ -63,8 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!dept && data.idCard) {
                         const prefix = data.idCard.substring(0, 4).toUpperCase();
                         if (prefix === 'GPWD') dept = 'Public Works Department (PWD)';
-                        else if (prefix === 'GSWM') dept = 'Department of Sanitation';
+                        else if (prefix === 'GSWM') dept = 'Solid Waste Management (SWM)';
                         else if (prefix === 'GDJB') dept = 'Water Supply & Sewerage Board';
+                        else if (prefix === 'GOED') dept = 'Electrical Department';
                         else dept = 'General Administration';
 
                         // Write back to DB so it is "stored in the database"

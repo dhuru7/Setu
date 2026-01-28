@@ -545,11 +545,11 @@
             };
 
             const issueTypes = {
-                "Garbage Dump": { icon: "../static/images/icongarbagedump.png" },
+                "Garbage Dumps": { icon: "../static/images/icongarbagedump.png" },
                 "No Dustbins": { icon: "../static/images/iconnobin.png" },
                 "Open Sewage": { icon: "../static/images/iconopensewage.png" },
-                "Bad Roads": { icon: "../static/images/iconbadroads.png" },
-                "Streetlight": { icon: "../static/images/iconstreetlights.png" },
+                "Broken Roads": { icon: "../static/images/iconbadroads.png" },
+                "Streetlights Not Working": { icon: "../static/images/iconstreetlights.png" },
                 "Other": { icon: "../static/images/iconother.png" }
             };
 
@@ -606,6 +606,16 @@
                 }
             };
 
+            const determineDepartment = (issueType) => {
+                if (!issueType) return "General Administration";
+                const lower = issueType.toLowerCase();
+                if (lower.includes("road") || lower.includes("pothole")) return "Public Works Department (PWD)";
+                if (lower.includes("garbage") || lower.includes("dustbin") || lower.includes("waste")) return "Solid Waste Management (SWM)";
+                if (lower.includes("light") || lower.includes("electric")) return "Electrical Department";
+                if (lower.includes("sewage") || lower.includes("water") || lower.includes("drain")) return "Water Supply & Sewerage Board";
+                return "General Administration";
+            };
+
             const populateSummary = () => {
                 UI.summaryImage.src = reportData.image;
                 UI.summaryIssue.textContent = reportData.issue;
@@ -613,10 +623,14 @@
                 UI.summaryLocation.textContent = `${loc.full}, ${loc.village}, ${loc.district}`;
 
                 const vName = loc.village.trim().toLowerCase();
-                const authority = villageDatabase[vName] || { name: "Nodal Officer", department: "Admin Office" };
+                // Keep authority name logic or generic
+                const authority = villageDatabase[vName] || { name: "Zone Officer", department: "General" };
+
+                // Determine Department based on Keyword Matching
+                const assignedDept = determineDepartment(reportData.issue);
 
                 UI.authorityName.textContent = authority.name;
-                UI.authorityDepartment.textContent = authority.department;
+                UI.authorityDepartment.textContent = assignedDept;
 
                 UI.authorityDetails.classList.remove('hidden');
                 UI.authorityInfoSection.classList.add('opacity-100');
@@ -682,7 +696,8 @@
                             // --- FIRESTORE SUBMISSION ---
                             try {
                                 const villageName = (reportData.location.village || '').trim().toLowerCase();
-                                const authority = villageDatabase[villageName] || { name: "District Officer", department: "General" };
+                                const authority = villageDatabase[villageName] || { name: "Zone Officer", department: "General" };
+                                const assignedDept = determineDepartment(reportData.issue);
 
                                 await addDoc(collection(db, "reports"), {
                                     userId: currentUser.uid,
@@ -693,7 +708,7 @@
                                     imageUrl: reportData.image,
                                     location: reportData.location,
                                     authorityName: authority.name,
-                                    department: authority.department,
+                                    department: assignedDept,
                                     status: "Pending",
                                     votes: 0,
                                     votedBy: [],

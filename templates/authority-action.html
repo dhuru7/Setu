@@ -25,12 +25,12 @@
             } catch (e) { }
         })();
     </script>
-    <title>Authority Reports - Setu</title>
+    <title>Action Center - Setu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="../static/css/set1_style.css">
     <style>
-        /* Sidebar & Layout Styles inherited from Dashboard */
+        /* Inheriting styles */
         :root {
             --bg-primary: #f8f9fa;
             --bg-secondary: #FFFFFF;
@@ -118,7 +118,6 @@
 
     <div id="mobile-menu-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
 
-    <!-- Sidebar -->
     <nav id="sidebar" class="flex flex-col fixed top-0 left-0 h-full w-60 z-50 p-4 desktop-sidebar">
         <div class="flex-shrink-0 flex justify-between items-center pt-2 pb-8">
             <a href="authority-dashboard.html" class="logo !text-2xl notranslate">Setu</a>
@@ -151,12 +150,12 @@
                 </svg>
                 Map View
             </a>
-            <a href="authority-reports.html" class="desktop-nav-link active">
+            <a href="authority-action.html" class="desktop-nav-link active">
                 <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12" />
+                        d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                 </svg>
-                Reports
+                Action Center
             </a>
             <a href="authority-profile.html" class="desktop-nav-link">
                 <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,7 +184,7 @@
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg></button>
-                <h1 class="text-xl font-bold text-[var(--text-primary)]">Reports & Issues</h1>
+                <h1 class="text-xl font-bold text-[var(--text-primary)]">Action Center</h1>
             </div>
             <div class="flex items-center space-x-4">
                 <button id="theme-toggle-desktop" class="p-2 rounded-lg bg-[var(--bg-accent)] theme-toggle">
@@ -203,43 +202,24 @@
             </div>
         </header>
 
-        <main class="p-4 sm:p-8">
-            <div
-                class="bg-[var(--bg-secondary)] rounded-2xl shadow-sm border border-[var(--border-light)] overflow-hidden">
-                <div class="p-6 border-b border-[var(--border-light)]">
-                    <h2 class="text-lg font-semibold text-[var(--text-primary)]">Jurisdiction Reports</h2>
-                    <p class="text-sm text-[var(--text-muted)] mt-1">Real-time reports originating from your assigned
-                        jurisdiction.</p>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm min-w-[800px]">
-                        <thead class="bg-[var(--bg-primary)] border-b border-[var(--border-light)]">
-                            <tr>
-                                <th class="p-4 text-left font-semibold text-[var(--text-secondary)]">ID</th>
-                                <th class="p-4 text-left font-semibold text-[var(--text-secondary)]">Issue Type</th>
-                                <th class="p-4 text-left font-semibold text-[var(--text-secondary)]">Location</th>
-                                <th class="p-4 text-left font-semibold text-[var(--text-secondary)]">Status</th>
-                                <th class="p-4 text-left font-semibold text-[var(--text-secondary)]">Date</th>
-                                <th class="p-4 text-left font-semibold text-[var(--text-secondary)]">Reported By</th>
-                                <th class="p-4 text-left font-semibold text-[var(--text-secondary)]">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reports-table-body">
-                            <!-- Populated JS -->
-                        </tbody>
-                    </table>
-                </div>
+        <main class="p-4 sm:p-8 flex flex-col items-center justify-center min-h-[50vh] text-center">
+            <h2 class="text-2xl font-bold text-[var(--text-primary)] mb-2">Take Action</h2>
+            <p class="text-[var(--text-muted)] max-w-md">
+                Select a complaint from the Dashboard to take action here.
+                Workflows for updating status and engaging with citizens will be available soon.
+            </p>
+            <div class="mt-8">
+                <a href="authority-dashboard.html"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)]">
+                    Go to Dashboard
+                </a>
             </div>
         </main>
     </div>
 
-    <!-- Logic Script Import -->
-    <script type="module" src="../static/js/authority-reports.js"></script>
-
     <!-- UI Toggle Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Theme Toggle & Sidebar Logic
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('mobile-menu-backdrop');
             const openBtn = document.getElementById('open-menu-btn');
@@ -255,7 +235,6 @@
                 const newTheme = isDark ? 'light' : 'dark';
                 document.documentElement.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
-                // Update icons
                 themeBtn.querySelector('.sun-icon').classList.toggle('hidden', newTheme === 'dark');
                 themeBtn.querySelector('.moon-icon').classList.toggle('hidden', newTheme !== 'dark');
             };
