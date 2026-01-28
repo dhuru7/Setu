@@ -255,17 +255,31 @@ What you can help with:
 For unrelated questions, politely redirect: "I'm Setu AI, here to help with civic issues. How can I help you report or track a problem in your area?"`;
 
 async function askGemini(prompt) {
-    // Show loading animation with spinning diamond
+    // Show loading animation
+    // Emojis for custom loading animation
+    const loadingEmojis = ["🔴", "🟥", "🟠", "🟧", "🟡", "🟨", "🟢", "🟩", "🔵", "🟦", "🟣", "🟪", "🟤", "🟫", "⚫", "⬛", "⚪", "⬜"];
+    let emojiIndex = 0;
+
+    // Show loading with emoji container
     UI.resultsContainer.innerHTML = `
-        <div class="py-8 px-4">
-            <div class="flex items-center gap-3">
-                <div class="setu-icon spinning">
-                    <span class="diamond">◆</span>
-                </div>
-                <span class="setu-ai-title">Setu AI is thinking...</span>
-            </div>
+        <div class="py-8 px-2 sm:px-4">
+            <p class="text-[var(--accent-primary)] font-semibold text-base sm:text-lg mb-2 flex items-center gap-2 flex-wrap">
+                <span id="loading-emoji" class="text-2xl inline-block w-8 text-center transition-all duration-200 transform scale-100">🔴</span>
+                <span class="whitespace-nowrap">Setu AI is thinking...</span>
+            </p>
         </div>
     `;
+
+    // Start Emoji Cycle Interval
+    const emojiInterval = setInterval(() => {
+        const el = document.getElementById('loading-emoji');
+        if (el) {
+            emojiIndex = (emojiIndex + 1) % loadingEmojis.length;
+            el.textContent = loadingEmojis[emojiIndex];
+        } else {
+            clearInterval(emojiInterval);
+        }
+    }, 500);
 
     try {
         console.log("==> Calling Puter AI with Setu persona:", prompt);
@@ -280,6 +294,8 @@ async function askGemini(prompt) {
             { role: 'system', content: SETU_AI_PERSONA },
             { role: 'user', content: prompt }
         ]);
+
+        clearInterval(emojiInterval); // Stop loading animation
         console.log("==> Raw Puter response:", response);
 
         // Extract text from response
@@ -300,32 +316,30 @@ async function askGemini(prompt) {
 
         console.log("==> Extracted text:", text);
 
-        // Display container with typing animation and spinning icon
+        // Display container with typing animation - Optimized for mobile
         UI.resultsContainer.innerHTML = `
-            <div class="py-6 px-4">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="setu-icon spinning" id="setu-typing-icon">
-                        <span class="diamond">◆</span>
-                    </div>
-                    <span class="setu-ai-title">Setu AI</span>
-                </div>
-                <div id="ai-typing-container" class="text-[var(--text-primary)] text-base leading-relaxed ml-11"></div>
+            <div class="py-6 px-2 sm:px-4 break-words w-full"> 
+                <p class="text-[var(--accent-primary)] font-bold text-lg mb-3 flex items-center gap-2">
+                    <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+                    </svg>
+                    <span>Setu AI</span>
+                </p>
+                <div id="ai-typing-container" class="text-[var(--text-primary)] text-base leading-relaxed overflow-hidden"></div>
             </div>
         `;
 
         // Start rainbow typing animation
         await typeWithRainbow(text, document.getElementById('ai-typing-container'));
 
-        // Stop spinning when done
-        document.getElementById('setu-typing-icon')?.classList.remove('spinning');
-
     } catch (error) {
+        clearInterval(emojiInterval); // Stop loading animation
         console.error("AI Error:", error);
 
         UI.resultsContainer.innerHTML = `
             <div class="py-8 px-4 text-center">
                 <p class="text-red-400 font-medium mb-2">Something went wrong</p>
-                <p class="text-[var(--text-muted)] text-sm">${error.message || 'Unknown error'}</p>
+                <p class="text-[var(--text-muted)] text-sm break-all">${error.message || 'Unknown error'}</p>
                 <button onclick="location.reload()" class="mt-4 btn btn-primary btn-sm">Refresh Page</button>
             </div>
         `;

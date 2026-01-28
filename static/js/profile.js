@@ -452,19 +452,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.classList.add('swiping-active');
             };
 
-            const handleMove = (clientX) => {
+            const handleMove = (e) => {
                 if (!isDragging) return;
-                const diff = clientX - startX;
-                const cardWidth = card.offsetWidth;
-                let newTranslate = currentTranslate + diff;
-                if (newTranslate > cardWidth) newTranslate = cardWidth;
-                if (newTranslate < 0) newTranslate = 0;
-                overlay.style.transform = `translateX(${newTranslate}px)`;
+
+                // Get current touch position
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                // Calculate movement
+                const diffX = clientX - startX;
+
+                // Direction Locking Idea:
+                // If we haven't locked direction yet, decide now based on initial movement
+                if (!card.dataset.swipeDir && Math.abs(diffX) > 5) {
+                    const diffY = clientY - (startY || 0);
+                    if (Math.abs(diffX) > Math.abs(diffY)) {
+                        card.dataset.swipeDir = 'horizontal';
+                    } else {
+                        card.dataset.swipeDir = 'vertical';
+                    }
+                }
+
+                // Only move if horizontal swipe
+                if (card.dataset.swipeDir === 'horizontal') {
+                    if (e.cancelable) e.preventDefault(); // STOP SCROLLING
+
+                    const cardWidth = card.offsetWidth;
+                    let newTranslate = currentTranslate + diffX;
+                    if (newTranslate > cardWidth) newTranslate = cardWidth;
+                    if (newTranslate < 0) newTranslate = 0;
+
+                    // Use requestAnimationFrame for performance
+                    requestAnimationFrame(() => {
+                        overlay.style.transform = `translateX(${newTranslate}px)`;
+                    });
+                }
             };
 
             const handleEnd = () => {
                 if (!isDragging) return;
                 isDragging = false;
+                delete card.dataset.swipeDir; // Reset lock
 
                 // Revert roundness
                 card.classList.remove('swiping-active');
@@ -484,8 +512,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
 
-            card.addEventListener('touchstart', e => handleStart(e.touches[0].clientX));
-            card.addEventListener('touchmove', e => handleMove(e.touches[0].clientX));
+            // Enhanced Touch Start to capture Y for direction lock
+            let startY = 0;
+            const onTouchStart = (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                handleStart(startX);
+            };
+
+            card.addEventListener('touchstart', onTouchStart, { passive: true });
+            card.addEventListener('touchmove', handleMove, { passive: false }); // Important: allow preventDefault
             card.addEventListener('touchend', handleEnd);
 
             // Mouse Support for Swipe Cards
