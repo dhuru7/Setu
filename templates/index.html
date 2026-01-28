@@ -38,7 +38,7 @@
     <script src="../static/js/notifications.js" defer></script>
     <script src="../static/js/settings.js" defer></script>
     <script src="../static/js/navigation.js" defer></script>
-    <script src="../static/js/setu-ai.js" defer></script>
+
     <style>
         /* Prevent transitions on page load */
         .preload * {
@@ -124,14 +124,7 @@
                     <a href="index.html" class="logo w-24 transition-all duration-300 notranslate"><span
                             id="animated-name-mobile">Setu</span></a>
                     <div id="mobile-header-buttons" class="flex items-center space-x-2 transition-all duration-300">
-                        <button id="setu-ai-btn-mobile" title="Setu AI Assistant"
-                            class="btn btn-cta !p-2 !rounded-full ai-widget-container">
-                            <svg class="w-5 h-5 flex-shrink-0 text-white original-icon" viewBox="0 0 24 24"
-                                fill="currentColor">
-                                <path
-                                    d="M12.0001 1.99219L3.45911 12.0002L12.0001 22.0082L20.5411 12.0002L12.0001 1.99219Z" />
-                            </svg>
-                        </button>
+
                         <button id="notification-btn-mobile" class="btn btn-secondary !p-2 relative !rounded-full"
                             title="Notifications">
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -302,14 +295,7 @@
         </div>
     </div>
 
-    <div id="setu-ai-container-desktop" class="hidden sm:block">
-        <button id="setu-ai-btn" title="Setu AI Assistant"
-            class="btn btn-cta !p-4 !rounded-full shadow-lg transform hover:scale-110 transition-transform duration-200 ai-widget-container">
-            <svg class="w-8 h-8 flex-shrink-0 text-white original-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.0001 1.99219L3.45911 12.0002L12.0001 22.0082L20.5411 12.0002L12.0001 1.99219Z" />
-            </svg>
-        </button>
-    </div>
+
 
     <div id="modal-overlay">
         <div id="modal-content-wrapper"></div>
@@ -322,24 +308,7 @@
             class="max-w-[90vw] max-h-[90vh] transition-transform duration-200">
     </div>
 
-    <div id="ai-info-modal-overlay"
-        class="fixed inset-0 bg-black bg-opacity-60 backdrop-filter backdrop-blur-sm z-[130] hidden items-center justify-center p-4">
-        <div id="ai-info-modal"
-            class="bg-[var(--bg-secondary)] rounded-2xl shadow-xl max-w-sm w-full p-6 text-center transform scale-95 opacity-0 transition-all duration-300 ease-out">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-[var(--bg-accent)] mb-4">
-                <svg class="w-8 h-8 text-[var(--accent-primary)]" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.0001 1.99219L3.45911 12.0002L12.0001 22.0082L20.5411 12.0002L12.0001 1.99219Z" />
-                </svg>
-            </div>
-            <h3 class="text-xl font-bold text-[var(--text-primary)] mb-2">Setu AI is Evolving!</h3>
-            <p class="text-sm text-[var(--text-muted)] mb-6">
-                Thank you for trying our new AI assistant! This feature is currently under active development. While it
-                can perform some basic tasks, we're working hard to unlock its full potential. Stay tuned for exciting
-                updates!
-            </p>
-            <button id="ai-info-got-it-btn" class="btn btn-primary w-full">Got it</button>
-        </div>
-    </div>
+
 
     <div id="google_translate_element"></div>
     <script type="module" src="../static/js/home.js"></script>

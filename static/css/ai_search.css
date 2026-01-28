@@ -1,0 +1,105 @@
+/* AI Mode Styles */
+
+/* Rainbow Glow Animation for Input Container */
+.ai-mode-container {
+    position: relative;
+    border-radius: 0.75rem; /* rounded-xl */
+    z-index: 10;
+}
+
+.ai-mode-container::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    z-index: -1;
+    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    background-size: 400%;
+    border-radius: 0.9rem; /* slightly larger than input */
+    animation: rainbowGlow 10s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ai-mode-active .ai-mode-container::before {
+    opacity: 1;
+}
+
+/* Ensure background of input covers the inner part */
+.ai-mode-active #search-input {
+    background-color: var(--bg-secondary) !important;
+    border-color: transparent !important; /* Hide original border */
+}
+
+@keyframes rainbowGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Ask Button Transition */
+#search-action-btn {
+    transition: all 0.3s ease;
+}
+
+.ai-mode-btn {
+    background: linear-gradient(45deg, #7c3aed, #db2777) !important; /* Purple to Pink */
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+    transform: scale(1.05);
+}
+
+.ai-mode-btn:hover {
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+}
+
+/* Swipe Hint */
+.swipe-hint {
+    position: absolute;
+    bottom: -1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+    pointer-events: none;
+    white-space: nowrap;
+    animation: pulseHint 2s infinite;
+    transition: opacity 0.3s;
+}
+
+.ai-mode-active .swipe-hint {
+    opacity: 0; /* Hide hint when active */
+}
+
+@keyframes pulseHint {
+    0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+}
+
+/* Markdown Styles for AI Response */
+.ai-response-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--accent-primary);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    animation: fadeInResult 0.5s ease-out;
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.1);
+}
+
+.ai-response-container h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+}
+
+.ai-content {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.ai-content p { margin-bottom: 0.75rem; }
+.ai-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.ai-content strong { color: var(--text-primary); font-weight: 600; }
