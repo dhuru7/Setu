@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // --- PASTE YOUR FIREBASE KEYS HERE ---
 const firebaseConfig = {
@@ -188,7 +188,27 @@ loginForm.addEventListener('submit', async (e) => {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            const userData = docSnap.data();
+            let userData = docSnap.data();
+
+            // SCRIPT TO FIX MISSING DEPARTMENT IN DB (Self-Healing)
+            if (userData.role === 'authority' && !userData.department && userData.idCard) {
+                let derivedDept = 'General Administration';
+                const prefix = userData.idCard.substring(0, 4).toUpperCase();
+
+                if (prefix === 'GPWD') derivedDept = 'Public Works Department (PWD)';
+                else if (prefix === 'GSWM') derivedDept = 'Department of Sanitation';
+                else if (prefix === 'GDJB') derivedDept = 'Water Supply & Sewerage Board';
+
+                // Update Database immediately
+                try {
+                    await updateDoc(docRef, { department: derivedDept });
+                    console.log("Database updated with missing department:", derivedDept);
+                    // Update local object so it saves to localStorage correctly
+                    userData.department = derivedDept;
+                } catch (err) {
+                    console.error("Failed to auto-update department in DB:", err);
+                }
+            }
 
             // Save info to LocalStorage for quick access
             localStorage.setItem('userProfile', JSON.stringify(userData));

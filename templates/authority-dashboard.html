@@ -311,10 +311,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
-                <h1 class="text-lg sm:text-xl font-bold text-[var(--text-primary)]">Welcome, Anita Sharma!</h1>
+                <h1 class="text-lg sm:text-xl font-bold text-[var(--text-primary)]">Welcome, <span
+                        id="dashboard-welcome">Loading...</span></h1>
             </div>
             <div class="flex items-center space-x-4">
-                <span class="hidden sm:inline text-sm text-[var(--text-muted)]">Electricity Department</span>
+                <span id="dashboard-dept" class="hidden sm:inline text-sm text-[var(--text-muted)]"></span>
                 <button id="theme-toggle-desktop" class="p-2 rounded-lg bg-[var(--bg-accent)] theme-toggle"
                     title="Toggle Theme">
                     <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,6 +426,21 @@
             };
 
             const loadAndDisplayData = () => {
+                // Load User Profile Data for Header
+                try {
+                    const userProfile = JSON.parse(localStorage.getItem('userProfile'));
+                    if (userProfile) {
+                        const welcomeName = document.getElementById('dashboard-welcome');
+                        const welcomeDept = document.getElementById('dashboard-dept');
+
+                        if (welcomeName) welcomeName.textContent = userProfile.fullname || 'Authority User';
+
+                        if (welcomeDept) welcomeDept.textContent = userProfile.department || 'General Administration';
+                    }
+                } catch (e) {
+                    console.error("Error loading user profile", e);
+                }
+
                 const complaintsData = localStorage.getItem('complaintsData');
                 if (!complaintsData) {
                     UI.tableContainer.innerHTML = `<p class="text-center text-[var(--text-muted)] p-8">No complaint data found in local storage. Please use the citizen portal to report issues first.</p>`;

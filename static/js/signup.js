@@ -362,8 +362,23 @@ function initSignupProcess() {
             // Email is stored as empty string so Profile page prompts user to enter it
             // Determine Role based on ID format
             let role = 'citizen'; // Default
-            if (/^[A-Z]{4}\d{8}$/.test(idCard)) {
+            let department = ''; // Default department
+
+            const officerRegex = /^[A-Z]{4}\d{8}$/;
+            if (officerRegex.test(idCard)) {
                 role = 'authority';
+
+                // Department allocation logic
+                const prefix = idCard.substring(0, 4);
+                if (prefix === 'GPWD') {
+                    department = 'Public Works Department (PWD)';
+                } else if (prefix === 'GSWM') {
+                    department = 'Department of Sanitation';
+                } else if (prefix === 'GDJB') {
+                    department = 'Water Supply & Sewerage Board';
+                } else {
+                    department = 'General Administration'; // Fallback
+                }
             }
 
             const userData = {
@@ -374,7 +389,8 @@ function initSignupProcess() {
                 role: role,
                 createdAt: new Date().toISOString(), // Serializing date for JSON
                 email: "",
-                city: "" // Explicitly empty city to trigger completion request
+                city: "", // Explicitly empty city to trigger completion request
+                department: department // Add the determined department
             };
 
             await setDoc(doc(db, "users", user.uid), userData);
