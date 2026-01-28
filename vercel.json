@@ -1,23 +1,78 @@
 {
+    "buildCommand": "",
+    "outputDirectory": ".",
     "rewrites": [
         {
             "source": "/",
             "destination": "/templates/index.html"
         },
         {
-            "source": "/(.*).html",
-            "destination": "/templates/$1.html"
-        }
-    ],
-    "headers": [
+            "source": "/index.html",
+            "destination": "/templates/index.html"
+        },
         {
-            "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "Cache-Control",
-                    "value": "public, max-age=0, must-revalidate"
-                }
-            ]
+            "source": "/login.html",
+            "destination": "/templates/login.html"
+        },
+        {
+            "source": "/signup.html",
+            "destination": "/templates/signup.html"
+        },
+        {
+            "source": "/search.html",
+            "destination": "/templates/search.html"
+        },
+        {
+            "source": "/profile.html",
+            "destination": "/templates/profile.html"
+        },
+        {
+            "source": "/report.html",
+            "destination": "/templates/report.html"
+        },
+        {
+            "source": "/reportfeed.html",
+            "destination": "/templates/reportfeed.html"
+        },
+        {
+            "source": "/updates.html",
+            "destination": "/templates/updates.html"
+        },
+        {
+            "source": "/about.html",
+            "destination": "/templates/about.html"
+        },
+        {
+            "source": "/authority-dashboard.html",
+            "destination": "/templates/authority-dashboard.html"
+        },
+        {
+            "source": "/authority-profile.html",
+            "destination": "/templates/authority-profile.html"
+        },
+        {
+            "source": "/authority-reports.html",
+            "destination": "/templates/authority-reports.html"
+        },
+        {
+            "source": "/authority-complaints.html",
+            "destination": "/templates/authority-complaints.html"
+        },
+        {
+            "source": "/authority-action.html",
+            "destination": "/templates/authority-action.html"
+        },
+        {
+            "source": "/authority-map.html",
+            "destination": "/templates/authority-map.html"
+        },
+        {
+            "source": "/Userreport.html",
+            "destination": "/templates/Userreport.html"
+        },
+        {
+            "source": "/ahome.html",
+            "destination": "/templates/ahome.html"
         }
     ]
 }
