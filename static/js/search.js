@@ -271,11 +271,13 @@ async function askGemini(prompt) {
     `;
 
     // Start Emoji Cycle Interval
+    let currentEmoji = loadingEmojis[0];
     const emojiInterval = setInterval(() => {
         const el = document.getElementById('loading-emoji');
         if (el) {
             emojiIndex = (emojiIndex + 1) % loadingEmojis.length;
-            el.textContent = loadingEmojis[emojiIndex];
+            currentEmoji = loadingEmojis[emojiIndex];
+            el.textContent = currentEmoji;
         } else {
             clearInterval(emojiInterval);
         }
@@ -320,9 +322,7 @@ async function askGemini(prompt) {
         UI.resultsContainer.innerHTML = `
             <div class="py-6 px-2 sm:px-4 break-words w-full"> 
                 <p class="text-[var(--accent-primary)] font-bold text-lg mb-3 flex items-center gap-2">
-                    <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
-                    </svg>
+                    <span class="text-2xl">${currentEmoji}</span>
                     <span>Setu AI</span>
                 </p>
                 <div id="ai-typing-container" class="text-[var(--text-primary)] text-base leading-relaxed overflow-hidden"></div>

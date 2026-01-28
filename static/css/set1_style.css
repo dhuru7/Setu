@@ -49,7 +49,6 @@
 
 /* --- Global Resets & Base Styles --- */
 
-#google_translate_element,
 .skiptranslate {
     display: none !important;
 }

@@ -117,9 +117,7 @@ const Navigation = {
                 item.classList.add('active');
 
                 // 3. Wait for animation to mostly finish, then navigate
-                setTimeout(() => {
-                    window.location.href = href;
-                }, 150);
+                window.location.href = href;
             });
         });
     }

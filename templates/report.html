@@ -904,36 +904,51 @@
                 UI.locationErrorMsg.classList.add('hidden'); // Clear previous errors
                 if (navigator.geolocation) {
                     document.getElementById('location-btn-text').innerText = "Detecting...";
-                    UI.getLocationBtn.classList.add('loading'); // Add loading state if CSS supports it
+                    UI.getLocationBtn.classList.add('loading');
 
                     navigator.geolocation.getCurrentPosition(async (pos) => {
                         try {
-                            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                            // OPTIMIZATION: Use addressdetails=1 and handle errors robustly
+                            // Nominatim requires a User-Agent. Browsers send one automatically.
+                            // We catch 403s and other network errors.
+                            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&addressdetails=1`, {
+                                headers: {
+                                    'Accept-Language': 'en' // Get results in English
+                                }
+                            });
+
+                            if (!res.ok) {
+                                throw new Error(`Location Service Error: ${res.status}`);
+                            }
+
                             const data = await res.json();
 
                             // Check if address exists
                             if (!data.address) throw new Error("Address not found");
 
-                            UI.locationFields.village.value = data.address.village || "";
+                            const addr = data.address;
+
+                            UI.locationFields.village.value = addr.village || addr.hamlet || addr.suburb || "";
                             reportData.location.village = UI.locationFields.village.value;
 
-                            UI.locationFields.subdistrict.value = data.address.suburb || data.address.county || "";
+                            UI.locationFields.subdistrict.value = addr.county || addr.state_district || "";
                             reportData.location.subdistrict = UI.locationFields.subdistrict.value;
 
-                            UI.locationFields.district.value = data.address.state_district || data.address.county || "";
+                            UI.locationFields.district.value = addr.state_district || addr.district || "";
                             reportData.location.district = UI.locationFields.district.value;
 
-                            UI.locationFields.city.value = data.address.city || data.address.town || "";
+                            UI.locationFields.city.value = addr.city || addr.town || addr.municipality || "";
                             reportData.location.city = UI.locationFields.city.value;
 
-                            UI.locationFields.state.value = data.address.state || "";
+                            UI.locationFields.state.value = addr.state || "";
                             reportData.location.state = UI.locationFields.state.value;
 
-                            UI.locationFields.pincode.value = data.address.postcode || "";
-                            reportData.location.pincode = UI.locationFields.pincode.value;
-
-                            // Fill full address as fallback removed by user request
-
+                            // OPTIMIZATION: Pincode cleaning
+                            let rawPin = addr.postcode || "";
+                            // Remove non-numeric characters to prevent "wrong pin code" issues
+                            let cleanPin = rawPin.replace(/\D/g, '');
+                            UI.locationFields.pincode.value = cleanPin;
+                            reportData.location.pincode = cleanPin;
 
                             document.getElementById('location-btn-text').innerText = "Location Found";
                             document.getElementById('location-success-anim').classList.remove('hidden');
@@ -942,10 +957,14 @@
                             UI.getLocationBtn.classList.add('success');
                             updateNavButtons();
                         } catch (e) {
-                            console.error(e);
+                            console.error("Location Error:", e);
                             document.getElementById('location-btn-text').innerText = "Retry Location";
                             UI.getLocationBtn.classList.remove('loading');
-                            UI.locationErrorMsg.innerText = "Could not fetch details. Please fill manually.";
+
+                            let errorMsg = "Could not fetch details. Please fill manually.";
+                            if (e.message.includes("403")) errorMsg = "Service busy. Please fill manually.";
+
+                            UI.locationErrorMsg.innerText = errorMsg;
                             UI.locationErrorMsg.classList.remove('hidden');
                         }
                     }, (err) => {
