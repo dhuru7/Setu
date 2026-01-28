@@ -1,14 +1,23 @@
 {
-    "builds": [
+    "rewrites": [
         {
-            "src": "app.py",
-            "use": "@vercel/python"
+            "source": "/",
+            "destination": "/templates/index.html"
+        },
+        {
+            "source": "/(.*).html",
+            "destination": "/templates/$1.html"
         }
     ],
-    "routes": [
+    "headers": [
         {
-            "src": "/(.*)",
-            "dest": "app.py"
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=0, must-revalidate"
+                }
+            ]
         }
     ]
 }
