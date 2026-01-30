@@ -1,0 +1,576 @@
+/* =====================================================
+   SET1_REPORT.CSS - Base Report Page Styles
+   Mobile-first redesign inspired by provided mockups
+   ===================================================== */
+
+/* -------------------------
+   CSS Variables
+   ------------------------- */
+:root {
+    --report-bg: #f7f8fa;
+    --report-card-bg: #ffffff;
+    --report-text-primary: #1a1a1a;
+    --report-text-secondary: #6b7280;
+    --report-text-muted: #9ca3af;
+    --report-border-light: #f3f4f6;
+    --report-border-medium: #e5e7eb;
+    --report-accent: #1a1a1a;
+    --report-accent-success: #10b981;
+    --report-accent-info: #3b82f6;
+    --report-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --report-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --report-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+    --report-bg: #0f0f0f;
+    --report-card-bg: #1a1a1a;
+    --report-text-primary: #fafafa;
+    --report-text-secondary: #a1a1aa;
+    --report-text-muted: #71717a;
+    --report-border-light: #27272a;
+    --report-border-medium: #3f3f46;
+    --report-accent: #fafafa;
+    --report-accent-success: #22c55e;
+    --report-accent-info: #60a5fa;
+    --report-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --report-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --report-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* -------------------------
+   Reset & Base
+   ------------------------- */
+* {
+    box-sizing: border-box;
+}
+
+body.report-page {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--report-bg);
+    color: var(--report-text-primary);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* -------------------------
+   Ambient Background Gradient
+   ------------------------- */
+.report-bg-gradient {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 80% 0%, rgba(209, 213, 219, 0.5) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 100%, rgba(209, 213, 219, 0.4) 0%, transparent 50%);
+    background-color: var(--report-bg);
+}
+
+[data-theme="dark"] .report-bg-gradient {
+    background:
+        radial-gradient(ellipse at 80% 0%, rgba(50, 50, 60, 0.4) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 100%, rgba(50, 50, 60, 0.3) 0%, transparent 50%);
+    background-color: var(--report-bg);
+}
+
+/* -------------------------
+   Report Container
+   ------------------------- */
+.report-container {
+    max-width: 28rem;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+    padding-bottom: 7rem;
+    min-height: 100vh;
+}
+
+/* -------------------------
+   Header
+   ------------------------- */
+.report-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    background: transparent;
+}
+
+.report-header-close {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    color: var(--report-text-secondary);
+}
+
+.report-header-close:hover {
+    background: var(--report-border-light);
+}
+
+.report-header-close svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke-width: 2;
+}
+
+.step-indicator-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--report-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* -------------------------
+   Progress Ring
+   ------------------------- */
+.progress-ring-container {
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+}
+
+.progress-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.progress-ring-bg {
+    fill: none;
+    stroke: var(--report-border-medium);
+    stroke-width: 2.5;
+}
+
+.progress-ring-fill {
+    fill: none;
+    stroke: var(--report-text-primary);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.4s ease;
+}
+
+/* -------------------------
+   Step Content Area
+   ------------------------- */
+.report-main {
+    padding-top: 1.5rem;
+}
+
+.step-panel {
+    display: none;
+    opacity: 0;
+    transform: translateY(16px);
+}
+
+.step-panel.active {
+    display: block;
+    animation: stepFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes stepFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* -------------------------
+   Page Titles
+   ------------------------- */
+.report-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--report-text-primary);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.report-subtitle {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: var(--report-text-secondary);
+    margin: 0 0 2rem 0;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Text variant for step 2 */
+.report-subtitle.accent {
+    color: var(--report-accent-info);
+}
+
+/* -------------------------
+   Upload Cards (Step 1)
+   ------------------------- */
+.upload-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.upload-card {
+    position: relative;
+    cursor: pointer;
+    display: block;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+    width: 100%;
+    text-align: left;
+}
+
+.upload-card-inner {
+    background: var(--report-card-bg);
+    border: 1px solid var(--report-border-light);
+    border-radius: 1.25rem;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+    box-shadow: var(--report-shadow-sm);
+}
+
+.upload-card:hover .upload-card-inner {
+    border-color: var(--report-border-medium);
+    box-shadow: var(--report-shadow-md);
+}
+
+.upload-card:active .upload-card-inner {
+    transform: scale(0.98);
+}
+
+.upload-card-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.upload-card-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: var(--report-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--report-text-primary);
+    flex-shrink: 0;
+}
+
+.upload-card-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    stroke-width: 1.5;
+}
+
+.upload-card-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--report-text-primary);
+}
+
+.upload-card-arrow {
+    color: var(--report-text-muted);
+    flex-shrink: 0;
+}
+
+.upload-card-arrow svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* -------------------------
+   Form Inputs
+   ------------------------- */
+.report-form-group {
+    margin-bottom: 1rem;
+}
+
+.report-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.report-form-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--report-text-muted);
+    margin-bottom: 0.375rem;
+}
+
+.report-form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--report-border-light);
+    border: 1px solid transparent;
+    border-radius: 0.75rem;
+    font-size: 0.9375rem;
+    color: var(--report-text-primary);
+    outline: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    font-family: inherit;
+}
+
+.report-form-input::placeholder {
+    color: var(--report-text-muted);
+}
+
+.report-form-input:focus {
+    background: var(--report-card-bg);
+    border-color: var(--report-accent);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .report-form-input:focus {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+}
+
+/* Textarea */
+.report-textarea {
+    min-height: 6rem;
+    resize: none;
+    line-height: 1.5;
+}
+
+/* Input with icon (mic button) */
+.report-input-wrapper {
+    position: relative;
+}
+
+.report-input-wrapper .report-form-input {
+    padding-right: 3rem;
+}
+
+.report-input-mic {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--report-border-light);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--report-text-muted);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.report-input-mic:hover {
+    background: var(--report-text-primary);
+    color: var(--report-card-bg);
+}
+
+.report-input-mic.listening {
+    background: #ef4444;
+    color: white;
+    animation: micPulse 1s ease-in-out infinite;
+}
+
+@keyframes micPulse {
+
+    0%,
+    100% {
+        transform: translateY(-50%) scale(1);
+    }
+
+    50% {
+        transform: translateY(-50%) scale(1.1);
+    }
+}
+
+.report-input-mic svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* -------------------------
+   Textarea Container (Step 2)
+   ------------------------- */
+.report-textarea-container {
+    position: relative;
+}
+
+.report-textarea-wrapper {
+    background: var(--report-card-bg);
+    border: 1px solid var(--report-border-medium);
+    border-radius: 1rem;
+    padding: 0.25rem;
+    box-shadow: var(--report-shadow-sm);
+}
+
+.report-textarea-inner {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    background: transparent;
+    font-size: 0.9375rem;
+    color: var(--report-text-primary);
+    resize: none;
+    outline: none;
+    min-height: 5rem;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+.report-textarea-inner::placeholder {
+    color: var(--report-text-muted);
+}
+
+.report-textarea-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0.5rem 1rem 0.75rem;
+    gap: 0.75rem;
+}
+
+.report-char-count {
+    font-size: 0.6875rem;
+    color: var(--report-text-muted);
+}
+
+/* -------------------------
+   Location Fields Card
+   ------------------------- */
+.location-fields-card {
+    background: var(--report-card-bg);
+    border: 1px solid var(--report-border-medium);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    box-shadow: var(--report-shadow-sm);
+}
+
+.location-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.location-fields-grid .report-form-group:first-child {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 480px) {
+    .location-fields-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* -------------------------
+   Auto-Detect Location Button
+   Styled to match reference mockup (dark pill button)
+   ------------------------- */
+.location-detect-btn {
+    width: 100%;
+    padding: 1.125rem 2rem;
+    border-radius: 9999px;
+    /* Full pill shape */
+    background: #1a1a1a;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+    font-family: inherit;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .location-detect-btn {
+    background: #fafafa;
+    color: #1a1a1a;
+}
+
+.location-detect-btn:hover {
+    background: #2d2d2d;
+    transform: scale(1.01);
+}
+
+[data-theme="dark"] .location-detect-btn:hover {
+    background: #e5e5e5;
+}
+
+.location-detect-btn:active {
+    transform: scale(0.98);
+}
+
+.location-detect-btn.loading {
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.location-detect-btn.success {
+    background: #1a1a1a;
+}
+
+[data-theme="dark"] .location-detect-btn.success {
+    background: #fafafa;
+}
+
+.location-detect-btn.loading svg {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.location-detect-btn svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* -------------------------
+   Error Messages
+   ------------------------- */
+.report-error-msg {
+    color: #ef4444;
+    font-size: 0.8125rem;
+    text-align: center;
+    margin-top: 0.75rem;
+}
+
+/* -------------------------
+   Note Text
+   ------------------------- */
+.report-note {
+    text-align: center;
+    font-size: 0.8125rem;
+    color: var(--report-text-muted);
+    margin-top: 1.5rem;
+}

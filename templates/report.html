@@ -39,367 +39,273 @@
     <link rel="stylesheet" href="../static/css/navigation.css">
     <link rel="stylesheet" href="../static/css/settings.css">
     <link rel="stylesheet" href="../static/css/notifications.css">
+    <link rel="stylesheet" href="../static/css/set1_report.css?v=5">
+    <link rel="stylesheet" href="../static/css/set2_report.css?v=5">
     <script src="../static/js/notifications.js" defer></script>
     <script src="../static/js/settings.js" defer></script>
     <script src="../static/js/navigation.js" defer></script>
     <script src="../static/js/setu-ai.js" defer></script>
-    <style>
-        /* Custom Submit Button Animation Styles */
-        /* Morphing Loader Button Styles */
-        .morphing-btn {
-            background-color: var(--accent-primary);
-            color: white;
-            transition-property: all;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
 
-        .morphing-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .morphing-btn.minimizing {
-            width: 256px;
-            /* w-64 */
-            height: 8px;
-            /* h-2 */
-            border-radius: 9999px;
-            /* rounded-full */
-            background-color: #1f2937;
-            /* bg-gray-800 */
-            transition-duration: 600ms;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            color: transparent;
-        }
-
-        .morphing-btn.loading {
-            width: 256px;
-            height: 8px;
-            border-radius: 9999px;
-            background-color: #1f2937;
-            transition-duration: 300ms;
-            /* short transition for state switch */
-        }
-
-        .morphing-btn.expanding {
-            width: 256px;
-            height: 56px;
-            /* h-14 */
-            border-radius: 12px;
-            /* rounded-xl */
-            background-color: #10b981;
-            /* bg-emerald-500 */
-            transition-duration: 600ms;
-            transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .morphing-btn.success {
-            width: 256px;
-            height: 56px;
-            border-radius: 12px;
-            background-color: #10b981;
-            cursor: default;
-        }
-
-        #morphing-progress {
-            transition: width 1500ms linear;
-        }
-
-        #morphing-check-path {
-            transition: stroke-dashoffset 0.5s ease-out 0.2s;
-        }
-    </style>
 </head>
 
-<body class="antialiased pb-28">
+<body class="report-page antialiased">
+    <!-- Ambient Background -->
+    <div class="report-bg-gradient"></div>
 
-    <div id="app" class="min-h-screen flex items-center justify-center p-4">
+    <!-- Main Report Container -->
+    <div class="report-container">
+        <!-- Header -->
+        <header class="report-header">
+            <a href="index.html" onclick="window.location.href='index.html'; return false;" class="report-header-close"
+                aria-label="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </a>
+            <span id="step-text" class="step-indicator-text">Step 1 of 4</span>
+            <div class="progress-ring-container">
+                <svg class="progress-ring" viewBox="0 0 32 32">
+                    <circle class="progress-ring-bg" cx="16" cy="16" r="14" />
+                    <circle id="progress-ring-fill" class="progress-ring-fill" cx="16" cy="16" r="14"
+                        stroke-dasharray="87.96" stroke-dashoffset="65.97" />
+                </svg>
+            </div>
+        </header>
 
-        <main id="report-page-container" class="max-w-3xl w-full">
+        <!-- Main Content Area -->
+        <main class="report-main">
+            <!-- Step 1: Media Upload -->
+            <section id="step-1" class="step-panel active">
+                <h1 class="report-title">Add Evidence</h1>
+                <p class="report-subtitle">A visual helps authorities understand the issue faster.</p>
 
-            <div id="wizard-container" class="relative">
-                <a href="index.html"
-                    class="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-[var(--bg-secondary-translucent)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-accent)] transition-all duration-200"
-                    aria-label="Close">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </a>
+                <div class="upload-cards-list">
+                    <label for="camera-input" class="upload-card">
+                        <div class="upload-card-inner">
+                            <div class="upload-card-left">
+                                <div class="upload-card-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.776 48.776 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                                    </svg>
+                                </div>
+                                <span class="upload-card-label">Take Picture</span>
+                            </div>
+                            <div class="upload-card-arrow">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </label>
 
-                <div class="progress-bar p-4 sm:p-6 mb-8">
-                    <div id="step-indicator-1" class="progress-step active">
-                        <div class="step-circle">1</div>
-                        <div class="step-name hidden sm:block">Upload</div>
-                    </div>
-                    <div id="step-indicator-2" class="progress-step">
-                        <div class="step-circle">2</div>
-                        <div class="step-name hidden sm:block">Details</div>
-                    </div>
-                    <div id="step-indicator-3" class="progress-step">
-                        <div class="step-circle">3</div>
-                        <div class="step-name hidden sm:block">Location</div>
-                    </div>
-                    <div id="step-indicator-4" class="progress-step">
-                        <div class="step-circle">4</div>
-                        <div class="step-name hidden sm:block">Confirm</div>
-                    </div>
+                    <label for="gallery-input" class="upload-card">
+                        <div class="upload-card-inner">
+                            <div class="upload-card-left">
+                                <div class="upload-card-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                    </svg>
+                                </div>
+                                <span class="upload-card-label">From Gallery</span>
+                            </div>
+                            <div class="upload-card-arrow">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </label>
+
+                    <button id="record-video-btn" class="upload-card">
+                        <div class="upload-card-inner">
+                            <div class="upload-card-left">
+                                <div class="upload-card-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9A2.25 2.25 0 0013.5 5.25h-9A2.25 2.25 0 002.25 7.5v9A2.25 2.25 0 004.5 18.75z" />
+                                    </svg>
+                                </div>
+                                <span class="upload-card-label">Record Video</span>
+                            </div>
+                            <div class="upload-card-arrow">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </button>
                 </div>
 
-                <div>
-                    <!-- Step 1: Media Upload -->
-                    <section id="step-1" class="wizard-step active p-6 sm:p-8">
-                        <div class="text-center mb-8">
-                            <h2 class="wizard-heading text-2xl sm:text-3xl">Add a Photo or Video</h2>
-                            <p class="text-[var(--text-muted)] mt-2">A visual helps the authorities understand the issue
-                                much faster.</p>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <label for="camera-input"
-                                class="upload-option p-6 rounded-xl flex items-center justify-center sm:flex-col cursor-pointer">
-                                <svg class="w-10 h-10 text-[var(--accent-primary)] sm:mb-3 mr-4 sm:mr-0"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.776 48.776 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                <input type="file" id="camera-input" class="hidden" accept="image/*" capture="environment">
+                <input type="file" id="gallery-input" class="hidden" accept="image/*">
+                <div id="upload-error-msg" class="report-error-msg hidden"></div>
+            </section>
+
+            <!-- Step 2: Issue Details -->
+            <section id="step-2" class="step-panel">
+                <h1 class="report-title">Describe the Issue</h1>
+                <p class="report-subtitle accent">Select the category that best fits the problem.</p>
+
+                <div id="issue-types-container" class="issue-grid"></div>
+
+                <div class="report-textarea-container">
+                    <div class="report-textarea-wrapper">
+                        <textarea id="description-input" class="report-textarea-inner" rows="3" maxlength="250"
+                            placeholder="Provide extra information (Optional)..."></textarea>
+                        <div class="report-textarea-footer">
+                            <span class="report-char-count"><span id="char-count">0</span>/250</span>
+                            <button id="description-mic-btn" class="report-input-mic" title="Voice input">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 14.25a3.75 3.75 0 003.75-3.75V5.25a3.75 3.75 0 00-7.5 0v5.25A3.75 3.75 0 0012 14.25z" />
+                                    <path
+                                        d="M6 10.5a.75.75 0 01.75.75v.75a5.25 5.25 0 1010.5 0v-.75a.75.75 0 011.5 0v.75a6.75 6.75 0 11-13.5 0v-.75a.75.75 0 01.75-.75z" />
                                 </svg>
-                                <span
-                                    class="font-semibold text-center text-lg sm:text-base text-[var(--text-primary)]">Take
-                                    Picture</span>
-                            </label>
-                            <label for="gallery-input"
-                                class="upload-option p-6 rounded-xl flex items-center justify-center sm:flex-col cursor-pointer">
-                                <svg class="w-10 h-10 text-[var(--accent-primary)] sm:mb-3 mr-4 sm:mr-0"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                </svg>
-                                <span
-                                    class="font-semibold text-center text-lg sm:text-base text-[var(--text-primary)]">From
-                                    Gallery</span>
-                            </label>
-                            <button id="record-video-btn"
-                                class="upload-option p-6 rounded-xl flex items-center justify-center sm:flex-col cursor-pointer">
-                                <svg class="w-10 h-10 text-[var(--accent-primary)] sm:mb-3 mr-4 sm:mr-0"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9A2.25 2.25 0 0013.5 5.25h-9A2.25 2.25 0 002.25 7.5v9A2.25 2.25 0 004.5 18.75z">
-                                    </path>
-                                </svg>
-                                <span
-                                    class="font-semibold text-center text-lg sm:text-base text-[var(--text-primary)]">Record
-                                    Video</span>
                             </button>
                         </div>
-                        <input type="file" id="camera-input" class="hidden" accept="image/*" capture="environment">
-                        <input type="file" id="gallery-input" class="hidden" accept="image/*">
-                        <div class="mt-6 text-center text-sm text-[var(--text-muted)]">Image upload is required to
-                            proceed.</div>
-                        <div id="upload-error-msg" class="text-red-500 text-sm text-center mt-4 hidden"></div>
-                    </section>
+                    </div>
+                </div>
+            </section>
 
-                    <!-- Step 2: Issue Details -->
-                    <section id="step-2" class="wizard-step p-6 sm:p-8">
-                        <div class="text-center mb-8">
-                            <h2 class="wizard-heading text-2xl sm:text-3xl">Describe the Issue</h2>
-                            <p class="text-[var(--text-muted)] mt-2">Select the category that best fits the problem.</p>
-                        </div>
-                        <div id="issue-types-container" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
-                        <div class="mt-6">
-                            <label for="description-input" class="form-label">Any other details? <span
-                                    class="text-sm font-normal text-[var(--text-muted)]">(Optional)</span></label>
-                            <div class="relative">
-                                <textarea id="description-input" rows="4" maxlength="250"
-                                    placeholder="Provide extra information..." class="form-input pr-12"></textarea>
-                                <div class="text-right text-xs text-[var(--text-muted)] mt-1"><span
-                                        id="char-count">0</span>/250</div>
-                                <!-- IMPROVEMENT: Redesigned mic button -->
-                                <button id="description-mic-btn"
-                                    class="absolute top-2.5 right-2.5 flex items-center justify-center w-8 h-8 rounded-full bg-[var(--accent-primary)] text-white shadow-md hover:bg-[var(--accent-primary-hover)] transition-all duration-200 transform hover:scale-110"
-                                    title="Add description via voice">
-                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                        fill="currentColor">
+            <!-- Step 3: Location -->
+            <section id="step-3" class="step-panel">
+                <h1 class="report-title">Where is it?</h1>
+                <p class="report-subtitle">Provide the location for a faster response.</p>
+
+                <button id="get-location-btn" class="location-detect-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    </svg>
+                    <span id="location-btn-text">Auto-Detect Location</span>
+                    <div id="location-success-anim" class="hidden">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </button>
+                <div id="location-error-msg" class="report-error-msg hidden"></div>
+
+                <div class="location-fields-card">
+                    <div class="location-fields-grid">
+                        <div class="report-form-group full-width">
+                            <label for="location-full" class="report-form-label">Complete Address</label>
+                            <div class="report-input-wrapper">
+                                <input type="text" id="location-full" class="report-form-input"
+                                    placeholder="House No, Street Name">
+                                <button id="address-mic-btn" class="report-input-mic" title="Voice input">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                                         <path
                                             d="M12 14.25a3.75 3.75 0 003.75-3.75V5.25a3.75 3.75 0 00-7.5 0v5.25A3.75 3.75 0 0012 14.25z" />
                                         <path
-                                            d="M6 10.5a.75.75 0 01.75.75v.75a5.25 5.25 0 1010.5 0v-.75a.75.75 0 011.5 0v.75a6.75 6.75 0 11-13.5 0v-.75a.75.75 0 01.75-.75zM12 18.75a.75.75 0 00.75-.75V16.5a.75.75 0 00-1.5 0v1.5a.75.75 0 00.75.75zM8.25 21a.75.75 0 01.75-.75h6a.75.75 0 010 1.5h-6a.75.75 0 01-.75-.75z" />
+                                            d="M6 10.5a.75.75 0 01.75.75v.75a5.25 5.25 0 1010.5 0v-.75a.75.75 0 011.5 0v.75a6.75 6.75 0 11-13.5 0v-.75a.75.75 0 01.75-.75z" />
                                     </svg>
                                 </button>
                             </div>
                         </div>
-                    </section>
-
-                    <!-- Step 3: Location -->
-                    <section id="step-3" class="wizard-step p-6 sm:p-8">
-                        <div class="text-center mb-8">
-                            <h2 class="wizard-heading text-2xl sm:text-3xl">Where is the Issue?</h2>
-                            <p class="text-[var(--text-muted)] mt-2">Provide the location for a faster response.</p>
+                        <div class="report-form-group">
+                            <label for="location-village" class="report-form-label">Village</label>
+                            <input type="text" id="location-village" class="report-form-input"
+                                placeholder="Enter village">
                         </div>
-                        <div id="location-btn-container" class="mb-2">
-                            <button id="get-location-btn" class="flex items-center justify-center gap-2">
-                                <span id="location-btn-text">AUTO-DETECT LOCATION</span>
-                                <div id="location-success-anim" class="hidden">
-                                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="12" cy="12" r="12" fill="#22C55E" />
-                                        <path d="M17.25 6.75L9.375 14.625L6.75 12" stroke="white" stroke-width="2.5"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </div>
-                            </button>
+                        <div class="report-form-group">
+                            <label for="location-subdistrict" class="report-form-label">Subdistrict</label>
+                            <input type="text" id="location-subdistrict" class="report-form-input" placeholder="Tehsil">
                         </div>
-                        <div id="location-error-msg" class="text-red-500 text-sm text-center mb-4 hidden"></div>
-                        <div id="location-fields-container" class="space-y-4">
-                            <div>
-                                <label for="location-full" class="form-label">Complete Address <span
-                                        class="required-marker">*</span></label>
-                                <div class="relative">
-                                    <input type="text" id="location-full" placeholder="e.g., House No, Street Name"
-                                        class="form-input pr-12">
-                                    <!-- IMPROVEMENT: Redesigned mic button -->
-                                    <button id="address-mic-btn"
-                                        class="absolute top-1/2 right-2.5 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-[var(--accent-primary)] text-white shadow-md hover:bg-[var(--accent-primary-hover)] transition-all duration-200 transform hover:scale-110"
-                                        title="Add address via voice">
-                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                            fill="currentColor">
-                                            <path
-                                                d="M12 14.25a3.75 3.75 0 003.75-3.75V5.25a3.75 3.75 0 00-7.5 0v5.25A3.75 3.75 0 0012 14.25z" />
-                                            <path
-                                                d="M6 10.5a.75.75 0 01.75.75v.75a5.25 5.25 0 1010.5 0v-.75a.75.75 0 011.5 0v.75a6.75 6.75 0 11-13.5 0v-.75a.75.75 0 01.75-.75zM12 18.75a.75.75 0 00.75-.75V16.5a.75.75 0 00-1.5 0v1.5a.75.75 0 00.75.75zM8.25 21a.75.75 0 01.75-.75h6a.75.75 0 010 1.5h-6a.75.75 0 01-.75-.75z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <!-- Reordered and added City -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="location-village" class="form-label">Village / Gram Panchayat<span
-                                            class="required-marker">*</span></label>
-                                    <input type="text" id="location-village" placeholder="Enter village name"
-                                        class="form-input">
-                                </div>
-                                <div>
-                                    <label for="location-subdistrict" class="form-label">Subdistrict / Tehsil<span
-                                            class="required-marker">*</span></label>
-                                    <input type="text" id="location-subdistrict" placeholder="Enter subdistrict"
-                                        class="form-input">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="location-district" class="form-label">District<span
-                                            class="required-marker">*</span></label>
-                                    <input type="text" id="location-district" placeholder="Enter district"
-                                        class="form-input">
-                                </div>
-                                <div>
-                                    <label for="location-city" class="form-label">City<span
-                                            class="required-marker">*</span></label>
-                                    <input type="text" id="location-city" placeholder="Enter city" class="form-input">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="location-state" class="form-label">State<span
-                                            class="required-marker">*</span></label>
-                                    <input type="text" id="location-state" placeholder="Enter state" class="form-input">
-                                </div>
-                                <div>
-                                    <label for="location-pincode" class="form-label">PIN Code<span
-                                            class="required-marker">*</span></label>
-                                    <input type="text" id="location-pincode" placeholder="Enter PIN code"
-                                        class="form-input">
-                                </div>
-                            </div>
+                        <div class="report-form-group">
+                            <label for="location-district" class="report-form-label">District</label>
+                            <input type="text" id="location-district" class="report-form-input" placeholder="District">
                         </div>
-                    </section>
-
-                    <!-- Step 4: Confirm & Submit -->
-                    <section id="step-4" class="wizard-step p-6 sm:p-8">
-                        <div class="text-center mb-8">
-                            <h2 class="wizard-heading text-2xl sm:text-3xl">Review & Submit</h2>
-                            <p class="text-[var(--text-muted)] mt-2">Please confirm the details of your report below.
-                            </p>
+                        <div class="report-form-group">
+                            <label for="location-city" class="report-form-label">City</label>
+                            <input type="text" id="location-city" class="report-form-input" placeholder="City">
                         </div>
-                        <div class="space-y-6">
-                            <div class="rounded-lg overflow-hidden border border-[var(--border-light)]"><img
-                                    id="summary-image" src="" alt="Report summary image"
-                                    class="w-full h-48 object-cover"></div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                                <div class="bg-[var(--bg-accent)] p-4 rounded-lg"><label
-                                        class="block font-semibold text-[var(--text-muted)] mb-1">Issue Type</label>
-                                    <p id="summary-issue" class="font-bold text-[var(--text-primary)] text-base"></p>
-                                </div>
-                                <div class="bg-[var(--bg-accent)] p-4 rounded-lg"><label
-                                        class="block font-semibold text-[var(--text-muted)] mb-1">Location</label>
-                                    <p id="summary-location" class="font-bold text-[var(--text-primary)] text-base"></p>
-                                </div>
-                            </div>
-                            <div id="authority-info-section" class="opacity-0 transition-opacity duration-500">
-                                <div id="authority-details" class="hidden"><label
-                                        class="block text-md font-semibold text-[var(--text-secondary)] mb-2">Assigned
-                                        Authority</label>
-                                    <div
-                                        class="bg-[var(--bg-primary)] border border-[var(--border-light)] p-4 rounded-lg space-y-1">
-                                        <p class="text-sm font-semibold text-[var(--text-muted)]">Name: <span
-                                                id="authority-name"
-                                                class="font-bold text-[var(--text-secondary)]"></span></p>
-                                        <p class="text-sm font-semibold text-[var(--text-muted)] mt-2">Department: <span
-                                                id="authority-department"
-                                                class="font-bold text-[var(--text-secondary)]"></span></p>
-                                    </div>
-                                </div>
-                                <div id="village-not-found-notice"
-                                    class="hidden bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
-                                    <p class="text-sm text-yellow-700">Data for this village is not yet available. We'll
-                                        add it soon!</p>
-                                </div>
-                            </div>
+                        <div class="report-form-group">
+                            <label for="location-state" class="report-form-label">State</label>
+                            <input type="text" id="location-state" class="report-form-input" placeholder="State">
                         </div>
-                    </section>
-                </div>
-
-                <div id="wizard-navigation"
-                    class="hidden flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-3 p-4 bg-gray-50 dark:bg-slate-800 border-t border-[var(--border-light)]">
-                    <button id="prev-btn" class="btn btn-secondary w-full sm:w-auto">Previous</button>
-                    <button id="next-btn" class="btn btn-primary w-full sm:w-auto">Next</button>
-                    <div id="submit-report-btn" class="hidden w-full sm:w-auto flex justify-center">
-                        <button id="morphing-btn"
-                            class="morphing-btn relative overflow-hidden flex items-center justify-center font-bold text-lg tracking-wide w-64 h-14 rounded-xl">
-                            <!-- Progress Bar -->
-                            <div id="morphing-progress" class="absolute left-0 top-0 h-full bg-emerald-500 z-0 w-0">
-                            </div>
-
-                            <!-- Content -->
-                            <div class="relative z-10 flex items-center justify-center w-full h-full">
-                                <span id="morphing-text"
-                                    class="absolute transition-all duration-300 transform opacity-100 translate-y-0 scale-100">
-                                    Submit Report
-                                </span>
-
-                                <div id="morphing-success"
-                                    class="absolute flex items-center justify-center transition-all duration-300 opacity-0 scale-50">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"
-                                        class="text-white">
-                                        <path id="morphing-check-path" d="M5 12l5 5l10 -10" stroke-dasharray="24"
-                                            stroke-dashoffset="24" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </button>
+                        <div class="report-form-group">
+                            <label for="location-pincode" class="report-form-label">Pincode</label>
+                            <input type="text" id="location-pincode" class="report-form-input" placeholder="PIN">
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <!-- Step 4: Review & Submit -->
+            <section id="step-4" class="step-panel">
+                <h1 class="report-title">Review & Submit</h1>
+                <p class="report-subtitle">Confirm the details below.</p>
+
+                <div class="summary-card">
+                    <div class="summary-image-container">
+                        <img id="summary-image" src="" alt="Report evidence" class="summary-image">
+                        <span class="summary-image-label">Evidence</span>
+                    </div>
+                    <div class="summary-details">
+                        <div class="summary-detail-box">
+                            <div class="summary-detail-label">Issue Type</div>
+                            <div id="summary-issue" class="summary-detail-value"></div>
+                        </div>
+                        <div class="summary-detail-box">
+                            <div class="summary-detail-label">Location</div>
+                            <div id="summary-location" class="summary-detail-value"></div>
+                        </div>
+                        <div id="authority-info-section" class="opacity-0 transition-opacity">
+                            <div id="authority-details" class="summary-detail-box authority hidden">
+                                <div class="summary-detail-label">Assigned Authority</div>
+                                <div id="authority-name" class="summary-detail-value"></div>
+                                <div id="authority-department" class="summary-detail-sub"></div>
+                            </div>
+                            <div id="village-not-found-notice" class="hidden summary-detail-box"
+                                style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2);">
+                                <p style="color: #b45309; font-size: 0.8125rem; margin: 0;">Data for this village is not
+                                    yet available. We'll add it soon!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
+    <!-- Footer Navigation -->
+    <footer id="wizard-footer" class="wizard-footer hidden">
+        <div class="wizard-footer-inner">
+            <button id="prev-btn" class="wizard-back-btn">Back</button>
+            <button id="next-btn" class="wizard-next-btn">
+                Continue
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+            </button>
+            <button id="submit-btn" class="wizard-submit-btn hidden">
+                Submit Report
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+            </button>
+        </div>
+    </footer>
+
     <!-- All Modals -->
     <div id="private-location-modal"
-        class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm hidden opacity-0">
+        class="report-modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm hidden opacity-0">
         <div
             class="modal-box bg-[var(--bg-secondary)] rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-95">
             <div class="w-20 h-20 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-6"><svg
@@ -417,7 +323,7 @@
         </div>
     </div>
     <div id="success-modal"
-        class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm hidden opacity-0">
+        class="report-modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm hidden opacity-0">
         <div
             class="modal-box bg-[var(--bg-secondary)] rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-95">
             <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6"><svg
@@ -430,27 +336,24 @@
                 been sent.</p><button id="close-modal-btn" class="btn btn-primary w-full !py-3">Done</button>
         </div>
     </div>
-    <!-- IMPROVEMENT: Updated "Coming Soon" modal -->
-    <div id="coming-soon-modal"
-        class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm hidden opacity-0">
-        <div
-            class="modal-box bg-[var(--bg-secondary)] rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-95">
-            <div class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-6"><svg
-                    class="w-12 h-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke-width="1.5" stroke="currentColor">
+    <!-- Video Coming Soon Modal -->
+    <div id="coming-soon-modal" class="report-modal-overlay">
+        <div class="report-modal-box">
+            <div class="report-modal-icon info">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z">
-                    </path>
-                </svg></div>
-            <h2 class="text-2xl font-bold text-[var(--text-primary)]">Feature Under Development</h2>
-            <p class="text-[var(--text-muted)] mt-2 mb-6">The ability to report issues with a video is currently under
-                development. Please use an image for now.</p><button id="close-coming-soon-modal-btn"
-                class="btn btn-primary w-full !py-3">Got it</button>
+                        d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9A2.25 2.25 0 0013.5 5.25h-9A2.25 2.25 0 002.25 7.5v9A2.25 2.25 0 004.5 18.75z" />
+                </svg>
+            </div>
+            <h3 class="report-modal-title">Video Coming Soon</h3>
+            <p class="report-modal-text">We are working on video uploads. Please use an image for now.</p>
+            <button id="close-coming-soon-modal-btn" class="report-modal-btn">Got it</button>
         </div>
     </div>
     <!-- IMPROVEMENT: Updated "Coming Soon" modal for voice -->
     <div id="voicemail-soon-modal"
-        class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm hidden opacity-0">
+        class="report-modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm hidden opacity-0">
         <div
             class="modal-box bg-[var(--bg-secondary)] rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-95">
             <div class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-6">
@@ -510,11 +413,13 @@
 
             // UI Elements
             const UI = {
-                wizardSteps: document.querySelectorAll('.wizard-step'),
-                progressSteps: document.querySelectorAll('.progress-step'),
+                stepPanels: document.querySelectorAll('.step-panel'),
+                stepText: document.getElementById('step-text'),
+                progressRingFill: document.getElementById('progress-ring-fill'),
+                wizardFooter: document.getElementById('wizard-footer'),
                 prevBtn: document.getElementById('prev-btn'),
                 nextBtn: document.getElementById('next-btn'),
-                submitReportBtn: document.getElementById('submit-report-btn'),
+                submitBtn: document.getElementById('submit-btn'),
                 cameraInput: document.getElementById('camera-input'),
                 galleryInput: document.getElementById('gallery-input'),
                 uploadErrorMsg: document.getElementById('upload-error-msg'),
@@ -561,42 +466,56 @@
                 "karnal": { name: "District Grievance Officer", department: "Mini Secretariat, Karnal" }
             };
 
+            // Progress Ring calculations (circumference = 2 * PI * r = 2 * 3.14159 * 14 ≈ 87.96)
+            const circumference = 87.96;
+
             const showStep = (stepNumber) => {
-                UI.wizardSteps.forEach(step => step.classList.remove('active'));
+                // Update step panels
+                UI.stepPanels.forEach(step => step.classList.remove('active'));
                 document.getElementById(`step-${stepNumber}`).classList.add('active');
-                UI.progressSteps.forEach((step, index) => {
-                    step.classList.remove('active', 'completed');
-                    if (index < stepNumber - 1) step.classList.add('completed');
-                    if (index === stepNumber - 1) step.classList.add('active');
-                });
+
+                // Update step text
+                if (UI.stepText) {
+                    UI.stepText.textContent = `Step ${stepNumber} of ${totalSteps}`;
+                }
+
+                // Update progress ring
+                if (UI.progressRingFill) {
+                    const progress = stepNumber / totalSteps;
+                    const offset = circumference - (progress * circumference);
+                    UI.progressRingFill.style.strokeDashoffset = offset;
+                }
+
                 updateNavButtons();
             };
 
             const updateNavButtons = () => {
-                const navContainer = document.getElementById('wizard-navigation');
-
-                // Step 1: Hide all navigation (Upload triggers auto-advance)
+                // Step 1: Hide footer (Upload triggers auto-advance)
                 if (currentStep === 1) {
-                    if (navContainer) navContainer.classList.add('hidden');
+                    if (UI.wizardFooter) UI.wizardFooter.classList.add('hidden');
                     return;
                 }
 
-                if (navContainer) {
-                    navContainer.classList.remove('hidden');
+                // Show footer for steps 2-4
+                if (UI.wizardFooter) {
+                    UI.wizardFooter.classList.remove('hidden');
 
                     if (currentStep === totalSteps) {
+                        // Step 4: Show Back and Submit
                         UI.prevBtn.classList.remove('hidden');
                         UI.nextBtn.classList.add('hidden');
-                        UI.submitReportBtn.classList.remove('hidden');
+                        if (UI.submitBtn) UI.submitBtn.classList.remove('hidden');
                     } else {
+                        // Steps 2-3: Show Back and Continue
                         UI.prevBtn.classList.remove('hidden');
                         UI.nextBtn.classList.remove('hidden');
-                        UI.submitReportBtn.classList.add('hidden');
+                        if (UI.submitBtn) UI.submitBtn.classList.add('hidden');
                     }
                 }
+
+                // Disable next button if validation fails
                 UI.nextBtn.disabled = !validateStep(currentStep);
             };
-
             const validateStep = (stepNumber) => {
                 switch (stepNumber) {
                     case 1: return !!reportData.image;
@@ -682,102 +601,68 @@
 
             // --- SUBMIT REPORT ---
             const setupAnimatedSubmit = () => {
-                const btn = document.getElementById('morphing-btn');
-                const progress = document.getElementById('morphing-progress');
-                const text = document.getElementById('morphing-text');
-                const successIcon = document.getElementById('morphing-success');
-                const checkPath = document.getElementById('morphing-check-path');
+                const btn = UI.submitBtn;
+                if (!btn) return;
 
-                if (btn) {
-                    btn.addEventListener('click', async () => {
-                        if (!currentUser) { alert("You must be logged in!"); return; }
-                        if (btn.classList.contains('minimizing') || btn.classList.contains('loading')) return;
+                btn.addEventListener('click', async () => {
+                    if (!currentUser) { alert("You must be logged in!"); return; }
+                    if (btn.classList.contains('loading')) return;
 
-                        // 1. MINIMIZING STATE
-                        // Shrink to line
-                        btn.classList.add('minimizing');
-                        text.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
-                        text.classList.add('opacity-0', 'translate-y-4', 'scale-90');
+                    // Store original content
+                    const originalHTML = btn.innerHTML;
 
-                        // Wait for shrink (600ms)
-                        setTimeout(async () => {
-                            // 2. LOADING STATE
-                            btn.classList.remove('minimizing');
-                            btn.classList.add('loading');
-                            progress.style.width = '100%'; // Start fill animation (1500ms)
+                    // 1. LOADING STATE
+                    btn.classList.add('loading');
+                    btn.innerHTML = '<div class="loading-spinner"></div> Submitting...';
+                    btn.disabled = true;
 
-                            // --- FIRESTORE SUBMISSION ---
-                            try {
-                                const villageName = (reportData.location.village || '').trim().toLowerCase();
-                                const authority = villageDatabase[villageName] || { name: "Zone Officer", department: "General" };
-                                const assignedDept = determineDepartment(reportData.issue);
+                    // --- FIRESTORE SUBMISSION ---
+                    try {
+                        const villageName = (reportData.location.village || '').trim().toLowerCase();
+                        const authority = villageDatabase[villageName] || { name: "Zone Officer", department: "General" };
+                        const assignedDept = determineDepartment(reportData.issue);
 
-                                console.log("Submitting Report:", { issue: reportData.issue, dept: assignedDept, auth: authority });
-                                // alert(`Debug: Submitting Report for Issue: ${reportData.issue}\nAssigned Department: ${assignedDept}`);
-                                // Uncomment the above line if you need to verify the department on submission.
+                        console.log("Submitting Report:", { issue: reportData.issue, dept: assignedDept, auth: authority });
 
-                                await addDoc(collection(db, "reports"), {
-                                    userId: currentUser.uid,
-                                    userName: currentUser.displayName || "Anonymous",
-                                    userEmail: currentUser.email,
-                                    issueType: reportData.issue,
-                                    description: reportData.description,
-                                    imageUrl: reportData.image,
-                                    location: reportData.location,
-                                    authorityName: authority.name,
-                                    assignedDepartment: assignedDept,
-                                    status: "Pending",
-                                    votes: 0,
-                                    votedBy: [],
-                                    followers: [],
-                                    createdAt: serverTimestamp()
-                                });
+                        await addDoc(collection(db, "reports"), {
+                            userId: currentUser.uid,
+                            userName: currentUser.displayName || "Anonymous",
+                            userEmail: currentUser.email,
+                            issueType: reportData.issue,
+                            description: reportData.description,
+                            imageUrl: reportData.image,
+                            location: reportData.location,
+                            authorityName: authority.name,
+                            assignedDepartment: assignedDept,
+                            status: "Pending",
+                            votes: 0,
+                            votedBy: [],
+                            followers: [],
+                            createdAt: serverTimestamp()
+                        });
 
-                                // Wait for the visual loading to complete (at least 1500ms total from start of loading)
-                                // The Firestore call runs in parallel with the 1500ms visual fill. 
-                                // We'll assume the fill takes 1500ms. We set a timeout to match the visual.
-                                setTimeout(() => {
-                                    // 3. EXPANDING STATE
-                                    // Reset progress width (instantly hidden by opacity change in future, but clean up)
-                                    // We keep it full to fill the bar, but the expanding state changes bg color.
+                        // 2. SUCCESS STATE
+                        btn.classList.remove('loading');
+                        btn.classList.add('success');
+                        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:1.125rem;height:1.125rem"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg> Submitted!';
 
-                                    btn.classList.remove('loading');
-                                    btn.classList.add('expanding');
-                                    progress.classList.add('opacity-0'); // Hide the progress bar overlay
+                        // Show success modal after delay
+                        setTimeout(() => {
+                            showModal(UI.successModal.overlay);
+                            // Auto redirect after showing success
+                            setTimeout(() => {
+                                window.location.href = "index.html";
+                            }, 1500);
+                        }, 800);
 
-                                    // 4. SUCCESS STATE (After expansion 600ms)
-                                    setTimeout(() => {
-                                        btn.classList.remove('expanding');
-                                        btn.classList.add('success');
-
-                                        // Show Checkmark
-                                        successIcon.classList.remove('opacity-0', 'scale-50');
-                                        successIcon.classList.add('opacity-100', 'scale-100');
-                                        checkPath.style.strokeDashoffset = '0'; // Draw tick
-
-                                        // Final Modal Delay
-                                        setTimeout(() => {
-                                            showModal(UI.successModal.overlay);
-                                            // Reset after closure or delay? 
-                                            // User's code sets idle after 3000ms. We can reset if needed.
-                                        }, 1000);
-
-                                    }, 600); // Expansion time
-                                }, 1500); // Loading time
-
-                            } catch (error) {
-                                console.error("Error:", error);
-                                // Error State Revert
-                                alert("Submission Failed: " + error.message);
-                                btn.classList.remove('minimizing', 'loading');
-                                progress.style.width = '0%';
-                                text.classList.remove('opacity-0', 'translate-y-4', 'scale-90');
-                                text.classList.add('opacity-100', 'translate-y-0', 'scale-100');
-                            }
-
-                        }, 600); // Minimizing time
-                    });
-                }
+                    } catch (error) {
+                        console.error("Error:", error);
+                        alert("Submission Failed: " + error.message);
+                        btn.classList.remove('loading');
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                    }
+                });
             };
 
             // --- SETUP LISTENERS ---
@@ -903,7 +788,7 @@
             UI.getLocationBtn.addEventListener('click', () => {
                 UI.locationErrorMsg.classList.add('hidden'); // Clear previous errors
                 if (navigator.geolocation) {
-                    document.getElementById('location-btn-text').innerText = "Detecting...";
+                    document.getElementById('location-btn-text').innerText = "Locating...";
                     UI.getLocationBtn.classList.add('loading');
 
                     navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -993,8 +878,18 @@
             UI.recordVideoBtn.addEventListener('click', () => showModal(UI.comingSoonModal.overlay));
             UI.comingSoonModal.closeBtn.addEventListener('click', () => hideModal(UI.comingSoonModal.overlay));
 
-            const showModal = (modal) => { modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10); };
-            const hideModal = (modal) => { modal.classList.add('opacity-0'); setTimeout(() => modal.classList.add('hidden'), 300); };
+            const showModal = (modal) => {
+                modal.classList.add('visible');
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.add('active'), 10);
+            };
+            const hideModal = (modal) => {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('visible');
+                }, 300);
+            };
 
             // Initialize View
             showStep(currentStep);
