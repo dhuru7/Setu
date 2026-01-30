@@ -99,9 +99,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         let statusClass = 'status-pending'; // Default yellow
         if (status === 'Resolved' || status === 'Fixed') statusClass = 'status-resolved'; // Green
 
-        // Determine location string for geocoding
-        const locationStr = data.location?.village || data.location?.address || 'Unknown Location';
-        const displayLocation = locationStr.length > 25 ? locationStr.substring(0, 25) + '...' : locationStr;
+        // Determine location string for geocoding (Prioritize CITY for accurate distance)
+        const geocodeQuery = data.location?.city || data.location?.village || data.location?.address;
+
+        // Display Location: Prefer Village > Subdist > City
+        let displayLocation = 'Unknown Location';
+        if (data.location) {
+            if (data.location.village) displayLocation = data.location.village;
+            else if (data.location.address) displayLocation = data.location.address;
+            else if (data.location.city) displayLocation = data.location.city;
+        }
+        if (displayLocation.length > 25) displayLocation = displayLocation.substring(0, 25) + '...';
 
         // Coordinates might be directly in the report
         const lat = data.location?.lat || data.location?.latitude;
@@ -110,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const coordsAttr = (lat && lon) ? `data-lat="${lat}" data-lon="${lon}"` : '';
 
         return `
-            <a href="reportfeed.html" class="issue-item fade-in" data-location-query="${locationStr}" ${coordsAttr}>
+            <a href="reportfeed.html" class="issue-item fade-in" data-location-query="${geocodeQuery}" ${coordsAttr}>
                 <img src="${data.imageUrl || '../static/images/placeholder.png'}" alt="Report" class="issue-thumb" onerror="this.src='https://via.placeholder.com/80/f0f0f0/cccccc?text=Report'">
                 <div class="issue-details">
                     <div class="issue-meta-top">

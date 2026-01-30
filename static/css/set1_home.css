@@ -49,8 +49,8 @@ body {
 }
 
 .logo {
-    font-size: 1.1rem;
-    /* Reduced from 1.5rem */
+    font-size: 1.3rem;
+    /* Increased by ~15% */
     font-weight: 800;
     color: var(--text-primary);
     letter-spacing: -0.02em;
@@ -58,9 +58,9 @@ body {
 }
 
 .notification-btn {
-    width: 32px;
-    /* Reduced from 44px */
-    height: 32px;
+    width: 34px;
+    /* Increased by ~5% */
+    height: 34px;
     border-radius: 50%;
     border: 1px solid var(--border-light);
     display: flex;
@@ -73,9 +73,9 @@ body {
 }
 
 .notification-btn svg {
-    width: 18px;
-    /* Reduced from 24px */
-    height: 18px;
+    width: 19px;
+    /* Increased by ~5% */
+    height: 19px;
 }
 
 .notification-dot {
