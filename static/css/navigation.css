@@ -1,4 +1,14 @@
-/* Navigation Styles - Extracted & Refined */
+/* Navigation Styles - Optimized for Smooth Page Transitions */
+
+/* === PRELOAD STATE: Prevent transitions on page load === */
+.nav-preload .mobile-nav-item,
+.nav-preload .mobile-nav-item .icon,
+.nav-preload .mobile-nav-item .label,
+.nav-preload .mobile-floating-nav,
+.nav-preload .desktop-nav-link,
+.nav-preload .desktop-nav-text {
+    transition: none !important;
+}
 
 /* --- Logo --- */
 .logo {
@@ -30,7 +40,6 @@
     left: 1rem;
     bottom: 1rem;
     width: 5rem;
-    /* Collapsed width */
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-light);
     border-radius: 1.5rem;
@@ -45,7 +54,6 @@
 
 .desktop-sidebar:hover {
     width: 17rem;
-    /* Expanded width */
     background-color: var(--bg-secondary);
     box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
 }
@@ -109,7 +117,6 @@
     color: var(--bg-primary);
 }
 
-/* Active Icon Color Override if needed (from set1_style) */
 .desktop-nav-link.active svg {
     color: var(--accent-primary) !important;
 }
@@ -123,16 +130,18 @@
     box-shadow: 0 4px 16px var(--shadow-light);
 }
 
-/* --- Mobile Floating Navigation --- */
-/* Mobile Floating Navigation - Optimized */
+/* --- Mobile Floating Navigation - Optimized for Smooth Transitions --- */
 .mobile-floating-nav-container {
     position: fixed;
     bottom: 1.5rem;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateZ(0);
+    /* Force GPU layer */
     z-index: 50;
     width: auto;
     max-width: 90vw;
+    /* Prevent layout shift across pages */
+    contain: layout style;
 }
 
 .mobile-floating-nav {
@@ -140,13 +149,16 @@
     align-items: center;
     padding: 0.5rem;
     background-color: var(--bg-secondary-translucent);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-light);
     border-radius: 9999px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    /* GPU-accelerated transform */
+    transform: translateZ(0);
     will-change: transform;
+    /* Smooth subtle animations */
+    transition: box-shadow 0.3s ease;
 }
 
 .mobile-nav-item {
@@ -161,19 +173,22 @@
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
     flex-shrink: 0;
-    /* Use margin on label for spacing animation instead of gap to prevent ghost space */
     gap: 0;
 
-    /* Unified smooth transition */
-    transition:
-        background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-        color 0.4s ease,
-        padding 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-        box-shadow 0.4s ease,
-        transform 0.1s ease;
-    /* Fast transform for click */
+    /* GPU-accelerated - smooth transitions */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 
-    will-change: padding, background-color;
+    /* Optimized transitions with proper timing */
+    transition:
+        background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+    will-change: transform, background-color, padding;
 }
 
 .mobile-nav-item .icon {
@@ -181,30 +196,30 @@
     height: 24px;
     flex-shrink: 0;
     stroke-width: 1.5;
-    /* Explicit default */
-    /* Transition: color normal, stroke-width delayed for "last frame" effect */
+    /* GPU layer for icon */
+    transform: translateZ(0);
     transition:
-        color 0.4s ease,
-        stroke-width 0.2s ease-in 0.2s;
+        color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        stroke-width 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
 }
 
 .mobile-nav-item .label {
+    display: inline-block;
     max-width: 0;
     opacity: 0;
     overflow: hidden;
     margin-left: 0;
     font-weight: 500;
-    /* Start normal/medium */
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     white-space: nowrap;
+    /* GPU acceleration for smooth text reveal */
+    transform: translateZ(0);
 
-    /* Collapse: Width takes 0.4s, Opacity fades out continuously */
+    /* Smooth collapse transition */
     transition:
-        max-width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-        opacity 0.2s ease-out,
-        margin-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-        font-weight 0.2s ease 0s;
-    /* Revert quickly */
+        max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Hover only on non-touch devices */
@@ -215,44 +230,83 @@
     }
 }
 
+/* Press feedback */
 .mobile-nav-item:active {
-    transform: scale(0.92);
+    transform: translateZ(0) scale(0.94);
 }
 
-/* Active State */
+/* === Active State - Clean and Immediate === */
 .mobile-nav-item.active {
     background-color: #111827;
     color: #ffffff;
-    /* Adjusted padding for tighter look */
-    padding-left: 1.1rem;
-    padding-right: 1.1rem;
-    /* No gap on parent, strictly margin on child */
-    gap: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .mobile-nav-item.active .icon {
     color: #ffffff;
     stroke-width: 2;
-    /* Bold on active */
-    transition:
-        color 0.4s ease,
-        stroke-width 0.1s ease-in 0.32s;
 }
 
+/* === Label expansion for active items === */
+/* Default: Label hidden on active (before JS adds show-label) */
 .mobile-nav-item.active .label {
-    max-width: 140px;
-    /* Sufficient for specific labels */
-    opacity: 1;
-    margin-left: 0.35rem;
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
     font-weight: 600;
-    /* Bold on active */
-    /* Explicit margin when active */
-    /* Expand: Wait 0.1s for container to start opening, then fade in */
+}
+
+/* When JS adds show-label class, expand smoothly */
+.mobile-nav-item.active.show-label .label {
+    max-width: 100px;
+    opacity: 1;
+    margin-left: 0.4rem;
+    /* Smooth expansion */
     transition:
-        max-width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-        opacity 0.3s ease-out 0.15s,
-        margin-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-        font-weight 0.1s ease-in 0.32s;
-    /* Delayed thickening to very last frames */
+        max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
+        margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === Page Transition Overlay for View Transitions API === */
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.25s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === Fade-in animation for mobile nav on page load === */
+@keyframes nav-fade-in {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) translateZ(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) translateZ(0);
+    }
+}
+
+.mobile-floating-nav-container {
+    animation: nav-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Reduce animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .mobile-nav-item,
+    .mobile-nav-item .icon,
+    .mobile-nav-item .label,
+    .mobile-floating-nav,
+    .mobile-floating-nav-container {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
 }

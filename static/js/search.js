@@ -184,7 +184,9 @@ async function executeSearch() {
 
     // Show Loading
     UI.resultsContainer.innerHTML = '';
-    UI.loadingSpinner.classList.remove('hidden');
+    if (!isAIMode) {
+        UI.loadingSpinner.classList.remove('hidden');
+    }
     UI.noResultsMessage.classList.add('hidden');
 
     try {

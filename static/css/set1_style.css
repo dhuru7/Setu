@@ -361,87 +361,13 @@ html {
 }
 
 /* --- Mobile Floating Navigation --- */
-.mobile-floating-nav-container {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 50;
-    width: auto;
-    max-width: 90vw;
-}
-
-.mobile-floating-nav {
-    display: flex;
-    align-items: center;
-    padding: 0.5rem;
-    background-color: var(--bg-secondary-translucent);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border-light);
-    border-radius: 9999px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.mobile-nav-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem;
-    color: var(--text-muted);
-    border-radius: 9999px;
-    transition: background-color 0.3s ease, color 0.3s ease, padding 0.3s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
-    flex-shrink: 0;
-    will-change: padding, background-color;
-}
-
-.mobile-nav-item .icon {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-    transition: transform 0.3s ease;
-}
-
-.mobile-nav-item .label {
-    max-width: 0;
-    opacity: 0;
-    overflow: hidden;
-    margin-left: 0;
-    font-weight: 600;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    transition: max-width 0.35s cubic-bezier(0.2, 0, 0.2, 1), opacity 0.2s ease, margin-left 0.35s ease;
-    will-change: max-width, opacity;
-}
-
-.mobile-nav-item.active {
-    background-color: #111827;
-    color: #ffffff;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.mobile-nav-item.active .icon {
-    color: #ffffff;
-}
-
-.mobile-nav-item.active .label {
-    max-width: 0;
-    opacity: 0;
-    margin-left: 0;
-}
-
+/* NOTE: Full mobile navigation styles are in navigation.css */
+/* Only keeping show-label support for backwards compatibility */
+.mobile-nav-item.active.show-label .label,
 .mobile-nav-item.active.delayed-expand .label {
-    max-width: 140px;
+    max-width: 100px;
     opacity: 1;
-    margin-left: 0.5rem;
-    padding-right: 4px;
+    margin-left: 0.4rem;
 }
 
 .mobile-nav-item:not(.active):hover {
