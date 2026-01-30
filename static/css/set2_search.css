@@ -102,19 +102,21 @@
     display: flex;
     align-items: center;
     padding: 6px;
+    padding-right: 8px;
     margin-bottom: 40px;
     height: 60px;
     min-height: 60px;
-    overflow: hidden;
+    box-sizing: border-box;
     animation: rainbow-border 4s linear infinite;
 }
 
 .ai-input {
-    flex-grow: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     border: none;
     outline: none;
     background: transparent;
-    padding: 16px 24px;
+    padding: 12px 16px;
     font-size: 1rem;
     color: #1a1a1a;
     border-radius: 999px;
@@ -125,17 +127,17 @@
 }
 
 .ai-send-btn {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    min-height: 48px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     background-color: #000000;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    flex-shrink: 0;
+    flex: 0 0 44px;
     cursor: pointer;
     transition: transform 0.2s;
     box-sizing: border-box;
