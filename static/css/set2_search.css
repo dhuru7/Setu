@@ -84,12 +84,12 @@
 }
 
 .ai-header-highlight {
-    background: linear-gradient(90deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #74c0fc, #b197fc, #f783ac);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     display: block;
-    /* Rainbow gradient with softer colors */
+    /* Elegant purple-pink gradient */
 }
 
 /* AI Input */
@@ -98,13 +98,14 @@
     background: #ffffff;
     border-radius: 999px;
     border: 2px solid transparent;
-    /* Logic handled by animation */
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
     padding: 6px;
     margin-bottom: 40px;
     height: 60px;
+    min-height: 60px;
+    overflow: hidden;
     animation: rainbow-border 4s linear infinite;
 }
 
@@ -126,6 +127,8 @@
 .ai-send-btn {
     width: 48px;
     height: 48px;
+    min-width: 48px;
+    min-height: 48px;
     background-color: #000000;
     border-radius: 50%;
     display: flex;
@@ -135,6 +138,7 @@
     flex-shrink: 0;
     cursor: pointer;
     transition: transform 0.2s;
+    box-sizing: border-box;
 }
 
 .ai-send-btn svg {

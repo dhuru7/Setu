@@ -383,20 +383,47 @@ async function typeWithRainbow(text, container) {
 
 async function fetchReports(queryText) {
     const qLower = queryText.toLowerCase();
+    console.log('[Search] Searching for:', qLower);
+
     try {
-        const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(20));
+        // Fetch recent reports from Firestore
+        const reportsRef = collection(db, 'reports');
+        let q;
+
+        try {
+            // Try with ordering first
+            q = query(reportsRef, orderBy('createdAt', 'desc'), limit(50));
+        } catch (indexError) {
+            // Fallback without ordering if index doesn't exist
+            console.warn('[Search] Index not available, fetching without order');
+            q = query(reportsRef, limit(50));
+        }
+
         const snapshot = await getDocs(q);
+        console.log('[Search] Total documents fetched:', snapshot.size);
+
         const reports = [];
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const textToSearch = `${data.description || ''} ${data.issueType || ''} ${data.location?.full || ''}`.toLowerCase();
-            if (textToSearch.includes(qLower)) {
-                reports.push({ id: doc.id, ...data });
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            // Search in multiple fields
+            const searchableText = [
+                data.description || '',
+                data.issueType || '',
+                data.location?.full || '',
+                data.location?.city || '',
+                data.location?.area || '',
+                data.status || ''
+            ].join(' ').toLowerCase();
+
+            if (searchableText.includes(qLower)) {
+                reports.push({ id: docSnap.id, ...data });
             }
         });
+
+        console.log('[Search] Matching reports:', reports.length);
         return reports;
     } catch (e) {
-        console.warn("Fetch error", e);
+        console.error('[Search] Fetch error:', e);
         return [];
     }
 }

@@ -31,16 +31,19 @@
     position: relative;
     background: #ffffff;
     border-radius: 999px;
-    /* Pill shape */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
     padding: 6px;
     margin-bottom: 32px;
+    min-height: 60px;
+    overflow: hidden;
 }
 
 .search-input-1 {
     flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
     border: none;
     outline: none;
     background: transparent;
@@ -57,6 +60,8 @@
 .search-btn-1 {
     width: 48px;
     height: 48px;
+    min-width: 48px;
+    min-height: 48px;
     background-color: #000000;
     border-radius: 50%;
     display: flex;
@@ -66,6 +71,7 @@
     flex-shrink: 0;
     cursor: pointer;
     transition: transform 0.2s;
+    box-sizing: border-box;
 }
 
 .search-btn-1:active {
