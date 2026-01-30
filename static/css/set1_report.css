@@ -185,7 +185,18 @@ body.report-page {
     animation: stepFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Ensure first step is visible immediately on page load */
+#step-1.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 @keyframes stepFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -541,13 +552,8 @@ body.report-page {
 }
 
 .location-detect-btn.loading svg {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    /* Spinning animation removed per user request */
+    animation: none;
 }
 
 .location-detect-btn svg {

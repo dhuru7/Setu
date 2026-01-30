@@ -85,6 +85,8 @@
     transition: color 0.2s ease;
     z-index: 2;
     /* Ensure text is above icon if overlap */
+    position: relative;
+    bottom: 4%;
 }
 
 /* Horizontal scroll indicators */
@@ -767,6 +769,8 @@
     text-align: center;
     line-height: 1.35;
     transition: color 0.2s ease;
+    position: relative;
+    bottom: 4%;
 }
 
 .issue-type-option .check-icon {
