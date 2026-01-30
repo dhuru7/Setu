@@ -1,0 +1,184 @@
+/* set2_search.css - AI Search View */
+
+.search-container-ai {
+    padding: 24px;
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+    display: none;
+    /* Hidden by default */
+}
+
+/* Active state helper */
+.ai-view-active .search-container-main {
+    display: none;
+}
+
+.ai-view-active .search-container-ai {
+    display: block;
+}
+
+/* Header */
+.ai-header-title {
+    font-size: 2rem;
+    /* ~32px */
+    line-height: 1.2;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 32px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+}
+
+@keyframes rainbow-text {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes shimmer-text {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes rainbow-border {
+    0% {
+        border-color: #ff0000;
+    }
+
+    20% {
+        border-color: #ffff00;
+    }
+
+    40% {
+        border-color: #00ff00;
+    }
+
+    60% {
+        border-color: #00ffff;
+    }
+
+    80% {
+        border-color: #0000ff;
+    }
+
+    100% {
+        border-color: #ff00ff;
+    }
+}
+
+.ai-header-highlight {
+    background: linear-gradient(90deg, #ff6b6b, #ffa94d, #ffe066, #69db7c, #74c0fc, #b197fc, #f783ac);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+    /* Rainbow gradient with softer colors */
+}
+
+/* AI Input */
+.ai-input-wrapper {
+    position: relative;
+    background: #ffffff;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    /* Logic handled by animation */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    margin-bottom: 40px;
+    height: 60px;
+    animation: rainbow-border 4s linear infinite;
+}
+
+.ai-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 16px 24px;
+    font-size: 1rem;
+    color: #1a1a1a;
+    border-radius: 999px;
+}
+
+.ai-input::placeholder {
+    color: #c7c7cc;
+}
+
+.ai-send-btn {
+    width: 48px;
+    height: 48px;
+    background-color: #000000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.ai-send-btn svg {
+    margin-left: 2px;
+    /* Visual centering for send icon */
+}
+
+/* Recent Questions Label */
+.recent-questions-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #8e8e93;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+/* List Structure */
+.ai-recent-item {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    /* Slightly more padding */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f2f2f7;
+    margin-bottom: 12px;
+}
+
+.ai-recent-content {
+    flex-grow: 1;
+}
+
+.ai-recent-question {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+}
+
+.ai-recent-sub {
+    font-size: 0.75rem;
+    color: #8e8e93;
+}

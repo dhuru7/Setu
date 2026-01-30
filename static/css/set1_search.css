@@ -1,0 +1,243 @@
+/* set1_search.css - Default Search View */
+
+.search-container-main {
+    padding: 24px;
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+    display: block;
+    /* Visible by default */
+}
+
+/* Header */
+.search-header-title {
+    font-size: 2.25rem;
+    /* 36px */
+    line-height: 1.1;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 24px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.03em;
+}
+
+.search-header-subtitle {
+    font-weight: 400;
+    color: #8e8e93;
+    display: block;
+}
+
+/* Search Bar */
+.search-input-wrapper-1 {
+    position: relative;
+    background: #ffffff;
+    border-radius: 999px;
+    /* Pill shape */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    margin-bottom: 32px;
+}
+
+.search-input-1 {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 16px 20px;
+    font-size: 1rem;
+    color: #1a1a1a;
+    border-radius: 999px;
+}
+
+.search-input-1::placeholder {
+    color: #c7c7cc;
+}
+
+.search-btn-1 {
+    width: 48px;
+    height: 48px;
+    background-color: #000000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.search-btn-1:active {
+    transform: scale(0.95);
+}
+
+/* Ask Setu AI Card */
+.ai-entry-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 32px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.ai-entry-card:active {
+    transform: scale(0.98);
+}
+
+.ai-logo-container {
+    width: 44px;
+    height: 44px;
+    background: #f5f5f7;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ai-logo-circle {
+    width: 24px;
+    height: 24px;
+    /* Removed background/shape styles to display emoji directly */
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.ai-text-content {
+    flex-grow: 1;
+}
+
+.ai-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1a1a1a;
+    margin-bottom: 2px;
+}
+
+.ai-subtitle {
+    font-size: 0.75rem;
+    color: #8e8e93;
+}
+
+.ai-arrow-btn {
+    width: 32px;
+    height: 32px;
+    background: #f5f5f7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a1a1a;
+}
+
+/* Tags */
+.tags-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #8e8e93;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.tags-scroll-container {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    /* Hide scrollbar visual impact */
+    margin-bottom: 32px;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.tags-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+.tag-btn {
+    background: #ffffff;
+    border: 1px solid #f2f2f7;
+    border-radius: 999px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    color: #1a1a1a;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+/* Recent */
+.recent-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #8e8e93;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.recent-item {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.recent-icon-circle {
+    width: 40px;
+    height: 40px;
+    background: #f5f5f7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8e8e93;
+}
+
+.recent-content {
+    flex-grow: 1;
+}
+
+.recent-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+}
+
+.recent-time {
+    font-size: 0.75rem;
+    color: #8e8e93;
+}
+
+.recent-arrow {
+    color: #d1d1d6;
+}
+
+/* Base Utility Overrides for Search Page */
+body {
+    background-color: #fcfcfc !important;
+    /* Slightly off-white for contrast with cards */
+}
