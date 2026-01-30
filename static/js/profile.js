@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             currentUserUid = user.uid;
             await loadUserProfile(user.uid);
+            // Load user's reports for MY REPORTS section
+            loadUserReports(user.uid);
         } else {
             // Not logged in
             window.location.href = "login.html";
@@ -82,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayProfileData() {
-        // Clear skeleton states
+        // Clear skeleton states - remove the new 'skeleton' class and inline styles
         const elementsToRemoveSkeleton = [
             UI.profile.fullName,
             UI.profile.city,
@@ -93,12 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         elementsToRemoveSkeleton.forEach(el => {
             if (el) {
-                el.classList.remove('animate-pulse', 'bg-[var(--bg-accent)]', 'h-8', 'h-5', 'w-32', 'w-full', 'block', 'rounded');
+                // Remove both old and new skeleton classes for compatibility
+                el.classList.remove('skeleton', 'animate-pulse', 'bg-[var(--bg-accent)]', 'h-8', 'h-5', 'w-32', 'w-full', 'block', 'rounded');
+                el.removeAttribute('style');
             }
         });
 
         // Show ALL Icons that were hidden
         document.querySelectorAll('.detail-icon').forEach(icon => icon.classList.remove('hidden'));
+
 
         UI.profile.fullName.textContent = currentUserData.fullname;
 
@@ -714,6 +719,98 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.classList.remove('hint-animating');
             }, 300);
         }, 300);
+    }
+
+    // --- Load User Reports for MY REPORTS section ---
+    async function loadUserReports(uid) {
+        const reportsGrid = document.getElementById('my-reports-grid');
+        if (!reportsGrid) return;
+
+        try {
+            const { collection, query, where, orderBy, limit, getDocs } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js");
+
+            let reportsQuery;
+            let querySnapshot;
+
+            try {
+                // Try with orderBy first (requires composite index)
+                reportsQuery = query(
+                    collection(db, "reports"),
+                    where("userId", "==", uid),
+                    orderBy("timestamp", "desc"),
+                    limit(4)
+                );
+                querySnapshot = await getDocs(reportsQuery);
+            } catch (indexError) {
+                // Fallback without orderBy if composite index doesn't exist
+                console.warn("Falling back to simpler query:", indexError.message);
+                reportsQuery = query(
+                    collection(db, "reports"),
+                    where("userId", "==", uid),
+                    limit(4)
+                );
+                querySnapshot = await getDocs(reportsQuery);
+            }
+
+            // Clear skeleton placeholders
+            reportsGrid.innerHTML = '';
+
+            if (querySnapshot.empty) {
+                reportsGrid.innerHTML = `
+                    <div class="no-reports-message" style="grid-column: span 2; text-align: center; padding: 32px 16px;">
+                        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 8px;">No reports yet</p>
+                        <a href="report.html" style="color: var(--accent-primary); font-size: 0.875rem; font-weight: 600; text-decoration: none;">Report an issue</a>
+                    </div>
+                `;
+                return;
+            }
+
+            querySnapshot.forEach((docSnapshot) => {
+                const report = docSnapshot.data();
+                const card = createReportCard(report, docSnapshot.id);
+                reportsGrid.appendChild(card);
+            });
+
+        } catch (error) {
+            console.error("Error loading user reports:", error);
+            reportsGrid.innerHTML = `
+                <div class="no-reports-message" style="grid-column: span 2; text-align: center; padding: 32px 16px;">
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Could not load reports</p>
+                </div>
+            `;
+        }
+    }
+
+    function createReportCard(report, reportId) {
+        const card = document.createElement('div');
+        card.className = 'report-card-mini';
+        card.onclick = () => window.location.href = `report-detail.html?id=${reportId}`;
+
+        // Get status display
+        const statusMap = {
+            'pending': { label: 'Pending', class: 'pending' },
+            'in-progress': { label: 'In Progress', class: 'in-progress' },
+            'resolved': { label: 'Fixed', class: 'fixed' },
+            'fixed': { label: 'Fixed', class: 'fixed' }
+        };
+        const status = statusMap[report.status?.toLowerCase()] || statusMap['pending'];
+
+        // Get image (first media item or placeholder)
+        const imageUrl = report.media && report.media.length > 0
+            ? report.media[0]
+            : 'https://placehold.co/200x100/e5e7eb/9ca3af?text=No+Image';
+
+        card.innerHTML = `
+            <div class="report-card-image">
+                <img src="${imageUrl}" alt="${report.issueType || 'Report'}" loading="lazy">
+                <span class="report-status-badge ${status.class}">${status.label}</span>
+            </div>
+            <div class="report-card-info">
+                <p class="report-card-title">${report.issueType || 'Issue Report'}</p>
+            </div>
+        `;
+
+        return card;
     }
 
     addClickHints();

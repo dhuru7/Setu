@@ -1,0 +1,786 @@
+/* ==========================================
+   Profile Page Styles - set1_profile.css
+   Core styling, animations, and modals
+   ========================================== */
+
+/* CSS Variables for Profile Page */
+:root {
+    --profile-avatar-size: 100px;
+    --profile-avatar-border: 4px;
+    --profile-card-radius: 20px;
+    --profile-item-radius: 16px;
+    --profile-icon-size: 44px;
+    --profile-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================
+   Main Profile Container
+   ========================================== */
+.profile-container {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 0 20px 120px 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* ==========================================
+   Settings Icon (Top Right)
+   ========================================== */
+.profile-settings-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: var(--profile-transition);
+    z-index: 10;
+}
+
+.profile-settings-btn:hover {
+    color: var(--text-primary);
+    transform: rotate(45deg);
+}
+
+.profile-settings-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* ==========================================
+   Profile Header Section (Avatar + Name)
+   ========================================== */
+.profile-header-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 24px 24px;
+    width: 100%;
+    position: relative;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* Avatar Container - Circular with Edit Pen */
+.profile-image-container {
+    position: relative;
+    width: var(--profile-avatar-size);
+    height: var(--profile-avatar-size);
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: var(--profile-avatar-border) solid var(--bg-primary);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    transition: var(--profile-transition);
+    overflow: visible;
+}
+
+.profile-image-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Avatar Initials Fallback */
+.avatar-initials {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Edit Pen Badge */
+.avatar-edit-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 28px;
+    height: 28px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--bg-primary);
+    transition: var(--profile-transition);
+}
+
+.avatar-edit-badge svg {
+    width: 14px;
+    height: 14px;
+    color: #333;
+}
+
+.profile-image-container:hover .avatar-edit-badge {
+    background: var(--accent-primary);
+}
+
+.profile-image-container:hover .avatar-edit-badge svg {
+    color: #fff;
+}
+
+/* Profile Name */
+.profile-name-container {
+    margin-top: 16px;
+    text-align: center;
+}
+
+#profile-fullname {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+/* ==========================================
+   Section Labels
+   ========================================== */
+.profile-section-label {
+    width: 100%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 0 4px;
+    margin-bottom: -8px;
+}
+
+/* ==========================================
+   Personal Details Card
+   ========================================== */
+.profile-details-card {
+    width: 100%;
+    background: var(--bg-secondary);
+    border-radius: var(--profile-card-radius);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border-light);
+}
+
+/* Individual Detail Item */
+.detail-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--bg-secondary);
+    border-radius: var(--profile-item-radius);
+    cursor: default;
+    transition: var(--profile-transition);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+.detail-item:hover {
+    background: var(--bg-accent);
+}
+
+.detail-item:active {
+    transform: scale(0.98);
+    background: var(--bg-accent);
+}
+
+.detail-item:focus,
+.detail-item:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.3);
+}
+
+/* Detail Icon Circle */
+.detail-icon-wrapper {
+    width: var(--profile-icon-size);
+    height: var(--profile-icon-size);
+    min-width: var(--profile-icon-size);
+    background: var(--bg-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 14px;
+    border: 1px solid var(--border-light);
+}
+
+.detail-icon-wrapper svg,
+.detail-icon-label svg {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+}
+
+/* Also style the old icon label class */
+.detail-icon-label {
+    width: var(--profile-icon-size);
+    height: var(--profile-icon-size);
+    min-width: var(--profile-icon-size);
+    background: var(--bg-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 14px;
+    border: 1px solid var(--border-light);
+}
+
+.detail-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+    fill: currentColor;
+}
+
+/* Detail Content */
+.detail-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: capitalize;
+}
+
+.detail-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.detail-value-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+/* Chevron Arrow */
+.detail-chevron {
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted);
+    opacity: 0.5;
+    margin-left: 8px;
+}
+
+/* Left Chevron Arrow (for swipeable items) */
+.detail-chevron-left {
+    width: 20px;
+    height: 20px;
+    color: var(--text-primary);
+    opacity: 0.6;
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: var(--profile-transition);
+}
+
+[data-theme="dark"] .detail-chevron-left {
+    color: var(--text-secondary);
+}
+
+/* ==========================================
+   Swipe Card Styles (for City and Email)
+   ========================================== */
+.swipe-card {
+    position: relative;
+    overflow: hidden;
+    padding: 0 !important;
+}
+
+.swipe-content {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--bg-secondary);
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    transition: var(--profile-transition);
+}
+
+.swipe-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #374151, #1f2937);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: white;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    cursor: grab;
+    z-index: 10;
+}
+
+.swipe-overlay:active {
+    cursor: grabbing;
+}
+
+.swipe-overlay.swiped-open {
+    transform: translateX(0);
+}
+
+/* Swiping Active State */
+.detail-item.swiping-active {
+    border-radius: 24px !important;
+}
+
+/* ==========================================
+   My Reports Section
+   ========================================== */
+.my-reports-section {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.my-reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+    margin-bottom: 16px;
+}
+
+.my-reports-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.view-all-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: var(--profile-transition);
+}
+
+.view-all-link:hover {
+    color: var(--accent-primary);
+}
+
+/* Report Cards Grid */
+.my-reports-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.report-card-mini {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+    transition: var(--profile-transition);
+}
+
+.report-card-mini:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.report-card-image {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    background: var(--bg-accent);
+}
+
+.report-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.report-status-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.report-status-badge.pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.report-status-badge.fixed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.report-status-badge.in-progress {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.report-card-info {
+    padding: 12px;
+}
+
+.report-card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================
+   Inline Edit Styles
+   ========================================== */
+.inline-input {
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1.5px solid var(--border-medium);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 12px;
+    outline: none;
+    transition: var(--profile-transition);
+}
+
+.inline-input:focus {
+    border-color: var(--text-secondary);
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.15);
+}
+
+.confirm-tick-btn {
+    background: #374151;
+    color: white;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    margin-left: 8px;
+    transition: var(--profile-transition);
+    box-shadow: 0 4px 12px rgba(55, 65, 81, 0.25);
+}
+
+.confirm-tick-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(55, 65, 81, 0.35);
+}
+
+.confirm-tick-btn:active {
+    transform: scale(0.95);
+}
+
+.confirm-tick-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 3;
+}
+
+/* ==========================================
+   Edit Modal Styles
+   ========================================== */
+.edit-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.edit-modal-overlay.open {
+    display: flex;
+    opacity: 1;
+}
+
+.edit-modal {
+    background: var(--bg-secondary);
+    border-radius: 24px;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 360px;
+    padding: 28px;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid var(--border-light);
+}
+
+.edit-modal-overlay.open .edit-modal {
+    transform: scale(1);
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 24px 0;
+    text-align: center;
+}
+
+.modal-input-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 14px 48px 14px 16px;
+    border: 2px solid var(--border-medium);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none;
+    transition: var(--profile-transition);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.modal-input:focus {
+    border-color: var(--accent-primary);
+}
+
+.detect-location-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-accent);
+    color: var(--accent-primary);
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--profile-transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detect-location-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: var(--profile-transition);
+}
+
+.btn-cancel {
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-medium);
+}
+
+.btn-cancel:hover {
+    background: var(--bg-accent);
+    border-color: var(--text-secondary);
+}
+
+.btn-save {
+    background: #374151;
+    color: white;
+    box-shadow: 0 4px 16px rgba(55, 65, 81, 0.3);
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(55, 65, 81, 0.4);
+}
+
+.btn-save:active,
+.btn-cancel:active {
+    transform: scale(0.98);
+}
+
+/* ==========================================
+   Toast Notification
+   ========================================== */
+.toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translate(-50%, 100px);
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.toast.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+/* ==========================================
+   Animations
+   ========================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(107, 114, 128, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(107, 114, 128, 0);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Skeleton Loading States */
+.skeleton {
+    background: linear-gradient(90deg,
+            var(--bg-accent) 25%,
+            var(--bg-secondary) 50%,
+            var(--bg-accent) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+/* Card Lifted State (for email expansion) */
+.card-lifted {
+    transform: scale(1.02);
+    z-index: 20;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+    border-color: var(--text-secondary) !important;
+}
+
+.card-lifted .detail-value {
+    white-space: normal !important;
+    word-break: break-all;
+}
+
+/* Input Gradient Animation (for location detection) */
+.input-gradient-animation {
+    background: linear-gradient(-45deg,
+            var(--bg-primary),
+            var(--bg-accent),
+            #6b7280,
+            var(--bg-accent));
+    background-size: 400% 400%;
+    animation: gradientBG 0.5s ease infinite;
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* City Loader */
+#city-loader {
+    margin-left: auto;
+}
+
+#city-loader svg {
+    width: 20px;
+    height: 20px;
+}

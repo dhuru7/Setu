@@ -1,0 +1,394 @@
+/* ==========================================
+   Profile Page Layout - set2_profile.css
+   Responsive layouts and mobile/desktop overrides
+   ========================================== */
+
+/* ==========================================
+   Mobile Layout (Default)
+   ========================================== */
+
+/* Ensure proper page padding for mobile */
+.profile-page-wrapper {
+    padding-top: 10px;
+}
+
+/* Profile Header - Mobile Centered */
+.profile-header-card {
+    padding-top: 20px;
+    padding-bottom: 16px;
+}
+
+/* Gradient Background for profile section */
+.profile-gradient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: linear-gradient(180deg,
+            rgba(220, 230, 240, 0.5) 0%,
+            transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+[data-theme="dark"] .profile-gradient-bg {
+    background: linear-gradient(180deg,
+            rgba(30, 40, 60, 0.5) 0%,
+            transparent 100%);
+}
+
+/* Details Card - Full Width Mobile */
+.profile-details-card {
+    margin: 0;
+}
+
+/* Detail Items - Mobile Optimized */
+.detail-item {
+    min-height: 72px;
+}
+
+/* Detail Label Styling */
+.detail-item .detail-label {
+    display: block;
+}
+
+/* Swipe Cards - Mobile Touch Optimized */
+.swipe-card .swipe-content {
+    min-height: 72px;
+}
+
+/* Reports Grid - Mobile 2 Column */
+.my-reports-grid {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* Ensure proper spacing from bottom nav */
+.profile-container {
+    padding-bottom: 120px;
+}
+
+/* ==========================================
+   Small Mobile (max-width: 360px)
+   ========================================== */
+@media (max-width: 360px) {
+    :root {
+        --profile-avatar-size: 80px;
+        --profile-icon-size: 38px;
+    }
+
+    .profile-container {
+        padding: 0 16px 100px 16px;
+    }
+
+    #profile-fullname {
+        font-size: 1.25rem;
+    }
+
+    .detail-item {
+        padding: 12px 14px;
+        min-height: 64px;
+    }
+
+    .swipe-card .swipe-content {
+        padding: 12px 14px;
+        min-height: 64px;
+    }
+
+    .detail-value {
+        font-size: 0.875rem;
+    }
+
+    .detail-label {
+        font-size: 0.7rem;
+    }
+
+    .report-card-image {
+        height: 80px;
+    }
+}
+
+/* ==========================================
+   Tablet Layout (min-width: 640px)
+   ========================================== */
+@media (min-width: 640px) {
+    .profile-container {
+        max-width: 500px;
+        padding: 24px;
+        padding-bottom: 80px;
+    }
+
+    :root {
+        --profile-avatar-size: 120px;
+    }
+
+    #profile-fullname {
+        font-size: 1.75rem;
+    }
+
+    .profile-details-card {
+        padding: 12px;
+        gap: 4px;
+    }
+
+    .detail-item {
+        padding: 16px 20px;
+        min-height: 80px;
+    }
+
+    .swipe-card .swipe-content {
+        padding: 16px 20px;
+        min-height: 80px;
+    }
+
+    .my-reports-grid {
+        gap: 16px;
+    }
+
+    .report-card-image {
+        height: 120px;
+    }
+}
+
+/* ==========================================
+   Desktop Layout (min-width: 1024px)
+   ========================================== */
+@media (min-width: 1024px) {
+
+    /* Main App Layout */
+    #app>main {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px;
+        min-height: 100vh;
+    }
+
+    /* Profile Container - Card Style */
+    .profile-container {
+        max-width: 900px;
+        background: var(--bg-secondary);
+        border-radius: 32px;
+        padding: 48px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-light);
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        grid-template-rows: auto auto;
+        gap: 32px 48px;
+        padding-bottom: 48px;
+    }
+
+    /* Profile Header - Left Column, Full Height */
+    .profile-header-card {
+        grid-column: 1;
+        grid-row: 1 / -1;
+        background: var(--bg-primary);
+        border-radius: 24px;
+        padding: 48px 32px;
+        border: 1px solid var(--border-light);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    :root {
+        --profile-avatar-size: 140px;
+    }
+
+    #profile-fullname {
+        font-size: 1.5rem;
+        margin-top: 24px;
+    }
+
+    /* Section Label - Right Column */
+    .profile-section-label {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: end;
+        margin-bottom: 0;
+    }
+
+    /* Details Card - Right Column */
+    .profile-details-card {
+        grid-column: 2;
+        grid-row: 2;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .detail-item {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-light);
+        padding: 18px 24px;
+        min-height: 84px;
+    }
+
+    .detail-item:hover {
+        border-color: var(--accent-primary);
+        transform: translateX(4px);
+    }
+
+    .swipe-card .swipe-content {
+        background: var(--bg-primary);
+        padding: 18px 24px;
+        min-height: 84px;
+    }
+
+    /* My Reports Section - Full Width Below */
+    .my-reports-section {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        margin-top: 16px;
+    }
+
+    .my-reports-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    /* Settings Button Position */
+    .profile-settings-btn {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+    }
+
+    /* Hide gradient on desktop */
+    .profile-gradient-bg {
+        display: none;
+    }
+}
+
+/* ==========================================
+   Large Desktop (min-width: 1280px)
+   ========================================== */
+@media (min-width: 1280px) {
+    .profile-container {
+        max-width: 1000px;
+        grid-template-columns: 360px 1fr;
+        gap: 40px 56px;
+    }
+
+    :root {
+        --profile-avatar-size: 160px;
+        --profile-icon-size: 52px;
+    }
+
+    #profile-fullname {
+        font-size: 1.75rem;
+    }
+
+    .detail-item {
+        padding: 20px 28px;
+        min-height: 90px;
+    }
+
+    .swipe-card .swipe-content {
+        padding: 20px 28px;
+        min-height: 90px;
+    }
+
+    .detail-value {
+        font-size: 1.05rem;
+    }
+
+    .detail-label {
+        font-size: 0.8rem;
+    }
+}
+
+/* ==========================================
+   Dark Theme Adjustments
+   ========================================== */
+[data-theme="dark"] .profile-image-container {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    border-color: var(--bg-secondary);
+}
+
+[data-theme="dark"] .avatar-edit-badge {
+    background: var(--bg-primary);
+    border-color: var(--bg-secondary);
+}
+
+[data-theme="dark"] .avatar-edit-badge svg {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .profile-details-card {
+    border-color: var(--border-medium);
+}
+
+[data-theme="dark"] .detail-icon-wrapper,
+[data-theme="dark"] .detail-icon-label {
+    background: var(--bg-accent);
+    border-color: var(--border-medium);
+}
+
+[data-theme="dark"] .report-status-badge.pending {
+    background: #422006;
+    color: #fcd34d;
+}
+
+[data-theme="dark"] .report-status-badge.fixed {
+    background: #064e3b;
+    color: #6ee7b7;
+}
+
+[data-theme="dark"] .report-status-badge.in-progress {
+    background: #1e3a5f;
+    color: #93c5fd;
+}
+
+/* ==========================================
+   Accessibility & Motion Preferences
+   ========================================== */
+@media (prefers-reduced-motion: reduce) {
+
+    .profile-image-container,
+    .detail-item,
+    .swipe-overlay,
+    .edit-modal,
+    .toast,
+    .report-card-mini {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ==========================================
+   Print Styles
+   ========================================== */
+@media print {
+    .profile-container {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    .profile-settings-btn,
+    .swipe-overlay,
+    .avatar-edit-badge,
+    .my-reports-section {
+        display: none !important;
+    }
+}
+
+/* ==========================================
+   High Contrast Mode
+   ========================================== */
+@media (prefers-contrast: high) {
+    .detail-item {
+        border-width: 2px;
+    }
+
+    .profile-details-card {
+        border-width: 2px;
+    }
+
+    .detail-value {
+        font-weight: 700;
+    }
+}
