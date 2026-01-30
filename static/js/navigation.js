@@ -11,16 +11,9 @@ const Navigation = {
     },
 
     init() {
-        // Add preload state to prevent transition flash
-        this.addPreloadState();
-
         this.setupLogoAnimation();
-        this.highlightActiveLink();
-        this.resizeSetup();
+        this.highlightActiveLink(); // Ensure correct state based on URL
         this.setupMobileInteractions();
-
-        // Remove preload state after a short delay
-        this.removePreloadState();
 
         // Initialize other global components
         if (window.Notifications) window.Notifications.init();
@@ -28,41 +21,6 @@ const Navigation = {
         if (window.SetuAI) SetuAI.init();
 
         this.checkProfileCompletion();
-    },
-
-    /**
-     * Add preload state to prevent transition flash on page load
-     */
-    addPreloadState() {
-        document.body.classList.add('nav-preload');
-    },
-
-    /**
-     * Remove preload state after initial render
-     */
-    removePreloadState() {
-        requestAnimationFrame(() => {
-            setTimeout(() => {
-                document.body.classList.remove('nav-preload');
-                // After preload is removed, trigger label expansion for active nav item
-                this.expandActiveLabel();
-            }, this.config.preloadRemoveDelay);
-        });
-    },
-
-    /**
-     * Expand the label for the currently active mobile nav item
-     */
-    expandActiveLabel() {
-        const activeItem = document.querySelector('.mobile-nav-item.active');
-        if (activeItem) {
-            // Use requestAnimationFrame for smooth animation
-            requestAnimationFrame(() => {
-                setTimeout(() => {
-                    activeItem.classList.add('show-label');
-                }, this.config.labelExpandDelay);
-            });
-        }
     },
 
     checkProfileCompletion() {
@@ -122,7 +80,7 @@ const Navigation = {
                 document.querySelectorAll(selector).forEach(el => {
                     if (el !== targetEl) {
                         el.classList.remove('active');
-                        el.classList.remove('show-label');
+                        // el.classList.remove('show-label'); // No longer needed
                     }
                 });
                 return;
@@ -131,7 +89,7 @@ const Navigation = {
             if (targetEl) {
                 document.querySelectorAll(selector).forEach(el => {
                     el.classList.remove('active');
-                    el.classList.remove('show-label');
+                    // el.classList.remove('show-label'); // No longer needed
                 });
                 targetEl.classList.add('active');
             }
@@ -158,28 +116,22 @@ const Navigation = {
                 // If already active, do nothing
                 if (item.classList.contains('active')) return;
 
-                // Prevent default navigation
+                // Prevent default navigation to handle transition manually
                 e.preventDefault();
 
-                // Collapse current active label first
+                // 1. Collapse current active item
                 const currentActive = document.querySelector('.mobile-nav-item.active');
                 if (currentActive) {
-                    currentActive.classList.remove('show-label');
+                    currentActive.classList.remove('active');
+                    // CSS transition will collapse the label
                 }
 
-                // Brief delay for label collapse, then navigate
-                setTimeout(() => {
-                    // Remove active from previous
-                    if (currentActive) {
-                        currentActive.classList.remove('active');
-                    }
+                // 2. Highlight new item WITHOUT expanding label (to notify user of selection)
+                // We add 'active' AND 'collapsed' so it gets colors but no width
+                item.classList.add('active', 'collapsed');
 
-                    // Add active to clicked item (without label yet)
-                    item.classList.add('active');
-
-                    // Navigate with View Transitions API if supported
-                    this.navigateWithTransition(href);
-                }, 50);
+                // 3. Navigate immediately
+                this.navigateWithTransition(href);
             });
         });
     },

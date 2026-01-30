@@ -181,14 +181,15 @@
     -webkit-backface-visibility: hidden;
 
     /* Optimized transitions with proper timing */
+    /* Optimized transitions with proper timing */
     transition:
-        background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        /* Removed padding transition to prevent reflow */
+        box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 
-    will-change: transform, background-color, padding;
+    will-change: transform, background-color;
 }
 
 .mobile-nav-item .icon {
@@ -199,8 +200,8 @@
     /* GPU layer for icon */
     transform: translateZ(0);
     transition:
-        color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        stroke-width 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+        color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        stroke-width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mobile-nav-item .label {
@@ -239,8 +240,9 @@
 .mobile-nav-item.active {
     background-color: #111827;
     color: #ffffff;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0.85rem;
+    /* Standardized padding */
+    padding-right: 0.85rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -250,24 +252,18 @@
 }
 
 /* === Label expansion for active items === */
-/* Default: Label hidden on active (before JS adds show-label) */
+/* Active items are expanded BY DEFAULT for instant load state */
 .mobile-nav-item.active .label {
-    max-width: 0;
-    opacity: 0;
-    margin-left: 0;
-    font-weight: 600;
-}
-
-/* When JS adds show-label class, expand smoothly */
-.mobile-nav-item.active.show-label .label {
     max-width: 100px;
     opacity: 1;
     margin-left: 0.4rem;
-    /* Smooth expansion */
-    transition:
-        max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
-        margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Optional: Class to force collapse if needed (for complex animations only) */
+.mobile-nav-item.active.collapsed .label {
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
 }
 
 /* === Page Transition Overlay for View Transitions API === */
