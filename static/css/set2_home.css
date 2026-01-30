@@ -79,19 +79,21 @@
 }
 
 .section-title {
-    font-size: 1.35rem;
+    font-size: 1rem;
+    /* Reduced from 1.35rem */
     font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .count-badge {
     background: #f0f0f0;
     color: #666;
-    font-size: 0.8rem;
-    padding: 2px 8px;
-    border-radius: 12px;
+    font-size: 0.65rem;
+    /* Reduced */
+    padding: 2px 6px;
+    border-radius: 8px;
     vertical-align: middle;
 }
 
@@ -99,37 +101,42 @@
     border: 1px solid var(--border-light);
     background: white;
     color: var(--text-primary);
-    padding: 8px 16px;
+    padding: 6px 12px;
+    /* Reduced padding */
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.7rem;
+    /* Reduced font */
     font-weight: 600;
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 
 /* Issue List */
 .issue-list {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
+    /* Reduced gap */
     /* Space between items */
     padding: 0 var(--spacing-lg);
 }
 
 .issue-item {
     display: flex;
-    gap: 16px;
+    gap: 12px;
+    /* Reduced gap */
     align-items: flex-start;
     text-decoration: none;
     color: inherit;
 }
 
 .issue-thumb {
-    width: 80px;
-    height: 80px;
-    border-radius: 16px;
+    width: 52px;
+    /* Reduced from 80px */
+    height: 52px;
+    border-radius: 12px;
     object-fit: cover;
     background-color: #f0f0f0;
     flex-shrink: 0;
@@ -143,51 +150,63 @@
 }
 
 .issue-title {
-    font-size: 1.1rem;
+    font-size: 0.85rem;
+    /* Reduced from 1.1rem */
     font-weight: 700;
     margin-bottom: 2px;
     color: var(--text-primary);
 }
 
 .issue-location {
-    font-size: 0.9rem;
+    font-size: 0.7rem;
+    /* Reduced from 0.9rem */
     color: var(--text-muted);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.7rem;
+    display: inline-flex;
+    /* Use flex for centering */
+    align-items: center;
+    justify-content: center;
+    padding: 3px 10px;
+    /* Adjusted padding */
+    border-radius: 8px;
+    font-size: 0.6rem;
+    /* Reduced */
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    white-space: nowrap;
+    /* Prevent wrapping */
+    line-height: 1;
 }
 
 .status-pending {
-    border: 1px solid #fcd34d;
+    border: 1.5px solid #fcd34d;
+    /* Thicker border for visibility */
     color: #b45309;
     /* Darker yellow/orange */
     background: transparent;
 }
 
 .status-resolved {
-    border: 1px solid #86efac;
+    border: 1.5px solid #86efac;
     color: #15803d;
     background: transparent;
 }
 
 .distance-tag {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
+    /* Reduced */
     color: #999;
     font-weight: 500;
     background: #f8f9fa;
-    padding: 2px 6px;
+    padding: 2px 4px;
     border-radius: 4px;
     float: right;
     /* To position top right of item */
-    margin-top: 4px;
+    margin-top: 2px;
     /* Adjust alignment */
 }
 
@@ -207,14 +226,16 @@
 /* Bottom Navigation - Floating */
 .bottom-nav-container {
     position: fixed;
-    bottom: 24px;
+    bottom: 20px;
+    /* Slightly adjusted */
     /* Floating from bottom */
     left: 50%;
     transform: translateX(-50%);
     z-index: 100;
-    width: calc(100% - 48px);
+    width: calc(100% - 32px);
     /* Margins on side */
-    max-width: 400px;
+    max-width: 380px;
+    /* Reduced max-width slightly */
 }
 
 .bottom-nav {
@@ -222,10 +243,12 @@
     justify-content: space-around;
     align-items: center;
     background: #000000;
-    border-radius: 32px;
-    padding: 12px 24px;
-    height: 72px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-radius: 28px;
+    /* Reduced radius */
+    padding: 10px 20px;
+    height: 64px;
+    /* Reduced height */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .nav-item {
@@ -243,8 +266,9 @@
 }
 
 .nav-item svg {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    /* Reduced size */
+    height: 22px;
     stroke-width: 2;
     /* Thicker based on image */
 }
@@ -253,21 +277,22 @@
 .nav-item.plus-btn {
     background: white;
     color: black;
-    width: 54px;
+    width: 48px;
+    /* Reduced size */
     /* Slightly larger */
-    height: 54px;
+    height: 48px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-top: -6px;
     /* Pop out slightly? image shows it centered but white circle */
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
 }
 
 .nav-item.plus-btn svg {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     stroke: black;
     stroke-width: 2.5;
 }

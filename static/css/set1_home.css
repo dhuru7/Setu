@@ -7,9 +7,12 @@
     --accent-light: #ffffff;
     --border-light: #e5e5e5;
     --font-family: 'Inter', sans-serif;
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
+    --spacing-sm: 5px;
+    /* Reduced by ~35% */
+    --spacing-md: 10px;
+    /* Reduced by ~35% */
+    --spacing-lg: 16px;
+    /* Reduced by ~35% */
 }
 
 * {
@@ -25,21 +28,29 @@ body {
     color: var(--text-primary);
     line-height: 1.5;
     overflow-x: hidden;
-    padding-bottom: 90px;
-    /* Space for fab/nav */
+    padding-bottom: 70px;
+    /* Reduced */
 }
 
-/* Header */
+/* Header - "Global Bar" Style */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-lg);
-    background: transparent;
+    padding: 12px var(--spacing-lg);
+    background: var(--bg-primary);
+    /* Solid background */
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
+    /* Shadow for bar effect */
+    height: 60px;
 }
 
 .logo {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
+    /* Reduced from 1.5rem */
     font-weight: 800;
     color: var(--text-primary);
     letter-spacing: -0.02em;
@@ -47,8 +58,9 @@ body {
 }
 
 .notification-btn {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    /* Reduced from 44px */
+    height: 32px;
     border-radius: 50%;
     border: 1px solid var(--border-light);
     display: flex;
@@ -61,16 +73,17 @@ body {
 }
 
 .notification-btn svg {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    /* Reduced from 24px */
+    height: 18px;
 }
 
 .notification-dot {
     position: absolute;
-    top: 10px;
-    right: 12px;
-    width: 8px;
-    height: 8px;
+    top: 6px;
+    right: 6px;
+    width: 6px;
+    height: 6px;
     background-color: #ef4444;
     border-radius: 50%;
     display: none;
@@ -82,13 +95,17 @@ body {
 
 /* Greetings */
 .greeting-section {
-    padding: 0 var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    /* reduced padding */
+    margin-bottom: var(--spacing-md);
+    margin-top: var(--spacing-sm);
 }
 
 .greeting-text {
-    font-size: 3rem;
-    font-weight: 500;
+    font-size: 1.9rem;
+    /* Reduced from 3rem */
+    font-weight: 600;
+    /* Increased weight slightly for smaller size visibility */
     line-height: 1.1;
     color: var(--text-primary);
 }
@@ -111,7 +128,8 @@ body {
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(6px);
+        /* Reduced movement */
     }
 
     to {

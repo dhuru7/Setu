@@ -24,6 +24,55 @@ enableIndexedDbPersistence(db).catch((err) => {
     }
 });
 
+// --- Distance Calculation Helpers ---
+
+// Cache for geocoding results to minimize API calls
+const geocodeCache = {};
+
+async function getCoordinates(locationQuery) {
+    if (!locationQuery) return null;
+    if (geocodeCache[locationQuery]) return geocodeCache[locationQuery];
+
+    try {
+        // Use Nominatim OpenStreetMap API
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1`;
+        const response = await fetch(url, { headers: { 'User-Agent': 'SetuApp/1.0' } });
+        if (!response.ok) return null;
+
+        const data = await response.json();
+        if (data && data.length > 0) {
+            const coords = { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+            geocodeCache[locationQuery] = coords;
+            return coords;
+        }
+    } catch (error) {
+        console.warn("Geocoding error:", error);
+    }
+    return null;
+}
+
+function calculateHaversine(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in km
+    return d.toFixed(1);
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+}
+
+// Global user city variable (set when auth loads)
+let currentUserCity = null;
+let currentUserCoords = null;
+let reportItemsLoaded = false;
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize Notifications manually since navigation.js is not included
     if (window.Notifications) {
@@ -50,19 +99,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         let statusClass = 'status-pending'; // Default yellow
         if (status === 'Resolved' || status === 'Fixed') statusClass = 'status-resolved'; // Green
 
-        // Try to generate a random distance for demo if not available, or just hide it
-        const randomDist = (Math.random() * 2).toFixed(1) + " km";
+        // Determine location string for geocoding
+        const locationStr = data.location?.village || data.location?.address || 'Unknown Location';
+        const displayLocation = locationStr.length > 25 ? locationStr.substring(0, 25) + '...' : locationStr;
+
+        // Coordinates might be directly in the report
+        const lat = data.location?.lat || data.location?.latitude;
+        const lon = data.location?.long || data.location?.longitude;
+
+        const coordsAttr = (lat && lon) ? `data-lat="${lat}" data-lon="${lon}"` : '';
 
         return `
-            <a href="reportfeed.html" class="issue-item fade-in">
+            <a href="reportfeed.html" class="issue-item fade-in" data-location-query="${locationStr}" ${coordsAttr}>
                 <img src="${data.imageUrl || '../static/images/placeholder.png'}" alt="Report" class="issue-thumb" onerror="this.src='https://via.placeholder.com/80/f0f0f0/cccccc?text=Report'">
                 <div class="issue-details">
                     <div class="issue-meta-top">
                         <h4 class="issue-title">${data.issueType || 'Issue Report'}</h4>
-                        <span class="distance-tag">${randomDist}</span>
+                        <span class="distance-tag">...</span>
                     </div>
-                    <p class="issue-location">${data.location?.village || data.location?.address || 'Unknown Location'}</p>
-                    <span class="status-badge ${statusClass}">${status}</span>
+                    <p class="issue-location">${displayLocation}</p>
+                    <div><span class="status-badge ${statusClass}">${status}</span></div>
                 </div>
             </a>
         `;
@@ -79,34 +135,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             const snapshots = await getDocs(q);
 
             if (snapshots.empty) {
-                publicFeedContainer.innerHTML = '<div style="padding:16px; text-align:center; color:#666;">No reports in your area yet.</div>';
+                publicFeedContainer.innerHTML = '<div style="padding:16px; text-align:center; color:#666; font-size: 0.8rem;">No reports available.</div>';
             } else {
                 let html = '';
                 snapshots.forEach(doc => html += renderCard(doc.data()));
                 publicFeedContainer.innerHTML = html;
+                reportItemsLoaded = true;
+
+                // Try to update distances if user coords are already ready
+                if (currentUserCoords) updateDistancesInFeed();
             }
 
             // 1b. Count Reports in Last 48 Hours
             try {
-                // Determine timestamp for 48 hours ago
                 const now = new Date();
                 const fortyEightHoursAgo = new Date(now.getTime() - (48 * 60 * 60 * 1000)).toISOString();
-
-                // Query: reports where createdAt >= 48 hours ago
-                // Note: This assumes createdAt is stored as an ISO string or compatible string format.
                 const countQuery = query(collection(db, 'reports'), where('createdAt', '>=', fortyEightHoursAgo));
                 const countSnap = await getDocs(countQuery);
 
                 if (countBadge) {
-                    const count = countSnap.size;
-                    countBadge.textContent = count;
-                    // Use dataset or just text.
+                    countBadge.textContent = countSnap.size;
                 }
-
             } catch (countErr) {
                 console.warn("Error fetching count:", countErr);
-                // Fallback to purely visual update or keep previous
-                if (countBadge) countBadge.textContent = "12"; // Fallback static if query fails (e.g. index issue)
+                if (countBadge) countBadge.textContent = "12";
             }
 
         } catch (e) {
@@ -115,37 +167,79 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // 2. Load Greeting Details (Name)
+    // 2. Load Greeting Details (Name & City)
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // Update Greeting - Fetch from Firestore for Full Name
+            // Update Greeting - Fetch from Firestore for Full Name & City
             let name = 'User';
-            if (user.displayName) {
-                name = user.displayName.split(' ')[0];
-            }
 
             try {
                 const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
                 const userDocRef = doc(db, "users", user.uid);
                 const userSnap = await getDoc(userDocRef);
+
                 if (userSnap.exists()) {
                     const userData = userSnap.data();
+
+                    // Name logic
                     if (userData.firstName) name = userData.firstName;
                     else if (userData.fullname) name = userData.fullname.split(' ')[0];
                     else if (userData.displayName) name = userData.displayName.split(' ')[0];
+                    else if (user.displayName) name = user.displayName.split(' ')[0];
+
+                    // City logic for distance
+                    if (userData.city) {
+                        currentUserCity = userData.city;
+                        // Start geocoding user city immediately
+                        const coords = await getCoordinates(currentUserCity);
+                        if (coords) {
+                            currentUserCoords = coords;
+                            // If reports are loaded, update distances now
+                            if (reportItemsLoaded) updateDistancesInFeed();
+                        }
+                    }
                 }
             } catch (e) {
-                console.warn("Could not fetch user profile for name", e);
+                console.warn("Could not fetch user profile", e);
             }
 
             if (greetingSpan) {
-                greetingSpan.textContent = name + "."; // Add dot as per design
+                greetingSpan.textContent = name + ".";
                 localStorage.setItem('cachedUserName', name);
             }
         } else {
             if (greetingSpan) greetingSpan.textContent = 'Neighbor.';
         }
     });
+
+    async function updateDistancesInFeed() {
+        if (!currentUserCoords) return;
+
+        const items = document.querySelectorAll('.issue-item');
+        for (const item of items) {
+            const distTag = item.querySelector('.distance-tag');
+            if (!distTag) continue;
+
+            // Check if report already has coords
+            let reportCoords = null;
+            if (item.dataset.lat && item.dataset.lon) {
+                reportCoords = { lat: parseFloat(item.dataset.lat), lon: parseFloat(item.dataset.lon) };
+            } else {
+                // Try geocoding the query string
+                const query = item.dataset.locationQuery;
+                if (query) {
+                    reportCoords = await getCoordinates(query);
+                }
+            }
+
+            if (reportCoords) {
+                const dist = calculateHaversine(currentUserCoords.lat, currentUserCoords.lon, reportCoords.lat, reportCoords.lon);
+                distTag.textContent = dist + " km";
+            } else {
+                distTag.textContent = "? km";
+            }
+        }
+    }
 });
 
 function createMiniSkeleton() {
