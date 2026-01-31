@@ -533,13 +533,13 @@
                 const lower = issueType.toLowerCase();
 
                 // Public Works
-                if (lower.includes("road") || lower.includes("pothole") || lower.includes("broken") || lower.includes("street")) return "Public Works Department (PWD)";
+                if (lower.includes("road") || lower.includes("pothole")) return "Public Works Department (PWD)";
 
                 // Sanitation
                 if (lower.includes("garbage") || lower.includes("dustbin") || lower.includes("waste") || lower.includes("dump") || lower.includes("clean")) return "Solid Waste Management (SWM)";
 
                 // Electrical
-                if (lower.includes("light") || lower.includes("electric") || lower.includes("lamp") || lower.includes("pole")) return "Electrical Department";
+                if (lower.includes("light") || lower.includes("electric") || lower.includes("lamp") || lower.includes("pole") || lower.includes("streetlight")) return "Electrical Department";
 
                 // Water/Sewage
                 if (lower.includes("sewage") || lower.includes("water") || lower.includes("drain") || lower.includes("pipe") || lower.includes("leak")) return "Water Supply & Sewerage Board";

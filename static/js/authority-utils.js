@@ -1,6 +1,6 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, query, where, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -76,13 +76,13 @@ function determineDepartment(issueType) {
     const lower = issueType.toLowerCase();
 
     // Public Works
-    if (lower.includes("road") || lower.includes("pothole") || lower.includes("broken") || lower.includes("street")) return "Public Works Department (PWD)";
+    if (lower.includes("road") || lower.includes("pothole")) return "Public Works Department (PWD)";
 
     // Sanitation
     if (lower.includes("garbage") || lower.includes("dustbin") || lower.includes("waste") || lower.includes("dump") || lower.includes("clean")) return "Solid Waste Management (SWM)";
 
     // Electrical
-    if (lower.includes("light") || lower.includes("electric") || lower.includes("lamp") || lower.includes("pole")) return "Electrical Department";
+    if (lower.includes("light") || lower.includes("electric") || lower.includes("lamp") || lower.includes("pole") || lower.includes("streetlight")) return "Electrical Department";
 
     // Water/Sewage
     if (lower.includes("sewage") || lower.includes("water") || lower.includes("drain") || lower.includes("pipe") || lower.includes("leak")) return "Water Supply & Sewerage Board";
@@ -198,6 +198,130 @@ export async function fetchOfficerReports(userUid) {
 
     } catch (error) {
         console.error("Error fetching reports:", error);
+        return [];
+    }
+}
+
+// --- UPDATE REPORT STATUS ---
+export async function updateReportStatus(reportId, actionData) {
+    try {
+        console.log("Updating report status:", reportId, actionData);
+
+        const reportRef = doc(db, "reports", reportId);
+
+        await updateDoc(reportRef, {
+            status: actionData.status || "In Progress",
+            assignedOfficerName: actionData.officerName,
+            assignedOfficerPhone: actionData.officerPhone,
+            workStartDate: actionData.startDate,
+            resolutionDuration: actionData.resolutionDuration,
+            actionTakenAt: serverTimestamp(),
+            lastUpdatedAt: serverTimestamp()
+        });
+
+        console.log("Report status updated successfully");
+        return { success: true };
+
+    } catch (error) {
+        console.error("Error updating report status:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// --- GET SINGLE REPORT ---
+export async function getReportById(reportId) {
+    try {
+        const reportRef = doc(db, "reports", reportId);
+        const reportSnap = await getDoc(reportRef);
+
+        if (reportSnap.exists()) {
+            return { id: reportSnap.id, ...reportSnap.data() };
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching report:", error);
+        return null;
+    }
+}
+
+// --- CREATE UPDATE NOTIFICATION ---
+export async function createUpdateNotification(reportId, reportData, actionData, authorityInfo) {
+    try {
+        console.log("Creating update notification for report:", reportId);
+
+        // Get all users who should receive this notification
+        // 1. Report owner
+        const recipients = [reportData.userId];
+
+        // 2. Report followers (if followers field exists)
+        if (reportData.followers && Array.isArray(reportData.followers)) {
+            reportData.followers.forEach(follower => {
+                if (!recipients.includes(follower)) {
+                    recipients.push(follower);
+                }
+            });
+        }
+
+        // Create notification for each recipient
+        for (const recipientId of recipients) {
+            await addDoc(collection(db, "notifications"), {
+                recipientId: recipientId,
+                reportId: reportId,
+                type: 'status_update',
+                title: `Update on your report: ${reportData.issueType || 'Report'}`,
+                message: `Your report has been updated to "${actionData.status || 'In Progress'}". An officer has been assigned.`,
+                actionData: {
+                    officerName: actionData.officerName,
+                    officerPhone: actionData.officerPhone,
+                    startDate: actionData.startDate,
+                    resolutionDuration: actionData.resolutionDuration,
+                    previousStatus: reportData.status || 'Pending',
+                    newStatus: actionData.status || 'In Progress'
+                },
+                department: authorityInfo?.department || 'Authority',
+                isRead: false,
+                createdAt: serverTimestamp()
+            });
+        }
+
+        console.log(`Created notifications for ${recipients.length} recipient(s)`);
+        return { success: true, recipientCount: recipients.length };
+
+    } catch (error) {
+        console.error("Error creating notification:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+// --- FETCH USER NOTIFICATIONS ---
+export async function fetchUserNotifications(userId) {
+    try {
+        const q = query(
+            collection(db, "notifications"),
+            where("recipientId", "==", userId)
+        );
+
+        const snapshot = await getDocs(q);
+        const notifications = [];
+
+        snapshot.forEach(docSnap => {
+            notifications.push({
+                id: docSnap.id,
+                ...docSnap.data()
+            });
+        });
+
+        // Sort by creation date (newest first)
+        notifications.sort((a, b) => {
+            const aTime = a.createdAt?.seconds || 0;
+            const bTime = b.createdAt?.seconds || 0;
+            return bTime - aTime;
+        });
+
+        return notifications;
+
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
         return [];
     }
 }

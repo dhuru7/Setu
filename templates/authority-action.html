@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script>
         // CRITICAL OPTIMIZATION: Instant Auth Redirect
         (function () {
@@ -17,227 +17,909 @@
             }
         })();
     </script>
-    <script>
-        (function () {
-            try {
-                const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                document.documentElement.setAttribute('data-theme', theme);
-            } catch (e) { }
-        })();
-    </script>
-    <title>Action Center - Setu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="../static/css/set1_style.css">
+    <title>Action Center - Setu Authority</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../static/css/set1_authority.css">
     <style>
-        /* Inheriting styles */
-        :root {
-            --bg-primary: #f8f9fa;
-            --bg-secondary: #FFFFFF;
-            --text-primary: #1D2228;
-            --text-secondary: #343a40;
-            --text-muted: #6c757d;
-            --border-light: #E1E2E2;
-            --bg-accent: #fff5eb;
-            --accent-primary: #FB8122;
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: #1D2228;
-            --bg-secondary: #252b31;
-            --text-primary: #E1E2E2;
-            --text-secondary: #adb5bd;
-            --text-muted: #6c757d;
-            --border-light: #373d42;
-            --bg-accent: #373d42;
-            --accent-primary: #FB8122;
-        }
-
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-secondary);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .desktop-sidebar {
-            background-color: var(--bg-secondary);
-            border-right: 1px solid var(--border-light);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        @media (max-width: 767px) {
-            .desktop-sidebar {
-                transform: translateX(-100%);
-            }
-
-            .desktop-sidebar.open {
-                transform: translateX(0);
-            }
-        }
-
-        .main-content {
-            transition: padding-left 0.3s ease-in-out;
-        }
-
-        @media (min-width: 768px) {
-            .main-content {
-                padding-left: 240px;
-            }
-        }
-
-        .header {
-            background-color: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .desktop-nav-link {
+        /* Action Center Specific Styles */
+        .reports-grid {
             display: flex;
-            align-items: center;
-            padding: 0.75rem;
-            border-radius: 0.75rem;
-            color: var(--text-muted);
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .report-card {
+            background: var(--auth-card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px var(--auth-shadow);
+            border: 1px solid var(--auth-border);
             transition: all 0.2s;
         }
 
-        .desktop-nav-link:hover,
-        .desktop-nav-link.active {
-            background-color: var(--bg-accent);
-            color: var(--text-primary);
+        .report-card:hover {
+            box-shadow: 0 4px 20px var(--auth-shadow-md);
         }
 
-        .logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            text-decoration: none;
+        .report-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .report-info {
+            flex: 1;
+        }
+
+        .report-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--auth-text-primary);
+            margin-bottom: 4px;
+        }
+
+        .report-id {
+            font-size: 0.75rem;
+            color: var(--auth-text-muted);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        .report-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 0.8125rem;
+            color: var(--auth-text-secondary);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-item svg {
+            width: 14px;
+            height: 14px;
+            color: var(--auth-text-muted);
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .status-badge.pending,
+        .status-badge.submitted {
+            background: var(--auth-orange-light);
+            color: var(--auth-orange);
+        }
+
+        .status-badge.in-progress {
+            background: var(--auth-blue-light);
+            color: var(--auth-blue);
+        }
+
+        .status-badge.resolved {
+            background: var(--auth-green-light);
+            color: var(--auth-green);
+        }
+
+        .take-action-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: var(--auth-blue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .take-action-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .take-action-btn:disabled {
+            background: var(--auth-text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .take-action-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--auth-card-bg);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 24px 24px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--auth-text-primary);
+        }
+
+        .modal-subtitle {
+            font-size: 0.875rem;
+            color: var(--auth-text-muted);
+            margin-top: 4px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--auth-bg);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: var(--auth-text-secondary);
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--auth-border);
+        }
+
+        .modal-close svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--auth-text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--auth-bg);
+            border: 1px solid var(--auth-border);
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            color: var(--auth-text-primary);
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--auth-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--auth-text-muted);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-footer {
+            padding: 0 24px 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px 20px;
+            background: var(--auth-bg);
+            color: var(--auth-text-secondary);
+            border: 1px solid var(--auth-border);
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: var(--auth-border);
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 12px 20px;
+            background: var(--auth-green);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            background: #16a34a;
+        }
+
+        .btn-submit:disabled {
+            background: var(--auth-text-muted);
+            cursor: not-allowed;
+        }
+
+        .btn-submit svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            background: var(--auth-card-bg);
+            border: 1px solid var(--auth-border);
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--auth-text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .filter-tab:hover {
+            border-color: var(--auth-blue);
+            color: var(--auth-blue);
+        }
+
+        .filter-tab.active {
+            background: var(--auth-blue);
+            border-color: var(--auth-blue);
+            color: white;
+        }
+
+        /* Success Toast */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--auth-green);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toast svg {
+            width: 20px;
+            height: 20px;
         }
     </style>
 </head>
 
-<body class="antialiased">
+<body class="authority-dashboard">
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-    <div id="mobile-menu-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
-
-    <nav id="sidebar" class="flex flex-col fixed top-0 left-0 h-full w-60 z-50 p-4 desktop-sidebar">
-        <div class="flex-shrink-0 flex justify-between items-center pt-2 pb-8">
-            <a href="authority-dashboard.html" class="logo !text-2xl notranslate">Setu</a>
-            <button id="close-menu-btn" class="md:hidden text-[var(--text-primary)] rounded-full p-1"><svg
-                    class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg></button>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="auth-sidebar">
+        <div class="sidebar-header">
+            <a href="authority-dashboard.html" class="sidebar-logo">
+                <div class="logo-icon">S</div>
+                <span class="logo-text">Setu.</span>
+            </a>
+            <button id="close-sidebar-btn" class="sidebar-close" aria-label="Close menu">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
-        <div class="flex-grow flex flex-col items-start space-y-2">
-            <a href="authority-dashboard.html" class="desktop-nav-link">
-                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+
+        <nav class="sidebar-nav">
+            <a href="authority-dashboard.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
                         d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                 </svg>
                 Dashboard
             </a>
-            <a href="authority-complaints.html" class="desktop-nav-link">
-                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            <a href="authority-complaints.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
                         d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
                 Complaints
             </a>
-            <a href="authority-map.html" class="desktop-nav-link">
-                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+            <a href="authority-map.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
                 </svg>
                 Map View
             </a>
-            <a href="authority-action.html" class="desktop-nav-link active">
-                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            <a href="authority-action.html" class="nav-item active">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
                         d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                 </svg>
                 Action Center
             </a>
-            <a href="authority-profile.html" class="desktop-nav-link">
-                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                My Profile
-            </a>
-        </div>
-        <div class="mt-auto flex flex-col items-start space-y-2 pb-2">
-            <a href="login.html" class="desktop-nav-link w-full" title="Logout">
-                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke-width="1.5" stroke="currentColor">
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-label">Signed in as</div>
+                <div class="user-name" id="sidebar-user-name">Authority</div>
+                <div class="user-dept" id="sidebar-user-dept">General Dept</div>
+            </div>
+            <button id="logout-btn" class="logout-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                 </svg>
-                <span class="desktop-nav-text">Logout</span>
-            </a>
+                Log Out
+            </button>
         </div>
-    </nav>
+    </aside>
 
-    <div class="main-content w-full">
-        <header class="p-4 flex justify-between items-center header">
-            <div class="flex items-center">
-                <button id="open-menu-btn" class="md:hidden mr-4 text-[var(--text-primary)]"><svg class="w-6 h-6"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg></button>
-                <h1 class="text-xl font-bold text-[var(--text-primary)]">Action Center</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <button id="theme-toggle-desktop" class="p-2 rounded-lg bg-[var(--bg-accent)] theme-toggle">
-                    <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                        </path>
-                    </svg>
-                    <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
-                        </path>
+    <!-- Main Content -->
+    <main class="auth-main">
+        <!-- Header -->
+        <header class="auth-header">
+            <div class="header-left">
+                <button id="open-sidebar-btn" class="menu-btn" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
                 </button>
+                <h1 class="header-title">Action Center</h1>
+            </div>
+            <div class="header-right">
+                <a href="authority-profile.html" class="profile-btn" aria-label="Profile">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </a>
             </div>
         </header>
 
-        <main class="p-4 sm:p-8 flex flex-col items-center justify-center min-h-[50vh] text-center">
-            <h2 class="text-2xl font-bold text-[var(--text-primary)] mb-2">Take Action</h2>
-            <p class="text-[var(--text-muted)] max-w-md">
-                Select a complaint from the Dashboard to take action here.
-                Workflows for updating status and engaging with citizens will be available soon.
-            </p>
-            <div class="mt-8">
-                <a href="authority-dashboard.html"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)]">
-                    Go to Dashboard
-                </a>
+        <!-- Content -->
+        <div class="auth-content">
+            <!-- Page Header -->
+            <section class="overview-section">
+                <h2 class="section-title">Take Action</h2>
+                <p class="section-subtitle">Review and take action on pending reports in your jurisdiction.</p>
+
+                <!-- Filter Tabs -->
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="pending">Pending</button>
+                    <button class="filter-tab" data-filter="in-progress">In Progress</button>
+                    <button class="filter-tab" data-filter="resolved">Resolved</button>
+                    <button class="filter-tab" data-filter="all">All Reports</button>
+                </div>
+            </section>
+
+            <!-- Reports List -->
+            <section class="assignments-section">
+                <div id="reports-list" class="reports-grid">
+                    <!-- Loading State -->
+                    <div class="empty-state">
+                        <p>Loading reports...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Action Modal -->
+    <div id="action-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title">Take Action</h3>
+                    <p class="modal-subtitle" id="modal-report-title">Report #12345</p>
+                </div>
+                <button id="modal-close-btn" class="modal-close">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
-        </main>
+            <form id="action-form">
+                <div class="modal-body">
+                    <input type="hidden" id="report-id" name="reportId">
+
+                    <div class="form-group">
+                        <label class="form-label" for="officer-name">Assigned Officer Name *</label>
+                        <input type="text" id="officer-name" name="officerName" class="form-input"
+                            placeholder="Enter officer's full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="officer-phone">Officer Contact Number *</label>
+                        <input type="tel" id="officer-phone" name="officerPhone" class="form-input"
+                            placeholder="Enter phone number" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="start-date">Work Start Date *</label>
+                            <input type="date" id="start-date" name="startDate" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="resolution-duration">Est. Duration *</label>
+                            <select id="resolution-duration" name="resolutionDuration" class="form-input" required>
+                                <option value="">Select duration</option>
+                                <option value="1 day">1 Day</option>
+                                <option value="2-3 days">2-3 Days</option>
+                                <option value="1 week">1 Week</option>
+                                <option value="2 weeks">2 Weeks</option>
+                                <option value="1 month">1 Month</option>
+                                <option value="2+ months">2+ Months</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancel-btn" class="btn-cancel">Cancel</button>
+                    <button type="submit" id="submit-btn" class="btn-submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Start Work
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- UI Toggle Script -->
-    <script>
+    <!-- Success Toast -->
+    <div id="toast" class="toast">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span id="toast-message">Status updated successfully!</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { fetchOfficerReports, updateReportStatus, createUpdateNotification, getReportById } from "../static/js/authority-utils.js?v=7";
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7uvvN3Xlo64pKCkJwfjGXtdqHuHIG0mI",
+            authDomain: "setu-6932f.firebaseapp.com",
+            projectId: "setu-6932f",
+            storageBucket: "setu-6932f.firebasestorage.app",
+            messagingSenderId: "1060012410845",
+            appId: "1:1060012410845:web:13da8942457a2d4ed89834"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Store reports globally for filtering
+        let allReports = [];
+        let currentFilter = 'pending';
+
         document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
             const sidebar = document.getElementById('sidebar');
-            const backdrop = document.getElementById('mobile-menu-backdrop');
-            const openBtn = document.getElementById('open-menu-btn');
-            const closeBtn = document.getElementById('close-menu-btn');
-            const themeBtn = document.getElementById('theme-toggle-desktop');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const openSidebarBtn = document.getElementById('open-sidebar-btn');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const sidebarUserName = document.getElementById('sidebar-user-name');
+            const sidebarUserDept = document.getElementById('sidebar-user-dept');
+            const reportsList = document.getElementById('reports-list');
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            const actionModal = document.getElementById('action-modal');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const actionForm = document.getElementById('action-form');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
 
-            if (openBtn) openBtn.onclick = () => { sidebar.classList.add('open'); backdrop.classList.remove('hidden'); };
-            if (closeBtn) closeBtn.onclick = () => { sidebar.classList.remove('open'); backdrop.classList.add('hidden'); };
-            if (backdrop) backdrop.onclick = () => { sidebar.classList.remove('open'); backdrop.classList.add('hidden'); };
-
-            if (themeBtn) themeBtn.onclick = () => {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                const newTheme = isDark ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                themeBtn.querySelector('.sun-icon').classList.toggle('hidden', newTheme === 'dark');
-                themeBtn.querySelector('.moon-icon').classList.toggle('hidden', newTheme !== 'dark');
+            // Sidebar Toggle
+            const openSidebar = () => {
+                sidebar.classList.add('open');
+                sidebarOverlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
             };
+
+            const closeSidebar = () => {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('show');
+                document.body.style.overflow = '';
+            };
+
+            openSidebarBtn?.addEventListener('click', openSidebar);
+            closeSidebarBtn?.addEventListener('click', closeSidebar);
+            sidebarOverlay?.addEventListener('click', closeSidebar);
+
+            // Logout
+            logoutBtn?.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userType');
+                    localStorage.removeItem('userProfile');
+                    window.location.replace('login.html');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            });
+
+            // Load cached profile data
+            const loadCachedProfile = () => {
+                const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                if (sidebarUserName) sidebarUserName.textContent = userProfile.fullname || 'Authority';
+                if (sidebarUserDept) sidebarUserDept.textContent = userProfile.department || 'General Dept';
+            };
+
+            // Get status class
+            const getStatusClass = (status) => {
+                const s = (status || '').toLowerCase();
+                if (s === 'resolved') return 'resolved';
+                if (s === 'in progress') return 'in-progress';
+                return 'pending';
+            };
+
+            // Get status text
+            const getStatusText = (status) => {
+                const s = (status || '').toLowerCase();
+                if (s === 'resolved') return 'Resolved';
+                if (s === 'in progress') return 'In Progress';
+                return 'Pending';
+            };
+
+            // Filter reports
+            const filterReports = (filter) => {
+                currentFilter = filter;
+                let filtered = allReports;
+
+                if (filter === 'pending') {
+                    filtered = allReports.filter(r => !r.status || r.status.toLowerCase() === 'submitted' || r.status.toLowerCase() === 'pending');
+                } else if (filter === 'in-progress') {
+                    filtered = allReports.filter(r => r.status && r.status.toLowerCase() === 'in progress');
+                } else if (filter === 'resolved') {
+                    filtered = allReports.filter(r => r.status && r.status.toLowerCase() === 'resolved');
+                }
+
+                renderReports(filtered);
+            };
+
+            // Render reports
+            const renderReports = (reports) => {
+                if (reports.length === 0) {
+                    reportsList.innerHTML = `
+                        <div class="empty-state">
+                            <p>No ${currentFilter === 'all' ? '' : currentFilter} reports found.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                reportsList.innerHTML = reports.map((report, index) => {
+                    const date = report.createdAt
+                        ? new Date(report.createdAt.seconds * 1000).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                        })
+                        : 'N/A';
+                    const location = [report.location?.full, report.location?.district].filter(Boolean).join(', ') || 'Unknown Location';
+                    const statusClass = getStatusClass(report.status);
+                    const statusText = getStatusText(report.status);
+                    const isPending = statusClass === 'pending';
+
+                    return `
+                        <div class="report-card fade-in-up" style="animation-delay: ${index * 0.05}s;">
+                            <div class="report-card-header">
+                                <div class="report-info">
+                                    <div class="report-title">${report.issueType || 'Issue Report'}</div>
+                                    <div class="report-id">#${report.id.substring(0, 8).toUpperCase()}</div>
+                                </div>
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="report-meta">
+                                <div class="meta-item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                    </svg>
+                                    ${location.length > 40 ? location.substring(0, 40) + '...' : location}
+                                </div>
+                                <div class="meta-item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                    </svg>
+                                    ${date}
+                                </div>
+                                <div class="meta-item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                    </svg>
+                                    ${report.userName || 'Anonymous'}
+                                </div>
+                            </div>
+                            ${isPending ? `
+                                <button class="take-action-btn" data-report-id="${report.id}" data-report-title="${report.issueType || 'Issue Report'}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                    </svg>
+                                    Take Action
+                                </button>
+                            ` : `
+                                <button class="take-action-btn" disabled>
+                                    ${statusClass === 'resolved' ? 'Resolved' : 'Work In Progress'}
+                                </button>
+                            `}
+                        </div>
+                    `;
+                }).join('');
+
+                // Add click handlers for action buttons
+                document.querySelectorAll('.take-action-btn:not([disabled])').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const reportId = btn.dataset.reportId;
+                        const reportTitle = btn.dataset.reportTitle;
+                        openActionModal(reportId, reportTitle);
+                    });
+                });
+            };
+
+            // Load reports
+            const loadReports = async (user) => {
+                try {
+                    reportsList.innerHTML = `
+                        <div class="report-card">
+                            <div class="loading-skeleton" style="height: 20px; width: 60%; margin-bottom: 8px;"></div>
+                            <div class="loading-skeleton" style="height: 16px; width: 40%; margin-bottom: 16px;"></div>
+                            <div class="loading-skeleton" style="height: 44px; width: 100%;"></div>
+                        </div>
+                        <div class="report-card">
+                            <div class="loading-skeleton" style="height: 20px; width: 70%; margin-bottom: 8px;"></div>
+                            <div class="loading-skeleton" style="height: 16px; width: 50%; margin-bottom: 16px;"></div>
+                            <div class="loading-skeleton" style="height: 44px; width: 100%;"></div>
+                        </div>
+                    `;
+
+                    allReports = await fetchOfficerReports(user.uid);
+                    filterReports(currentFilter);
+
+                } catch (error) {
+                    console.error('Error loading reports:', error);
+                    reportsList.innerHTML = `
+                        <div class="empty-state">
+                            <p>Failed to load reports. Please try again.</p>
+                        </div>
+                    `;
+                }
+            };
+
+            // Filter tab click handlers
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    filterReports(tab.dataset.filter);
+                });
+            });
+
+            // Modal functions
+            const openActionModal = (reportId, reportTitle) => {
+                document.getElementById('report-id').value = reportId;
+                document.getElementById('modal-report-title').textContent = reportTitle + ' - #' + reportId.substring(0, 8).toUpperCase();
+
+                // Set default start date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('start-date').value = today;
+
+                actionModal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeActionModal = () => {
+                actionModal.classList.remove('show');
+                document.body.style.overflow = '';
+                actionForm.reset();
+            };
+
+            modalCloseBtn?.addEventListener('click', closeActionModal);
+            cancelBtn?.addEventListener('click', closeActionModal);
+            actionModal?.addEventListener('click', (e) => {
+                if (e.target === actionModal) closeActionModal();
+            });
+
+            // Show toast
+            const showToast = (message, isError = false) => {
+                toastMessage.textContent = message;
+                toast.style.background = isError ? 'var(--auth-red)' : 'var(--auth-green)';
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            };
+
+            // Form submission
+            actionForm?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const submitBtn = document.getElementById('submit-btn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Updating...';
+
+                const formData = new FormData(actionForm);
+                const actionData = {
+                    officerName: formData.get('officerName'),
+                    officerPhone: formData.get('officerPhone'),
+                    startDate: formData.get('startDate'),
+                    resolutionDuration: formData.get('resolutionDuration'),
+                    status: 'In Progress'
+                };
+
+                const reportId = formData.get('reportId');
+
+                try {
+                    // First fetch the report data for notification
+                    const reportData = await getReportById(reportId);
+
+                    // Update the report status
+                    const result = await updateReportStatus(reportId, actionData);
+
+                    if (result.success) {
+                        // Create notifications for report owner and followers
+                        const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                        const authorityInfo = {
+                            department: userProfile.department || 'Authority'
+                        };
+
+                        await createUpdateNotification(reportId, reportData, actionData, authorityInfo);
+
+                        closeActionModal();
+                        showToast('Report status updated to In Progress!');
+
+                        // Refresh reports
+                        const user = auth.currentUser;
+                        if (user) {
+                            await loadReports(user);
+                        }
+                    } else {
+                        showToast('Failed to update status: ' + result.error, true);
+                    }
+                } catch (error) {
+                    console.error('Error updating status:', error);
+                    showToast('An error occurred. Please try again.', true);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            });
+
+            // Initialize
+            loadCachedProfile();
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    loadReports(user);
+                }
+            });
         });
     </script>
 </body>
