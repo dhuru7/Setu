@@ -75,7 +75,7 @@ body {
 }
 
 #animated-name {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.8s ease;
 }
 
 .nav-actions {
