@@ -218,6 +218,29 @@ body.login-page {
     font-weight: 400;
 }
 
+/* ============ AUTOFILL STYLING FIX ============ */
+/* Override browser autofill background to match our design */
+.login-input:-webkit-autofill,
+.login-input:-webkit-autofill:hover,
+.login-input:-webkit-autofill:focus,
+.login-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+    background-color: transparent !important;
+    transition: background-color 9999s ease-out, color 9999s ease-out;
+    caret-color: var(--text-primary);
+}
+
+[data-theme="dark"] .login-input:-webkit-autofill,
+[data-theme="dark"] .login-input:-webkit-autofill:hover,
+[data-theme="dark"] .login-input:-webkit-autofill:focus,
+[data-theme="dark"] .login-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+}
+
 .login-toggle-password {
     background: none;
     border: none;

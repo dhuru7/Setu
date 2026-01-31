@@ -298,6 +298,29 @@ body {
     font-weight: 400;
 }
 
+/* ============ AUTOFILL STYLING FIX ============ */
+/* Override browser autofill background to match our design */
+.custom-input:-webkit-autofill,
+.custom-input:-webkit-autofill:hover,
+.custom-input:-webkit-autofill:focus,
+.custom-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+    background-color: transparent !important;
+    transition: background-color 9999s ease-out, color 9999s ease-out;
+    caret-color: var(--text-primary);
+}
+
+[data-theme="dark"] .custom-input:-webkit-autofill,
+[data-theme="dark"] .custom-input:-webkit-autofill:hover,
+[data-theme="dark"] .custom-input:-webkit-autofill:focus,
+[data-theme="dark"] .custom-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+}
+
 .custom-input.uppercase {
     text-transform: uppercase;
 }
