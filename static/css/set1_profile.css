@@ -529,6 +529,28 @@
     stroke-width: 3;
 }
 
+/* Email Editing Mode - Tick beside input */
+.email-editing .detail-value-container {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.email-editing .detail-label {
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+.email-editing .inline-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.email-editing .confirm-tick-btn {
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
 /* ==========================================
    Edit Modal Styles
    ========================================== */

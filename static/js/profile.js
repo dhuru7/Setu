@@ -383,11 +383,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const viewEl = document.getElementById('view-email');
                 const inputEl = document.getElementById('edit-email-inline');
                 const btnEl = document.getElementById('save-email-inline-btn');
+                const emailCard = document.getElementById('email-card');
                 if (viewEl && inputEl && btnEl) {
                     viewEl.textContent = newVal; // Ensure view is updated
                     viewEl.classList.remove('hidden');
                     inputEl.classList.add('hidden');
                     btnEl.classList.add('hidden');
+                    // Remove editing class
+                    if (emailCard) emailCard.classList.remove('email-editing');
                 }
             } catch (e) {
                 console.error(e);
@@ -621,13 +624,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     const viewEl = document.getElementById('view-email');
                     const inputEl = document.getElementById('edit-email-inline');
                     const btnEl = document.getElementById('save-email-inline-btn');
+                    const emailCard = document.getElementById('email-card');
 
                     if (viewEl && inputEl && btnEl) {
                         viewEl.classList.add('hidden');
                         inputEl.classList.remove('hidden');
                         btnEl.classList.remove('hidden');
-                        inputEl.value = viewEl.textContent.trim(); // sync value
+                        // Use the full email from data attribute, not truncated display text
+                        inputEl.value = viewEl.dataset.fullEmail || currentUserData.email || '';
                         inputEl.focus();
+
+                        // Add editing class for CSS layout adjustment
+                        if (emailCard) emailCard.classList.add('email-editing');
 
                         // Close swipe visually to reveal input
                         overlay.style.transform = `translateX(100%)`;
@@ -842,7 +850,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         issueType: report.issueType,
                         status: report.status,
                         timestamp: report.timestamp,
-                        // Only store first media URL if exists (for thumbnail)
+                        // Store imageUrl for thumbnail
+                        imageUrl: report.imageUrl || null,
+                        // Fallback to first media URL if exists
                         media: report.media && report.media.length > 0 ? [report.media[0]] : []
                     },
                     reportId
@@ -884,14 +894,14 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const status = statusMap[report.status?.toLowerCase()] || statusMap['pending'];
 
-        // Get image (first media item or placeholder)
-        const imageUrl = report.media && report.media.length > 0
-            ? report.media[0]
-            : 'https://placehold.co/200x100/e5e7eb/9ca3af?text=No+Image';
+        // Get image (use imageUrl field, fallback to media array, then placeholder)
+        const imageUrl = report.imageUrl
+            || (report.media && report.media.length > 0 ? report.media[0] : null)
+            || 'https://placehold.co/200x100/e5e7eb/9ca3af?text=No+Image';
 
         card.innerHTML = `
             <div class="report-card-image">
-                <img src="${imageUrl}" alt="${report.issueType || 'Report'}" loading="lazy">
+                <img src="${imageUrl}" alt="${report.issueType || 'Report'}" loading="lazy" onerror="this.src='https://placehold.co/200x100/e5e7eb/9ca3af?text=No+Image'">
                 <span class="report-status-badge ${status.class}">${status.label}</span>
             </div>
             <div class="report-card-info">
