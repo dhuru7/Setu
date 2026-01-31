@@ -1,8 +1,27 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { doc, getDoc, updateDoc, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 document.addEventListener('DOMContentLoaded', () => {
+    // OPTIMIZATION: Render cached profile IMMEDIATELY (before Firebase even connects)
+    const cachedProfile = localStorage.getItem('userProfile');
+    const cachedReports = localStorage.getItem('userReportsCache');
+
+    if (cachedProfile) {
+        try {
+            const cachedData = JSON.parse(cachedProfile);
+            // Pre-populate UI with cached data instantly
+            renderProfileInstant(cachedData);
+        } catch (e) { console.warn('Cache parse error:', e); }
+    }
+
+    if (cachedReports) {
+        try {
+            const reports = JSON.parse(cachedReports);
+            renderReportsInstant(reports);
+        } catch (e) { console.warn('Reports cache parse error:', e); }
+    }
+
     const UI = {
         container: document.getElementById('profile-container'),
         // Edit Modal
@@ -32,13 +51,50 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUserData = {};
     let currentEditingField = null;
 
+    // OPTIMIZATION: Instant render function for cached data (no skeleton removal, just text update)
+    function renderProfileInstant(data) {
+        const nameEl = document.getElementById('profile-fullname');
+        const cityEl = document.getElementById('view-city');
+        const dobEl = document.getElementById('view-dob');
+        const mobileEl = document.getElementById('view-mobile');
+        const emailEl = document.getElementById('view-email');
+        const avatarEl = document.getElementById('profile-avatar');
+
+        if (nameEl && data.fullname) { nameEl.textContent = data.fullname; nameEl.classList.remove('skeleton'); nameEl.removeAttribute('style'); }
+        if (cityEl && data.city) { cityEl.textContent = data.city; cityEl.classList.remove('skeleton'); cityEl.removeAttribute('style'); }
+        if (dobEl && data.dob) { dobEl.textContent = data.dob; dobEl.classList.remove('skeleton'); dobEl.removeAttribute('style'); }
+        if (mobileEl && data.mobile) { mobileEl.textContent = data.mobile; mobileEl.classList.remove('skeleton'); mobileEl.removeAttribute('style'); }
+        if (emailEl && data.email) { emailEl.textContent = data.email; emailEl.classList.remove('skeleton'); emailEl.removeAttribute('style'); }
+        if (avatarEl && data.avatar) { avatarEl.src = data.avatar; }
+
+        // Show icons
+        document.querySelectorAll('.detail-icon').forEach(icon => icon.classList.remove('hidden'));
+
+        // Update currentUserData for other functions
+        currentUserData = data;
+    }
+
+    // OPTIMIZATION: Instant render function for cached reports
+    function renderReportsInstant(reports) {
+        const reportsGrid = document.getElementById('my-reports-grid');
+        if (!reportsGrid || !reports || reports.length === 0) return;
+
+        reportsGrid.innerHTML = '';
+        reports.forEach(({ report, reportId }) => {
+            const card = createReportCard(report, reportId);
+            reportsGrid.appendChild(card);
+        });
+    }
+
     // --- Authentication & Data Loading ---
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUserUid = user.uid;
-            await loadUserProfile(user.uid);
-            // Load user's reports for MY REPORTS section
-            loadUserReports(user.uid);
+            // OPTIMIZATION: Parallel fetch - profile and reports at the same time
+            await Promise.all([
+                loadUserProfile(user.uid),
+                loadUserReports(user.uid)
+            ]);
         } else {
             // Not logged in
             window.location.href = "login.html";
@@ -46,12 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function loadUserProfile(uid) {
-        // 1. FAST LOAD: Try LocalStorage first
+        // Skip cache display if already rendered by instant render above
         const cached = localStorage.getItem('userProfile');
-        if (cached) {
-            currentUserData = JSON.parse(cached);
-            displayProfileData();
-        }
+        const alreadyRendered = cached && currentUserData.fullname;
 
         try {
             const docRef = doc(db, "users", uid);
@@ -73,6 +126,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (JSON.stringify(freshData) !== JSON.stringify(currentUserData)) {
                     currentUserData = freshData;
                     localStorage.setItem('userProfile', JSON.stringify(freshData));
+                    displayProfileData();
+                } else if (!alreadyRendered) {
+                    // First time, no cache was available
+                    currentUserData = freshData;
                     displayProfileData();
                 }
             } else {
@@ -726,9 +783,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const reportsGrid = document.getElementById('my-reports-grid');
         if (!reportsGrid) return;
 
-        try {
-            const { collection, query, where, orderBy, limit, getDocs } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js");
+        // Check if already rendered from cache
+        const cachedReports = localStorage.getItem('userReportsCache');
+        const alreadyRendered = cachedReports && reportsGrid.querySelector('.report-card-mini:not(.skeleton)');
 
+        try {
+            // OPTIMIZATION: Use top-level imports instead of dynamic import
             let reportsQuery;
             let querySnapshot;
 
@@ -756,6 +816,8 @@ document.addEventListener('DOMContentLoaded', () => {
             reportsGrid.innerHTML = '';
 
             if (querySnapshot.empty) {
+                // Clear cache if no reports
+                localStorage.removeItem('userReportsCache');
                 reportsGrid.innerHTML = `
                     <div class="no-reports-message" style="grid-column: span 2; text-align: center; padding: 32px 16px;">
                         <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 8px;">No reports yet</p>
@@ -765,19 +827,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // OPTIMIZATION: Build array for caching
+            const reportsToCache = [];
+
             querySnapshot.forEach((docSnapshot) => {
                 const report = docSnapshot.data();
-                const card = createReportCard(report, docSnapshot.id);
+                const reportId = docSnapshot.id;
+                const card = createReportCard(report, reportId);
                 reportsGrid.appendChild(card);
+
+                // Store essential data for cache (exclude large fields like media base64)
+                reportsToCache.push({
+                    report: {
+                        issueType: report.issueType,
+                        status: report.status,
+                        timestamp: report.timestamp,
+                        // Only store first media URL if exists (for thumbnail)
+                        media: report.media && report.media.length > 0 ? [report.media[0]] : []
+                    },
+                    reportId
+                });
             });
+
+            // OPTIMIZATION: Cache reports for instant loading next time
+            try {
+                localStorage.setItem('userReportsCache', JSON.stringify(reportsToCache));
+            } catch (e) {
+                // Cache might be full, ignore
+                console.warn('Could not cache reports:', e);
+            }
 
         } catch (error) {
             console.error("Error loading user reports:", error);
-            reportsGrid.innerHTML = `
-                <div class="no-reports-message" style="grid-column: span 2; text-align: center; padding: 32px 16px;">
-                    <p style="color: var(--text-muted); font-size: 0.875rem;">Could not load reports</p>
-                </div>
-            `;
+            // Only show error if not already rendered from cache
+            if (!alreadyRendered) {
+                reportsGrid.innerHTML = `
+                    <div class="no-reports-message" style="grid-column: span 2; text-align: center; padding: 32px 16px;">
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">Could not load reports</p>
+                    </div>
+                `;
+            }
         }
     }
 

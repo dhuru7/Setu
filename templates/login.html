@@ -5,13 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login – Setu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/set1_style.css">
-    <link rel="stylesheet" href="../static/css/set1_loginstyle.css">
+    <link rel="stylesheet" href="../static/css/set1_login.css">
 
     <script>
-        // Simple Theme Loader (No Loops!)
+        // Simple Theme Loader
         (function () {
             try {
                 const theme = localStorage.getItem('theme') || 'light';
@@ -21,138 +20,106 @@
     </script>
 </head>
 
-<body class="antialiased">
+<body class="login-page antialiased">
     <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed top-4 right-4 z-[100] w-full max-w-sm space-y-3"></div>
+    <div id="toast-container"></div>
 
-    <!-- Navigation Header -->
-    <header class="nav-header sticky top-0 z-50">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div class="flex items-center justify-between">
-                <a href="index.html" class="logo notranslate">
-                    <span id="animated-name">Setu</span>
-                </a>
+    <div class="login-container">
+        <!-- Simple Header -->
+        <header class="login-header">
+            <a href="index.html" class="login-logo notranslate">Setu.</a>
+            <a href="about.html" class="login-nav-link">About</a>
+        </header>
 
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-2">
-                    <a href="about.html" class="btn btn-ghost">About</a>
+        <!-- Main Login Content -->
+        <main class="login-main">
+            <!-- Login Icon -->
+            <div class="login-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Arrow pointing right into bracket (login icon) -->
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 16l4-4m0 0l-4-4m4 4H3" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 4h4a2 2 0 012 2v12a2 2 0 01-2 2h-4" />
+                </svg>
+            </div>
 
-                    <div class="language-dropdown">
-                        <button id="language-btn" class="btn btn-ghost flex items-center">
-                            <span class="language-text notranslate">English</span>
-                            <span id="current-lang" class="language-indicator notranslate">EN</span>
-                            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div id="language-dropdown" class="dropdown-content">
-                            <!-- Language options will be dynamically populated by JS -->
-                        </div>
+            <!-- Heading -->
+            <h1 class="login-heading">Welcome back</h1>
+            <p class="login-subheading">Enter your details to continue.</p>
+
+            <!-- Login Form -->
+            <form id="login-form" class="login-form" novalidate>
+                <!-- Mobile Number Field -->
+                <div class="login-input-group">
+                    <div class="login-input-label-row">
+                        <label class="login-input-label" for="email">Mobile Number</label>
                     </div>
-
-                    <button id="theme-toggle" class="theme-toggle theme-toggle-btn" aria-label="Toggle theme">
-                        <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="login-input-wrapper">
+                        <svg class="login-input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                            </path>
+                                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
-                        <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <input type="tel" id="email" class="login-input" placeholder="Mobile Number" required
+                            maxlength="10" pattern="[0-9]{10}" inputmode="numeric">
+                    </div>
+                    <p id="email-error" class="login-error-message"></p>
+                </div>
+
+                <!-- Password Field -->
+                <div class="login-input-group">
+                    <div class="login-input-label-row">
+                        <label class="login-input-label" for="password">Password</label>
+                        <a href="#" class="login-forgot-link">Forgot?</a>
+                    </div>
+                    <div class="login-input-wrapper">
+                        <svg class="login-input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
-                            </path>
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                    </button>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <div id="mobile-menu-btn" class="md:hidden menu-wrapper" aria-label="Open menu">
-                    <div class="hamburger-menu">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mobile Menu -->
-            <div id="mobile-menu" class="md:hidden mobile-menu">
-                <div class="space-y-3">
-                    <a href="about.html" class="btn btn-ghost w-full justify-start">About</a>
-
-                    <div class="language-dropdown w-full">
-                        <button id="mobile-language-btn"
-                            class="btn btn-ghost text-left w-full flex justify-between items-center">
-                            <span class="mobile-language-text notranslate">English</span>
-                            <span id="mobile-current-lang" class="language-indicator notranslate">EN</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <input type="password" id="password" class="login-input" placeholder="••••••••" required>
+                        <button type="button" id="toggle-password" class="login-toggle-password"
+                            aria-label="Toggle password visibility">
+                            <!-- Eye Icon (Show) -->
+                            <svg class="eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                        </button>
-                        <div id="mobile-language-dropdown" class="dropdown-content w-full">
-                            <!-- Language options will be dynamically populated by JS -->
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center pt-3">
-                        <span class="text-sm font-medium text-[var(--text-secondary)]">Switch Theme</span>
-                        <button id="mobile-theme-toggle" class="theme-toggle theme-toggle-btn"
-                            aria-label="Toggle theme">
-                            <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- Eye Off Icon (Hide) - Hidden by default -->
+                            <svg class="eye-closed hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                                </path>
-                            </svg>
-                            <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
-                                </path>
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                             </svg>
                         </button>
                     </div>
+                    <p id="password-error" class="login-error-message"></p>
                 </div>
-            </div>
-        </nav>
-    </header>
 
-    <main class="login-container relative z-10 w-full min-h-screen flex flex-col justify-center px-6 py-8">
-        <div
-            class="desktop-wrapper step-container md:bg-[var(--bg-secondary)] md:p-10 md:rounded-2xl md:shadow-2xl md:max-w-md md:w-full md:mx-auto md:border md:border-[var(--border-light)]">
-
-            <div class="text-center mb-10">
-                <h1 class="text-4xl font-bold text-[var(--text-primary)] leading-tight">Welcome Back</h1>
-            </div>
-
-            <form id="login-form" novalidate>
-                <div class="space-y-6">
-
-                    <div>
-                        <input type="tel" id="email" class="custom-input" placeholder="Enter your mobile number"
-                            required>
-                    </div>
-
-                    <div>
-                        <input type="password" id="password" class="custom-input" placeholder="Enter your password"
-                            required>
-                    </div>
-
-                    <button type="submit" id="login-btn" class="btn-login-submit">
-                        Login
-                    </button>
-
-                </div>
+                <!-- Submit Button -->
+                <button type="submit" id="login-btn" class="login-submit-btn">
+                    <span class="btn-text">Log In</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </button>
             </form>
 
-            <div class="text-center mt-8 text-sm text-[var(--text-secondary)]">
-                Don't have an account?
-                <a href="signup.html" class="font-bold text-[var(--accent-primary)] hover:underline ml-1">Sign up</a>
-            </div>
-        </div>
-    </main>
+            <!-- Sign Up Link -->
+            <p class="login-signup-text">
+                Don't have an account?<a href="signup.html" class="login-signup-link">Sign up</a>
+            </p>
+        </main>
+    </div>
 
     <!-- Google Translate Element (Hidden but functional) -->
-    <div id="google_translate_element"></div>
+    <div id="google_translate_element" style="display: none;"></div>
 
     <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
     <script>
@@ -164,6 +131,56 @@
                 autoDisplay: false
             }, 'google_translate_element');
         }
+
+        // Password Toggle Functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('toggle-password');
+            const passwordInput = document.getElementById('password');
+            const eyeOpen = toggleBtn.querySelector('.eye-open');
+            const eyeClosed = toggleBtn.querySelector('.eye-closed');
+
+            toggleBtn.addEventListener('click', function () {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                eyeOpen.classList.toggle('hidden');
+                eyeClosed.classList.toggle('hidden');
+            });
+
+            // Mobile Number Validation - Only allow 10 digits
+            const mobileInput = document.getElementById('email');
+            const mobileError = document.getElementById('email-error');
+
+            mobileInput.addEventListener('input', function (e) {
+                // Remove any non-digit characters
+                let value = e.target.value.replace(/\D/g, '');
+
+                // Limit to 10 digits
+                if (value.length > 10) {
+                    value = value.slice(0, 10);
+                }
+
+                e.target.value = value;
+
+                // Show validation feedback
+                if (value.length > 0 && value.length < 10) {
+                    mobileError.textContent = `Enter ${10 - value.length} more digit(s)`;
+                    mobileError.classList.add('show');
+                } else if (value.length === 10) {
+                    mobileError.textContent = '';
+                    mobileError.classList.remove('show');
+                } else {
+                    mobileError.textContent = '';
+                    mobileError.classList.remove('show');
+                }
+            });
+
+            // Prevent non-numeric key presses
+            mobileInput.addEventListener('keypress', function (e) {
+                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                    e.preventDefault();
+                }
+            });
+        });
     </script>
 
     <script type="module" src="../static/js/login.js"></script>
