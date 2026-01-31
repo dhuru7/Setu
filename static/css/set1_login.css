@@ -69,6 +69,8 @@ body.login-page {
     align-items: center;
     justify-content: center;
     padding: 2rem 1.5rem 3rem;
+    /* Move content up by 3% */
+    margin-top: -3vh;
 }
 
 /* ============ LOGIN ICON ============ */

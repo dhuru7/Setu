@@ -13,166 +13,125 @@
         })();
     </script>
     <title>Sign Up – Setu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Link to the new common stylesheet -->
+    <!-- Common styles with CSS variables -->
     <link rel="stylesheet" href="../static/css/set1_style.css">
     <!-- Signup Page specific styles -->
-    <link rel="stylesheet" href="../static/css/set1_signupstyle.css">
+    <link rel="stylesheet" href="../static/css/set1_signup.css">
 </head>
 
-<body class="antialiased">
+<body>
     <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed top-4 right-4 z-[100] w-full max-w-sm space-y-3"></div>
+    <div id="toast-container"></div>
 
     <!-- Navigation Header -->
-    <header class="nav-header sticky top-0 z-50">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div class="flex items-center justify-between">
-                <!-- === MODIFIED: Added 'notranslate' class to logo === -->
-                <a href="signup.html" class="logo notranslate">
-                    <span id="animated-name">Setu</span>
-                </a>
-
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-2">
-                    <a href="about.html" class="btn btn-ghost">About</a>
-
-                    <div class="language-dropdown">
-                        <!-- === MODIFIED: Added 'notranslate' class to language button spans === -->
-                        <button id="language-btn" class="btn btn-ghost flex items-center">
-                            <span class="language-text notranslate">English</span>
-                            <span id="current-lang" class="language-indicator notranslate">EN</span>
-                            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div id="language-dropdown" class="dropdown-content">
-                            <!-- Language options will be dynamically populated by JS -->
-                        </div>
-                    </div>
-
-                    <button id="theme-toggle" class="theme-toggle theme-toggle-btn" aria-label="Toggle theme">
-                        <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                            </path>
-                        </svg>
-                        <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
-                            </path>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- === MODIFIED: NEW MOBILE MENU BUTTON === -->
-                <div id="mobile-menu-btn" class="md:hidden menu-wrapper" aria-label="Open menu">
-                    <div class="hamburger-menu">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-                <!-- === END MODIFIED BUTTON === -->
-            </div>
-
-            <!-- Mobile Menu -->
-            <div id="mobile-menu" class="md:hidden mobile-menu">
-                <div class="space-y-3">
-                    <a href="about.html" class="btn btn-ghost w-full justify-start">About</a>
-
-                    <div class="language-dropdown w-full">
-                        <!-- === MODIFIED: Added 'notranslate' class to mobile language button spans === -->
-                        <button id="mobile-language-btn"
-                            class="btn btn-ghost text-left w-full flex justify-between items-center">
-                            <span class="mobile-language-text notranslate">English</span>
-                            <span id="mobile-current-lang" class="language-indicator notranslate">EN</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div id="mobile-language-dropdown" class="dropdown-content w-full">
-                            <!-- Language options will be dynamically populated by JS -->
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center pt-3">
-                        <span class="text-sm font-medium text-[var(--text-secondary)]">Switch Theme</span>
-                        <button id="mobile-theme-toggle" class="theme-toggle theme-toggle-btn"
-                            aria-label="Toggle theme">
-                            <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                                </path>
-                            </svg>
-                            <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
+    <header class="nav-header">
+        <nav class="nav-container">
+            <a href="signup.html" class="logo notranslate">
+                <span id="animated-name">Setu.</span>
+            </a>
+            <a href="about.html" class="nav-link">About</a>
         </nav>
     </header>
 
     <!-- Signup Page Main Content -->
-    <!-- Main Container -->
-    <main class="signup-container relative z-10 w-full min-h-screen flex flex-col justify-center px-6 py-8">
-
-        <!-- Wrapper -->
-        <div
-            class="desktop-wrapper md:bg-[var(--bg-secondary)] md:p-10 md:rounded-2xl md:shadow-2xl md:max-w-md md:w-full md:mx-auto md:border md:border-[var(--border-light)]">
-
-            <!-- Header Title -->
-            <div class="mb-10 relative">
-                <h1 class="text-4xl font-bold text-[var(--text-primary)] leading-tight">
-                    Create Account
-                </h1>
+    <main class="signup-main">
+        <!-- Content Container -->
+        <div class="signup-container">
+            <!-- User Icon -->
+            <div class="user-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <line x1="19" y1="8" x2="19" y2="14"></line>
+                    <line x1="22" y1="11" x2="16" y2="11"></line>
+                </svg>
             </div>
 
-            <form id="signup-form" novalidate class="space-y-6">
+            <!-- Header Title -->
+            <div class="signup-header">
+                <h1 class="signup-title">Create Account</h1>
+                <p class="signup-subtitle">Join your community today.</p>
+            </div>
+
+            <form id="signup-form" novalidate class="signup-form">
 
                 <!-- STEP 1 -->
-                <div id="step-1" class="step-container space-y-4">
+                <div id="step-1" class="step-container">
+                    <!-- Full Name -->
                     <div class="input-group">
-                        <input type="text" id="fullname" name="fullname" class="custom-input" placeholder="Name"
-                            required>
+                        <label class="input-label">FULL NAME</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </span>
+                            <input type="text" id="fullname" name="fullname" class="custom-input" placeholder="John Doe"
+                                required>
+                        </div>
                         <span id="fullname-error" class="error-message"></span>
                     </div>
+
+                    <!-- Govt ID / Emp ID -->
                     <div class="input-group">
-                        <input type="text" id="id-card" name="id-card" class="custom-input uppercase"
-                            placeholder="Aadhaar (12 digits) or Emp ID (ABCD12345678)" required>
+                        <label class="input-label">GOVT ID / EMP ID</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                    <line x1="6" y1="8" x2="6" y2="8"></line>
+                                    <line x1="10" y1="8" x2="18" y2="8"></line>
+                                    <line x1="6" y1="12" x2="6" y2="12"></line>
+                                    <line x1="10" y1="12" x2="18" y2="12"></line>
+                                    <line x1="6" y1="16" x2="6" y2="16"></line>
+                                    <line x1="10" y1="16" x2="14" y2="16"></line>
+                                </svg>
+                            </span>
+                            <input type="text" id="id-card" name="id-card" class="custom-input uppercase"
+                                placeholder="AADHAAR OR GOVT. EMPLOYEE ID" required>
+                        </div>
                         <span id="id-error" class="error-message"></span>
                     </div>
+
+                    <!-- Date of Birth -->
                     <div class="input-group">
-                        <!-- Using text type with onfocus to handle placeholder better or keep date -->
-                        <input type="text" onfocus="(this.type='date')" onblur="(this.type='text')" id="dob" name="dob"
-                            class="custom-input" placeholder="Date of Birth" required>
+                        <label class="input-label">DATE OF BIRTH</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </span>
+                            <input type="text" onfocus="(this.type='date')" onblur="if(!this.value)(this.type='text')"
+                                id="dob" name="dob" class="custom-input" placeholder="Select Date" required>
+                        </div>
                         <span id="dob-error" class="error-message"></span>
                     </div>
 
-                    <!-- Step 1 Next Button & Login Link -->
-                    <div class="flex justify-between items-center mt-8">
-                        <div id="auth-note-container" class="transition-opacity duration-300">
-                            <p class="text-[var(--text-secondary)] text-sm font-medium">
-                                Already have an account?
-                                <a href="login.html"
-                                    class="font-bold text-[var(--accent-primary)] hover:underline ml-1">
-                                    Log in
-                                </a>
-                            </p>
+                    <!-- Step 1 Navigation -->
+                    <div class="step-navigation">
+                        <div id="auth-note-container" class="auth-note">
+                            <span class="auth-note-text">Has account?</span>
+                            <a href="login.html" class="auth-note-link">Log in</a>
                         </div>
 
                         <button type="button" id="to-step-2-btn" class="arrow-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="w-6 h-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                stroke="currentColor" width="22" height="22">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>
@@ -181,29 +140,76 @@
                 </div>
 
                 <!-- STEP 2 (Hidden Initially) -->
-                <div id="step-2" class="step-container space-y-4 hidden">
+                <div id="step-2" class="step-container hidden">
+                    <!-- Mobile Number -->
                     <div class="input-group">
-                        <input type="tel" id="mobile" name="mobile" class="custom-input" placeholder="Mobile Number"
-                            maxlength="10" required>
+                        <label class="input-label">MOBILE NUMBER</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                </svg>
+                            </span>
+                            <input type="tel" id="mobile" name="mobile" class="custom-input" placeholder="Mobile Number"
+                                maxlength="10" required>
+                        </div>
                         <span id="mobile-error" class="error-message"></span>
                     </div>
 
+                    <!-- Password -->
                     <div class="input-group">
-                        <input type="password" id="password" class="custom-input" placeholder="Password" required>
+                        <label class="input-label">PASSWORD</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                            </span>
+                            <input type="password" id="password" class="custom-input" placeholder="••••••••" required>
+                        </div>
                         <span id="password-error" class="error-message"></span>
                     </div>
+
+                    <!-- Confirm Password -->
                     <div class="input-group">
-                        <input type="password" id="confirm-password" class="custom-input" placeholder="Confirm Password"
-                            required>
+                        <label class="input-label">CONFIRM PASSWORD</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            </span>
+                            <input type="password" id="confirm-password" class="custom-input" placeholder="••••••••"
+                                required>
+                        </div>
                         <span id="confirm-password-error" class="error-message"></span>
                     </div>
 
-                    <!-- Step 2 Navigation Area -->
-                    <!-- Step 2 Navigation Area -->
-                    <div class="flex justify-end items-center mt-8">
-                        <button type="submit" id="signup-btn" class="arrow-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="w-6 h-6">
+                    <!-- Step 2 Navigation -->
+                    <div class="step-navigation">
+                        <button type="button" id="back-to-step-1-btn" class="back-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                            <span>Back</span>
+                        </button>
+
+                        <button type="submit" id="signup-btn" class="submit-btn">
+                            <span>Create Account</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                stroke="currentColor" width="18" height="18">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>
@@ -214,14 +220,6 @@
             </form>
         </div>
     </main>
-
-    <!-- Footer -->
-    <footer class="section-bg py-8 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto text-center">
-            <div class="text-xl font-bold mb-2 text-[var(--accent-primary)]">Setu</div>
-            <p class="text-sm text-[var(--text-secondary)]">&copy; A Bridge Between Citizens & Authorities.</p>
-        </div>
-    </footer>
 
     <!-- Google Translate Element (Hidden but functional) -->
     <div id="google_translate_element"></div>
@@ -241,3 +239,5 @@
         }
     </script>
 </body>
+
+</html>

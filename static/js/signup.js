@@ -197,6 +197,7 @@ function initSignupProcess() {
     const step1 = document.getElementById('step-1');
     const step2 = document.getElementById('step-2');
     const toStep2Btn = document.getElementById('to-step-2-btn');
+    const backToStep1Btn = document.getElementById('back-to-step-1-btn');
     const signupBtn = document.getElementById('signup-btn');
     const noteContainer = document.getElementById('auth-note-container');
 
@@ -288,14 +289,22 @@ function initSignupProcess() {
         if (isNameValid && isIdValid && isDobValid) {
             step1.classList.add('hidden');
             step2.classList.remove('hidden');
-            if (noteContainer) noteContainer.style.display = 'none'; // Hide note
 
             // Focus on next input
             if (fields.mobile.el) fields.mobile.el.focus();
         }
     });
 
+    // Step 2 -> Step 1 (Back Button)
+    if (backToStep1Btn) {
+        backToStep1Btn.addEventListener('click', () => {
+            step2.classList.add('hidden');
+            step1.classList.remove('hidden');
 
+            // Focus on first input
+            if (fields.fullname.el) fields.fullname.el.focus();
+        });
+    }
 
     // Swipe Feature for Note
     if (noteContainer) {
