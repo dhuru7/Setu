@@ -6,13 +6,16 @@
 /* ============ BASE STYLES ============ */
 body.login-page {
     background: linear-gradient(180deg, #f8f9fc 0%, #e8eaf0 100%);
+    background-attachment: fixed;
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
 }
 
 [data-theme="dark"] body.login-page {
     background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    background-attachment: fixed;
 }
 
 /* ============ LOGIN CONTAINER ============ */
@@ -29,8 +32,10 @@ body.login-page {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
     padding: 1.25rem 1.5rem;
     background: transparent;
+    box-sizing: border-box;
 }
 
 .login-logo {
@@ -196,6 +201,16 @@ body.login-page {
     font-weight: 500;
     color: var(--text-primary);
     outline: none;
+    /* Remove tap highlight and focus rectangle on mobile */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.login-input:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .login-input::placeholder {
@@ -242,8 +257,10 @@ body.login-page {
 /* Make toggle button position relative for absolute positioning of icons */
 .login-toggle-password {
     position: relative;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    flex-shrink: 0;
 }
 
 /* ============ SUBMIT BUTTON ============ */

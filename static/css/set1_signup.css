@@ -10,6 +10,24 @@
     box-sizing: border-box;
 }
 
+/* Remove all default input focus styling */
+input,
+textarea,
+select {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
+}
+
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 html {
     font-size: 16px;
     scroll-behavior: smooth;
@@ -17,8 +35,10 @@ html {
 
 body {
     background: linear-gradient(180deg, #f8f9fc 0%, #e8eaf0 100%) !important;
+    background-attachment: fixed !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -27,6 +47,7 @@ body {
 
 [data-theme="dark"] body {
     background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%) !important;
+    background-attachment: fixed !important;
 }
 
 /* ============ SIGNUP CONTAINER ============ */
@@ -52,37 +73,30 @@ body {
 }
 
 /* ============ HEADER / NAV ============ */
-.nav-header {
+.signup-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
     padding: 1.25rem 1.5rem;
     background: transparent;
-    position: relative;
-    z-index: 100;
+    box-sizing: border-box;
 }
 
-.nav-container {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
+.signup-logo {
     font-size: 1.5rem;
     font-weight: 800;
     color: var(--text-primary);
     text-decoration: none;
     letter-spacing: -0.5px;
+}
+
+.signup-logo:hover {
+    transform: scale(1.05);
     transition: transform 0.2s ease;
 }
 
-.logo:hover {
-    transform: scale(1.05);
-}
-
-.nav-link {
+.signup-nav-link {
     font-size: 0.95rem;
     font-weight: 500;
     color: var(--text-secondary);
@@ -92,7 +106,7 @@ body {
     transition: all 0.2s ease;
 }
 
-.nav-link:hover {
+.signup-nav-link:hover {
     color: var(--text-primary);
     background-color: var(--bg-accent);
 }
@@ -152,7 +166,7 @@ body {
 }
 
 /* ============ HEADING ============ */
-.signup-header {
+.signup-heading {
     text-align: center;
     margin-bottom: 2.5rem;
 }
@@ -254,14 +268,29 @@ body {
 
 .custom-input {
     flex: 1;
-    border: none;
-    background: transparent;
+    border: none !important;
+    background: transparent !important;
     padding: 1rem 0;
     font-size: 1rem;
     font-weight: 500;
     color: var(--text-primary);
-    outline: none;
+    outline: none !important;
     font-family: inherit;
+    /* Remove tap highlight and focus rectangle on mobile */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-shadow: none !important;
+}
+
+.custom-input:focus,
+.custom-input:focus-visible,
+.custom-input:active {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    -webkit-box-shadow: none !important;
 }
 
 .custom-input::placeholder {
@@ -594,8 +623,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 .submit-btn:focus-visible,
 .back-btn:focus-visible,
 .auth-note-link:focus-visible,
-.nav-link:focus-visible,
-.logo:focus-visible {
+.signup-nav-link:focus-visible,
+.signup-logo:focus-visible {
     outline: 2px solid var(--text-primary);
     outline-offset: 2px;
 }
