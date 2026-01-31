@@ -8,6 +8,22 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove focus outlines globally, add custom focus styles where needed */
+button,
+a,
+input,
+select,
+textarea {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus,
+a:focus {
+  outline: none;
 }
 
 body {
@@ -92,10 +108,16 @@ body {
   color: #1a1a1a;
   cursor: pointer;
   transition: background 0.2s;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .lang-btn:hover {
   background: #ebebed;
+}
+
+.lang-btn:active {
+  transform: scale(0.97);
 }
 
 .lang-badge {
@@ -119,12 +141,31 @@ body {
   top: calc(100% + 8px);
   right: 0;
   min-width: 180px;
+  max-height: 300px;
+  overflow-y: auto;
   background: #fff;
   border: 1px solid #eee;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
   z-index: 1000;
+}
+
+/* Custom scrollbar for dropdown */
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
 }
 
 .dropdown-menu.show {
@@ -161,10 +202,17 @@ body {
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .btn-outline:hover {
   border-color: #1a1a1a;
+}
+
+.btn-outline:active {
+  transform: scale(0.97);
+  background: #f5f5f7;
 }
 
 .btn-solid {
@@ -178,11 +226,17 @@ body {
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .btn-solid:hover {
   background: #333;
   border-color: #333;
+}
+
+.btn-solid:active {
+  transform: scale(0.97);
 }
 
 /* Mobile Menu Button */
@@ -198,6 +252,12 @@ body {
   border: none;
   border-radius: 10px;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mobile-menu-btn:active {
+  transform: scale(0.95);
 }
 
 .mobile-menu-btn span {
@@ -681,11 +741,17 @@ body {
   border-radius: 12px;
   text-decoration: none;
   transition: all 0.2s;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .cta-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+}
+
+.cta-btn:active {
+  transform: scale(0.97);
 }
 
 /* ===== FOOTER ===== */
