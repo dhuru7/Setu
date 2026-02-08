@@ -284,14 +284,14 @@ async function executeAISearch() {
     }, 500);
 
     try {
-        await askGemini(queryText, thinkingInterval);
+        await askSetuAI(queryText, thinkingInterval);
     } catch (e) {
         clearInterval(thinkingInterval);
         UI.aiResponseArea.innerHTML = `<p class="text-red-500">Error: ${e.message}</p>`;
     }
 }
 
-async function askGemini(prompt, thinkingInterval) {
+async function askSetuAI(prompt, thinkingInterval) {
     if (typeof puter === 'undefined') {
         clearInterval(thinkingInterval);
         throw new Error("AI Service not ready");
