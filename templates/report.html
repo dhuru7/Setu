@@ -18,14 +18,6 @@
             }
         })();
     </script>
-    <script>
-        (function () {
-            try {
-                const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                document.documentElement.setAttribute('data-theme', theme);
-            } catch (e) { }
-        })();
-    </script>
     <title>Submit Report - Setu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -813,18 +805,28 @@
 
                             const addr = data.address;
 
-                            UI.locationFields.village.value = addr.village || addr.hamlet || addr.suburb || "";
+                            // Populate Full Address (road + building info)
+                            const fullAddr = [addr.road, addr.neighbourhood, addr.suburb].filter(Boolean).join(', ');
+                            UI.locationFields.full.value = fullAddr || data.display_name?.split(',')[0] || "";
+                            reportData.location.full = UI.locationFields.full.value;
+
+                            // Village/Locality - village, hamlet, or suburb
+                            UI.locationFields.village.value = addr.village || addr.hamlet || addr.neighbourhood || "";
                             reportData.location.village = UI.locationFields.village.value;
 
-                            UI.locationFields.subdistrict.value = addr.county || addr.state_district || "";
+                            // Subdistrict/Tehsil/Taluka - In India, this is in 'county' field
+                            UI.locationFields.subdistrict.value = addr.county || "";
                             reportData.location.subdistrict = UI.locationFields.subdistrict.value;
 
-                            UI.locationFields.district.value = addr.state_district || addr.district || "";
+                            // District - In India, Nominatim uses 'state_district' for district
+                            UI.locationFields.district.value = addr.state_district || addr.county || "";
                             reportData.location.district = UI.locationFields.district.value;
 
-                            UI.locationFields.city.value = addr.city || addr.town || addr.municipality || "";
+                            // City/Town
+                            UI.locationFields.city.value = addr.city || addr.town || addr.municipality || addr.village || "";
                             reportData.location.city = UI.locationFields.city.value;
 
+                            // State
                             UI.locationFields.state.value = addr.state || "";
                             reportData.location.state = UI.locationFields.state.value;
 
@@ -834,6 +836,12 @@
                             let cleanPin = rawPin.replace(/\D/g, '');
                             UI.locationFields.pincode.value = cleanPin;
                             reportData.location.pincode = cleanPin;
+
+                            // Store coordinates for map
+                            reportData.location.coordinates = {
+                                lat: pos.coords.latitude,
+                                lng: pos.coords.longitude
+                            };
 
                             document.getElementById('location-btn-text').innerText = "Location Found";
                             document.getElementById('location-success-anim').classList.remove('hidden');

@@ -2,183 +2,229 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script>
         // CRITICAL OPTIMIZATION: Instant Auth Redirect
         (function () {
             if (localStorage.getItem('isLoggedIn') !== 'true') {
                 window.location.replace("login.html");
+            } else {
+                const userType = localStorage.getItem('userType');
+                if (userType !== 'authority') {
+                    window.location.replace("index.html");
+                }
             }
         })();
     </script>
-    <script>
-        (function () {
-            try {
-                const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                document.documentElement.setAttribute('data-theme', theme);
-            } catch (e) { }
-        })();
-    </script>
-    <title>404 Not Found</title>
-    <style>
-        @-webkit-keyframes cursor-blink {
-            0% {
-                opacity: 0;
-            }
+    <title>Map View - Setu Authority</title>
 
-            50% {
-                opacity: 1;
-            }
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-            100% {
-                opacity: 0;
-            }
-        }
-
-        @keyframes cursor-blink {
-            0% {
-                opacity: 0;
-            }
-
-            50% {
-                opacity: 1;
-            }
-
-            100% {
-                opacity: 0;
-            }
-        }
-
-        body {
-            background-color: black;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .four-oh-four {
-            position: relative;
-            top: 0;
-            left: 0;
-            min-height: 100vh;
-            min-width: 100vw;
-            z-index: 2;
-            background-color: black;
-            transition: opacity 300ms ease-out;
-            background-position: center center;
-            background-repeat: no-repeat;
-        }
-
-        .four-oh-four .dJAX_internal {
-            opacity: 0.0;
-        }
-
-        .four-oh-four form,
-        .four-oh-four input {
-            position: fixed;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            background-color: black;
-        }
-
-        .terminal {
-            position: relative;
-            padding: 4rem;
-        }
-
-        .terminal .prompt {
-            color: #1ff042;
-            display: block;
-            font-family: 'Andale Mono', monospace;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.9em;
-            letter-spacing: 0.15em;
-            white-space: pre-wrap;
-            text-shadow: 0 0 2px rgba(31, 240, 66, 0.75);
-            line-height: 1;
-            margin-bottom: 0.75em;
-        }
-
-        .terminal .prompt:before {
-            content: '> ';
-            display: inline-block;
-        }
-
-        .terminal .new-output {
-            display: inline-block;
-        }
-
-        .terminal .new-output:after {
-            display: inline-block;
-            vertical-align: -0.15em;
-            width: 0.75em;
-            height: 1em;
-            margin-left: 5px;
-            background: #1ff042;
-            box-shadow: 1px 1px 1px rgba(31, 240, 66, 0.65), -1px -1px 1px rgba(31, 240, 66, 0.65), 1px -1px 1px rgba(31, 240, 66, 0.65), -1px 1px 1px rgba(31, 240, 66, 0.65);
-            -webkit-animation: cursor-blink 1.25s steps(1) infinite;
-            animation: cursor-blink 1.25s steps(1) infinite;
-            content: '';
-        }
-
-        .four-oh-four-form {
-            opacity: 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
-    </style>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../static/css/set1_authority.css">
 </head>
 
-<body>
-    <div class="container">
-        <form class="four-oh-four-form">
-            <input type="text" class="404-input">
-        </form>
+<body class="authority-dashboard">
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-        <div class="terminal">
-            <p class="prompt">The page you requested cannot be found right meow. This page is under development. Try
-                typing 'Meow Meow'.</p>
-            <p class="prompt output new-output"></p>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="auth-sidebar">
+        <div class="sidebar-header">
+            <a href="authority-dashboard.html" class="sidebar-logo">
+                <span class="logo-text">Setu.</span>
+            </a>
+            <button id="close-sidebar-btn" class="sidebar-close" aria-label="Close menu">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
-    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.5.2/velocity.min.js"></script>
-    <script>
-        var input = $('.404-input');
-        input.focus();
+        <nav class="sidebar-nav">
+            <a href="authority-dashboard.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+                Dashboard
+            </a>
+            <a href="authority-feedback.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+                Feedback
+            </a>
+            <a href="authority-map.html" class="nav-item active">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+                </svg>
+                Map View
+            </a>
+            <a href="authority-action.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                </svg>
+                Action Center
+            </a>
+            <a href="authority-profile.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                My Profile
+            </a>
+        </nav>
 
-        $('.container').on('click', function (e) {
-            input.focus();
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-label">Signed in as</div>
+                <div class="user-name" id="sidebar-user-name">Authority</div>
+                <div class="user-dept" id="sidebar-user-dept">General Dept</div>
+            </div>
+            <button id="logout-btn" class="logout-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                Log Out
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="auth-main">
+        <!-- Header -->
+        <header class="auth-header">
+            <div class="header-left">
+                <button id="open-sidebar-btn" class="menu-btn" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </button>
+                <h1 class="header-title">Map View</h1>
+            </div>
+            <div class="header-right"></div>
+        </header>
+
+        <!-- Content -->
+        <div class="auth-content">
+            <!-- Page Header -->
+            <section class="overview-section">
+                <h2 class="section-title">Issue Map</h2>
+                <p class="section-subtitle">Visualize reported issues across your jurisdiction.</p>
+            </section>
+
+            <!-- Coming Soon Placeholder -->
+            <div class="fade-in-up"
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; background: var(--auth-card-bg); border-radius: 16px; border: 1px solid var(--auth-border); padding: 40px; text-align: center;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"
+                    stroke="currentColor"
+                    style="width: 80px; height: 80px; color: var(--auth-text-muted); margin-bottom: 24px;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+                </svg>
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--auth-text-primary); margin-bottom: 12px;">
+                    Map View Coming Soon</h3>
+                <p
+                    style="font-size: 0.9375rem; color: var(--auth-text-secondary); max-width: 400px; line-height: 1.6; margin-bottom: 24px;">
+                    We're working on integrating an official map with accurate India boundaries. This feature will be
+                    available soon.
+                </p>
+                <a href="authority-dashboard.html"
+                    style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--auth-blue); color: white; border-radius: 10px; font-weight: 600; font-size: 0.875rem; text-decoration: none; transition: opacity 0.2s;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" style="width: 18px; height: 18px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7uvvN3Xlo64pKCkJwfjGXtdqHuHIG0mI",
+            authDomain: "setu-6932f.firebaseapp.com",
+            projectId: "setu-6932f",
+            storageBucket: "setu-6932f.firebasestorage.app",
+            messagingSenderId: "1060012410845",
+            appId: "1:1060012410845:web:13da8942457a2d4ed89834"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const openSidebarBtn = document.getElementById('open-sidebar-btn');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const sidebarUserName = document.getElementById('sidebar-user-name');
+            const sidebarUserDept = document.getElementById('sidebar-user-dept');
+
+            // Sidebar Toggle
+            const openSidebar = () => {
+                sidebar.classList.add('open');
+                sidebarOverlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeSidebar = () => {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('show');
+                document.body.style.overflow = '';
+            };
+
+            openSidebarBtn?.addEventListener('click', openSidebar);
+            closeSidebarBtn?.addEventListener('click', closeSidebar);
+            sidebarOverlay?.addEventListener('click', closeSidebar);
+
+            // Logout
+            logoutBtn?.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userType');
+                    localStorage.removeItem('userProfile');
+                    window.location.replace('login.html');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            });
+
+            // Load cached profile data
+            const loadCachedProfile = () => {
+                const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                if (sidebarUserName) sidebarUserName.textContent = userProfile.fullname || 'Authority';
+                if (sidebarUserDept) sidebarUserDept.textContent = userProfile.department || 'General Dept';
+            };
+
+            loadCachedProfile();
         });
-
-        input.on('keyup', function (e) {
-            $('.new-output').text(input.val());
-        });
-
-        $('.four-oh-four-form').on('submit', function (e) {
-            e.preventDefault();
-            var val = $(this).children($('.404-input')).val().toLowerCase();
-            if (val === 'meow meow') {
-                window.location.href = 'https://youtu.be/L8XbI9aJOXk?si=yURPf74GI_PRyu4q';
-            } else {
-                resetForm();
-            }
-        });
-
-        function resetForm() {
-            var message = "Sorry that command is not recognized.";
-            var input = $('.404-input');
-
-            $('.new-output').removeClass('new-output');
-            input.val('');
-            $('.terminal').append('<p class="prompt">' + message + '</p><p class="prompt output new-output"></p>');
-
-            $('.new-output').velocity('scroll', { duration: 100 });
-        }
     </script>
 </body>
 

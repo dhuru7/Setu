@@ -3,14 +3,13 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script>
         // CRITICAL OPTIMIZATION: Instant Auth Redirect
         (function () {
             if (localStorage.getItem('isLoggedIn') !== 'true') {
                 window.location.replace("login.html");
             } else {
-                // Role Check
                 const userType = localStorage.getItem('userType');
                 if (userType !== 'authority') {
                     window.location.replace("index.html");
@@ -18,666 +17,1169 @@
             }
         })();
     </script>
-    <script>
-        (function () {
-            try {
-                const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                document.documentElement.setAttribute('data-theme', theme);
-            } catch (e) { }
-        })();
-    </script>
-    <title>Authority Profile - Setu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <title>My Profile - Setu Authority</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../static/css/set1_authority.css">
     <style>
-        :root {
-            /* New color theme based on your palette */
-            --bg-primary: #f8f9fa;
-            /* A very light grey */
-            --bg-secondary: #FFFFFF;
-            --bg-secondary-translucent: rgba(255, 255, 255, 0.85);
-            --bg-accent: #fff5eb;
-            /* Very light orange */
-            --text-primary: #1D2228;
-            /* Dark */
-            --text-secondary: #343a40;
-            /* Slightly lighter dark */
-            --text-muted: #6c757d;
-            /* Muted gray */
-            --border-light: #E1E2E2;
-            /* Light Gray */
-            --border-medium: #ced4da;
-            /* Medium Gray */
-            --accent-primary: #FB8122;
-            /* Orange */
-            --accent-primary-hover: #e0721d;
-            /* Darker Orange */
-            --accent-secondary: #1D2228;
-            /* Dark color as secondary accent */
-            --accent-secondary-hover: #343a40;
-            /* Lighter dark */
-            --shadow-light: rgba(29, 34, 40, 0.07);
-            --shadow-medium: rgba(29, 34, 40, 0.12);
-        }
-
-        [data-theme="dark"] {
-            /* New dark theme based on your palette */
-            --bg-primary: #1D2228;
-            /* Dark */
-            --bg-secondary: #252b31;
-            /* Slightly lighter dark */
-            --bg-secondary-translucent: rgba(37, 43, 49, 0.85);
-            --bg-accent: #373d42;
-            /* Even lighter dark for accents */
-            --text-primary: #E1E2E2;
-            /* Light Gray */
-            --text-secondary: #adb5bd;
-            /* Lighter, muted gray */
-            --text-muted: #6c757d;
-            /* Muted gray */
-            --border-light: #373d42;
-            /* Corresponds to bg-accent */
-            --border-medium: #495057;
-            /* A step lighter */
-            --accent-primary: #FB8122;
-            /* Orange */
-            --accent-primary-hover: #fc9344;
-            /* Lighter Orange */
-            --accent-secondary: #E1E2E2;
-            /* Light Gray as secondary accent */
-            --accent-secondary-hover: #ffffff;
-            /* White */
-            --shadow-light: rgba(0, 0, 0, 0.2);
-            --shadow-medium: rgba(0, 0, 0, 0.3);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-secondary);
-        }
-
-        /* Sidebar Styles (UNIFORM WITH DASHBOARD) */
-        .desktop-sidebar {
-            background-color: var(--bg-secondary);
-            border-right: 1px solid var(--border-light);
-            box-shadow: 0 4px 16px var(--shadow-light);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        @media (max-width: 767px) {
-            .desktop-sidebar {
-                transform: translateX(-100%);
-            }
-
-            .desktop-sidebar.open {
-                transform: translateX(0);
-            }
-        }
-
-        .logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-            text-decoration: none;
-        }
-
-        .logo:hover {
-            transform: scale(1.08) rotate(2deg);
-        }
-
-        #animated-name-desktop-sidebar {
-            transition: opacity 0.4s ease-in-out;
-        }
-
-        #animated-name-desktop-sidebar.fade-out {
-            opacity: 0;
-        }
-
-        .desktop-nav-link {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem;
-            width: 100%;
-            border-radius: 0.75rem;
-            color: var(--text-muted);
-            transition: all 0.2s ease-in-out;
-            text-decoration: none;
-        }
-
-        .desktop-nav-text {
-            margin-left: 1rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        .desktop-nav-link:hover {
-            background-color: var(--bg-accent);
-            color: var(--text-primary);
-            transform: scale(1.05);
-        }
-
-        .desktop-nav-link.active {
-            background-color: var(--bg-accent);
-            color: var(--text-primary);
-        }
-
-        .desktop-nav-link.active svg {
-            color: var(--accent-primary);
-        }
-
-        /* Main Content Styles */
-        .main-content {
-            transition: padding-left 0.3s ease-in-out;
-        }
-
-        @media (min-width: 768px) {
-            .main-content {
-                padding-left: 240px;
-                /* Sidebar width + padding - Matches Dashboard w-60 (15rem=240px) */
-            }
-        }
-
-        .header {
-            background-color: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-light);
-            box-shadow: 0 2px 8px var(--shadow-light);
-        }
-
-        .theme-toggle:hover {
-            transform: scale(1.1) rotate(10deg);
-            border-color: var(--accent-primary);
-        }
-
-        .mobile-menu-backdrop {
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        /* =========================================
-           Profile Page Specific Styles
-           ========================================= */
-
-        .profile-wrapper {
-            max-width: 800px;
-            margin: 2rem auto;
-            width: 100%;
-            padding: 0 1rem;
-        }
-
-        /* Header Card */
+        /* Profile Page Specific Styles */
         .profile-header-card {
-            background-color: var(--bg-secondary);
-            border-radius: 1.5rem;
-            padding: 2rem;
+            background: var(--auth-card-bg);
+            border-radius: 20px;
+            padding: 32px 24px;
+            box-shadow: 0 2px 12px var(--auth-shadow);
+            border: 1px solid var(--auth-border);
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            box-shadow: 0 4px 20px var(--shadow-light);
-            border: 1px solid var(--border-light);
-            margin-bottom: 1.5rem;
+            margin-bottom: 24px;
         }
 
         @media (min-width: 640px) {
             .profile-header-card {
                 flex-direction: row;
                 text-align: left;
-                padding: 2.5rem;
-                gap: 2rem;
+                padding: 32px;
+                gap: 24px;
             }
         }
 
         .profile-avatar-container {
             position: relative;
-            width: 120px;
-            height: 120px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
-            border: 4px solid var(--bg-accent);
-            overflow: hidden;
+            background: linear-gradient(135deg, var(--auth-blue-light), var(--auth-purple-light));
+            padding: 4px;
             flex-shrink: 0;
-            box-shadow: 0 8px 16px var(--shadow-light);
         }
 
         .profile-avatar {
             width: 100%;
             height: 100%;
+            border-radius: 50%;
             object-fit: cover;
+            background: var(--auth-card-bg);
         }
 
-        .profile-info h2 {
+        .profile-info {
+            margin-top: 16px;
+        }
+
+        @media (min-width: 640px) {
+            .profile-info {
+                margin-top: 0;
+            }
+        }
+
+        .profile-name {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
+            color: var(--auth-text-primary);
+            margin-bottom: 4px;
         }
 
-        .profile-info p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
+        .profile-role {
+            font-size: 0.9375rem;
+            color: var(--auth-text-secondary);
+            margin-bottom: 8px;
         }
 
-        /* Details List */
+        .profile-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--auth-green);
+        }
+
+        .profile-status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--auth-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Details Grid */
         .details-grid {
             display: grid;
-            gap: 1rem;
+            gap: 16px;
             grid-template-columns: 1fr;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 640px) {
             .details-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
 
         .detail-card {
-            background-color: var(--bg-secondary);
-            border-radius: 1rem;
-            padding: 1.25rem;
+            background: var(--auth-card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px var(--auth-shadow);
+            border: 1px solid var(--auth-border);
             display: flex;
-            align-items: center;
-            border: 1px solid var(--border-light);
-            box-shadow: 0 2px 8px var(--shadow-light);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            align-items: flex-start;
+            gap: 16px;
+            transition: all 0.2s;
         }
 
         .detail-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px var(--shadow-medium);
-            border-color: var(--accent-primary);
+            box-shadow: 0 4px 20px var(--auth-shadow-md);
         }
 
-        .detail-icon-box {
-            width: 3rem;
-            height: 3rem;
-            border-radius: 0.75rem;
-            background-color: var(--bg-accent);
+        .detail-card.editable {
+            cursor: pointer;
+        }
+
+        .detail-card.editable:hover {
+            border-color: var(--auth-blue);
+        }
+
+        .detail-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 1rem;
             flex-shrink: 0;
-            color: var(--accent-primary);
         }
 
-        .detail-icon-box svg {
-            width: 1.5rem;
-            height: 1.5rem;
+        .detail-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .detail-icon.blue {
+            background: var(--auth-blue-light);
+            color: var(--auth-blue);
+        }
+
+        .detail-icon.purple {
+            background: var(--auth-purple-light);
+            color: var(--auth-purple);
+        }
+
+        .detail-icon.orange {
+            background: var(--auth-orange-light);
+            color: var(--auth-orange);
+        }
+
+        .detail-icon.green {
+            background: var(--auth-green-light);
+            color: var(--auth-green);
         }
 
         .detail-content {
-            flex-grow: 1;
-            overflow: hidden;
+            flex: 1;
+            min-width: 0;
         }
 
         .detail-label {
             font-size: 0.75rem;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--text-muted);
-            margin-bottom: 0.25rem;
-            font-weight: 600;
+            color: var(--auth-text-muted);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-label .edit-hint {
+            font-size: 0.625rem;
+            color: var(--auth-blue);
+            text-transform: none;
+            letter-spacing: 0;
         }
 
         .detail-value {
             font-size: 1rem;
             font-weight: 500;
-            color: var(--text-primary);
+            color: var(--auth-text-primary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        .detail-sub {
+            font-size: 0.8125rem;
+            color: var(--auth-text-secondary);
+            margin-top: 4px;
+        }
+
+        .detail-value.placeholder {
+            color: var(--auth-orange);
+        }
+
+        /* Footer Info */
+        .profile-footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--auth-text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--auth-card-bg);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 24px 24px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--auth-text-primary);
+        }
+
+        .modal-subtitle {
+            font-size: 0.875rem;
+            color: var(--auth-text-muted);
+            margin-top: 4px;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--auth-bg);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: var(--auth-text-secondary);
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--auth-border);
+        }
+
+        .modal-close svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--auth-text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .form-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--auth-bg);
+            border: 1px solid var(--auth-border);
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            color: var(--auth-text-primary);
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--auth-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--auth-text-muted);
+        }
+
+        .btn-verify {
+            padding: 12px 16px;
+            background: var(--auth-blue-light);
+            color: var(--auth-blue);
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-verify:hover {
+            background: var(--auth-blue);
+            color: white;
+        }
+
+        .form-feedback {
+            font-size: 0.75rem;
+            margin-top: 6px;
+            min-height: 16px;
+        }
+
+        .form-feedback.success {
+            color: var(--auth-green);
+        }
+
+        .form-feedback.error {
+            color: var(--auth-red);
+        }
+
+        .form-section-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .form-checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .form-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--auth-blue);
+        }
+
+        .form-checkbox-label {
+            font-size: 0.875rem;
+            color: var(--auth-text-primary);
+        }
+
+        .villages-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .village-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--auth-bg);
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            color: var(--auth-text-primary);
+        }
+
+        .village-tag button {
+            background: none;
+            border: none;
+            color: var(--auth-red);
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .modal-footer {
+            padding: 0 24px 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px 20px;
+            background: var(--auth-bg);
+            color: var(--auth-text-secondary);
+            border: 1px solid var(--auth-border);
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: var(--auth-border);
+        }
+
+        .btn-save {
+            flex: 1;
+            padding: 12px 20px;
+            background: var(--auth-blue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-save:hover {
+            background: #2563eb;
+        }
+
+        .btn-save:disabled {
+            background: var(--auth-text-muted);
+            cursor: not-allowed;
+        }
+
+        /* Subsection wrapper */
+        .form-subsection {
+            display: none;
+        }
+
+        .form-subsection.show {
+            display: block;
+        }
     </style>
 </head>
 
-<body class="antialiased">
+<body class="authority-dashboard">
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-    <div id="mobile-menu-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
-    <nav id="sidebar" class="flex flex-col fixed top-0 left-0 h-full w-60 z-50 p-4 desktop-sidebar">
-        <div class="flex-shrink-0 flex justify-between items-center pt-2 pb-8">
-            <a href="authority-dashboard.html" class="logo !text-2xl notranslate">
-                <span id="animated-name-desktop-sidebar">Setu</span>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="auth-sidebar">
+        <div class="sidebar-header">
+            <a href="authority-dashboard.html" class="sidebar-logo">
+                <span class="logo-text">Setu.</span>
             </a>
-            <button id="close-menu-btn" class="md:hidden text-[var(--text-primary)] rounded-full p-1">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+            <button id="close-sidebar-btn" class="sidebar-close" aria-label="Close menu">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
 
-        <div class="flex-grow flex flex-col items-start space-y-2">
-            <a href="authority-dashboard.html" title="Dashboard" class="desktop-nav-link">
-                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke-width="1.5" stroke="currentColor">
+        <nav class="sidebar-nav">
+            <a href="authority-dashboard.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                 </svg>
-                <span class="desktop-nav-text">Dashboard</span>
+                Dashboard
             </a>
-            <a href="authority-complaints.html" title="Complaints" class="desktop-nav-link">
-                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke-width="1.5" stroke="currentColor">
+            <a href="authority-feedback.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
                 </svg>
-                <span class="desktop-nav-text">Complaints</span>
+                Feedback
             </a>
-            <a href="authority-map.html" title="Map View" class="desktop-nav-link">
-                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+            <a href="authority-map.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
                 </svg>
-                <span class="desktop-nav-text">Map View</span>
+                Map View
             </a>
-            <a href="authority-reports.html" title="Reports" class="desktop-nav-link">
-                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke-width="1.5" stroke="currentColor">
+            <a href="authority-action.html" class="nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12" />
+                        d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                 </svg>
-                <span class="desktop-nav-text">Reports</span>
+                Action Center
             </a>
-            <a href="authority-profile.html" title="My Profile" class="desktop-nav-link active">
-                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke-width="1.5" stroke="currentColor">
+            <a href="authority-profile.html" class="nav-item active">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span class="desktop-nav-text">My Profile</span>
+                My Profile
             </a>
-        </div>
+        </nav>
 
-        <div class="mt-auto flex flex-col items-start space-y-2 pb-2">
-            <a href="login.html" class="desktop-nav-link w-full" title="Logout">
-                <svg class="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke-width="1.5" stroke="currentColor">
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-label">Signed in as</div>
+                <div class="user-name" id="sidebar-user-name">Authority</div>
+                <div class="user-dept" id="sidebar-user-dept">General Dept</div>
+            </div>
+            <button id="logout-btn" class="logout-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                 </svg>
-                <span class="desktop-nav-text">Logout</span>
-            </a>
+                Log Out
+            </button>
         </div>
-    </nav>
+    </aside>
 
-    <div class="main-content w-full">
-        <header class="p-4 flex justify-between items-center header">
-            <div class="flex items-center">
-                <button id="open-menu-btn" class="md:hidden mr-4 text-[var(--text-primary)]">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+    <!-- Main Content -->
+    <main class="auth-main">
+        <!-- Header -->
+        <header class="auth-header">
+            <div class="header-left">
+                <button id="open-sidebar-btn" class="menu-btn" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
                 </button>
-                <h1 class="text-lg sm:text-xl font-bold text-[var(--text-primary)]">My Profile</h1>
+                <h1 class="header-title">My Profile</h1>
             </div>
-            <div class="flex items-center space-x-4">
-                <span id="header-profile-dept" class="hidden sm:inline text-sm text-[var(--text-muted)]"></span>
-                <button id="theme-toggle-desktop" class="p-2 rounded-lg bg-[var(--bg-accent)] theme-toggle"
-                    title="Toggle Theme">
-                    <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                        </path>
-                    </svg>
-                    <svg class="w-5 h-5 hidden moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
-                        </path>
-                    </svg>
-                </button>
-            </div>
+            <div class="header-right"></div>
         </header>
 
-        <main class="p-4 sm:p-8">
-            <div class="profile-wrapper">
-                <!-- Profile Header -->
-                <div class="profile-header-card animate-fade-in-up">
-                    <div class="profile-avatar-container">
-                        <img src="" alt="Avatar" class="profile-avatar">
-                    </div>
-                    <div class="profile-info text-center sm:text-left mt-4 sm:mt-0">
-                        <h2 id="profile-name">Loading...</h2>
-                        <p id="profile-role">Authority Representative</p>
-                        <p class="text-xs mt-1 text-[var(--accent-primary)] font-semibold">Active Status • Online</p>
-                    </div>
+        <!-- Content -->
+        <div class="auth-content">
+            <!-- Profile Header Card -->
+            <div class="profile-header-card fade-in-up">
+                <div class="profile-avatar-container">
+                    <img id="profile-avatar" src="" alt="Avatar" class="profile-avatar">
                 </div>
-
-                <!-- Info Cards -->
-                <div class="details-grid">
-                    <!-- ID Card -->
-                    <div class="detail-card">
-                        <div class="detail-icon-box">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
-                            </svg>
-                        </div>
-                        <div class="detail-content">
-                            <div class="detail-label">Employee ID</div>
-                            <div class="detail-value" id="profile-id">...</div>
-                        </div>
-                    </div>
-
-                    <!-- Department -->
-                    <div class="detail-card">
-                        <div class="detail-icon-box">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                            </svg>
-                        </div>
-                        <div class="detail-content">
-                            <div class="detail-label">Department</div>
-                            <div class="detail-value" id="profile-dept">...</div>
-                        </div>
-                    </div>
-
-                    <!-- Email -->
-                    <div class="detail-card hover:border-[var(--accent-primary)] cursor-pointer" id="email-card"
-                        title="Click to edit">
-                        <div class="detail-icon-box">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                            </svg>
-                        </div>
-                        <div class="detail-content">
-                            <div class="detail-label">Email Address <span
-                                    class="text-[10px] ml-2 text-[var(--accent-primary)]">(edit)</span></div>
-                            <div class="detail-value" id="profile-email">...</div>
-                        </div>
-                    </div>
-
-                    <!-- Jurisdiction -->
-                    <div class="detail-card hover:border-[var(--accent-primary)] cursor-pointer" id="jurisdiction-card"
-                        title="Click to edit">
-                        <div class="detail-icon-box">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
-                            </svg>
-                        </div>
-                        <div class="detail-content">
-                            <div class="detail-label">Jurisdiction <span
-                                    class="text-[10px] ml-2 text-[var(--accent-primary)]">(edit)</span></div>
-                            <div class="detail-value" id="profile-jurisdiction">Loading...</div>
-                            <div class="text-xs text-[var(--text-muted)] mt-1" id="profile-jurisdiction-detail"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-8 text-center text-sm text-[var(--text-muted)]">
-                    <p>Last login: Just now</p>
+                <div class="profile-info">
+                    <h2 class="profile-name" id="profile-name">Loading...</h2>
+                    <p class="profile-role" id="profile-role">Authority Representative</p>
+                    <span class="profile-status">Active • Online</span>
                 </div>
             </div>
-        </main>
-    </div>
 
-    <!-- Jurisdiction Modal -->
-    <div id="jurisdiction-modal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title"
-        role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
-                id="jurisdiction-backdrop"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div
-                class="inline-block align-bottom bg-[var(--bg-secondary)] rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
-                <div class="bg-[var(--bg-secondary)] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <h3 class="text-lg leading-6 font-medium text-[var(--text-primary)]" id="modal-title">Set
-                                Jurisdiction</h3>
-                            <div class="mt-4 space-y-4">
-                                <!-- State -->
-                                <div>
-                                    <label for="input-state"
-                                        class="block text-sm font-medium text-[var(--text-muted)]">State</label>
-                                    <div class="flex mt-1">
-                                        <input type="text" id="input-state" placeholder="Enter State e.g. Maharashtra"
-                                            class="flex-1 p-2 border border-[var(--border-medium)] rounded-l-md bg-[var(--bg-primary)] text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--accent-primary)] focus:outline-none">
-                                        <button id="btn-verify-state"
-                                            class="px-4 py-2 bg-[var(--bg-accent)] text-[var(--accent-primary)] rounded-r-md text-sm font-medium hover:bg-opacity-80">Verify</button>
-                                    </div>
-                                    <p id="feedback-state" class="text-xs mt-1 h-4"></p>
-                                </div>
-
-                                <!-- District -->
-                                <div id="container-district" class="opacity-50 pointer-events-none transition-opacity">
-                                    <label for="input-district"
-                                        class="block text-sm font-medium text-[var(--text-muted)]">District</label>
-                                    <div class="flex mt-1">
-                                        <input type="text" id="input-district" placeholder="Enter District"
-                                            class="flex-1 p-2 border border-[var(--border-medium)] rounded-l-md bg-[var(--bg-primary)] text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--accent-primary)] focus:outline-none">
-                                        <button id="btn-verify-district"
-                                            class="px-4 py-2 bg-[var(--bg-accent)] text-[var(--accent-primary)] rounded-r-md text-sm font-medium hover:bg-opacity-80">Verify</button>
-                                    </div>
-                                    <p id="feedback-district" class="text-xs mt-1 h-4"></p>
-                                </div>
-
-                                <!-- Sub-District (Optional) -->
-                                <div id="container-subdistrict"
-                                    class="opacity-50 pointer-events-none transition-opacity">
-                                    <div class="flex items-center mb-2">
-                                        <input type="checkbox" id="check-subdistrict"
-                                            class="h-4 w-4 text-[var(--accent-primary)] border-[var(--border-medium)] rounded">
-                                        <label for="check-subdistrict"
-                                            class="ml-2 block text-sm text-[var(--text-primary)]">Add Sub-district
-                                            (Tehsil/Taluka)</label>
-                                    </div>
-                                    <div id="wrapper-subdistrict" class="hidden">
-                                        <div class="flex mt-1">
-                                            <input type="text" id="input-subdistrict" placeholder="Enter Sub-District"
-                                                class="flex-1 p-2 border border-[var(--border-medium)] rounded-l-md bg-[var(--bg-primary)] text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--accent-primary)] focus:outline-none">
-                                            <button id="btn-verify-subdistrict"
-                                                class="px-4 py-2 bg-[var(--bg-accent)] text-[var(--accent-primary)] rounded-r-md text-sm font-medium hover:bg-opacity-80">Verify</button>
-                                        </div>
-                                        <p id="feedback-subdistrict" class="text-xs mt-1 h-4"></p>
-                                    </div>
-                                </div>
-
-                                <!-- Villages (Optional) -->
-                                <div id="container-village" class="opacity-50 pointer-events-none transition-opacity">
-                                    <div class="flex items-center mb-2">
-                                        <input type="checkbox" id="check-village"
-                                            class="h-4 w-4 text-[var(--accent-primary)] border-[var(--border-medium)] rounded">
-                                        <label for="check-village"
-                                            class="ml-2 block text-sm text-[var(--text-primary)]">Specific Villages
-                                            Only</label>
-                                    </div>
-                                    <div id="wrapper-village" class="hidden">
-                                        <div class="flex mt-1">
-                                            <input type="text" id="input-village" placeholder="Enter Village Name"
-                                                class="flex-1 p-2 border border-[var(--border-medium)] rounded-l-md bg-[var(--bg-primary)] text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--accent-primary)] focus:outline-none">
-                                            <button id="btn-add-village"
-                                                class="px-4 py-2 bg-[var(--bg-accent)] text-[var(--accent-primary)] rounded-r-md text-sm font-medium hover:bg-opacity-80">Add</button>
-                                        </div>
-                                        <div id="list-villages" class="mt-2 flex flex-wrap gap-2 text-sm"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Details Grid -->
+            <div class="details-grid">
+                <!-- Employee ID -->
+                <div class="detail-card fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="detail-icon blue">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
+                        </svg>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Employee ID</div>
+                        <div class="detail-value" id="profile-id">...</div>
                     </div>
                 </div>
-                <div class="bg-[var(--bg-primary)] px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" id="btn-save-jurisdiction"
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[var(--accent-primary)] text-base font-medium text-white hover:bg-[var(--accent-primary-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-primary)] sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-                        disabled>
-                        Save Jurisdiction
-                    </button>
-                    <button type="button" id="btn-close-modal"
-                        class="mt-3 w-full inline-flex justify-center rounded-md border border-[var(--border-medium)] shadow-sm px-4 py-2 bg-[var(--bg-secondary)] text-base font-medium text-[var(--text-muted)] hover:bg-[var(--bg-accent)] focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Cancel
-                    </button>
+
+                <!-- Department -->
+                <div class="detail-card fade-in-up" style="animation-delay: 0.15s;">
+                    <div class="detail-icon purple">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                        </svg>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Department</div>
+                        <div class="detail-value" id="profile-dept">...</div>
+                    </div>
                 </div>
+
+                <!-- Email (Editable) -->
+                <div class="detail-card editable fade-in-up" id="email-card" style="animation-delay: 0.2s;">
+                    <div class="detail-icon orange">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Email Address <span class="edit-hint">(tap to edit)</span></div>
+                        <div class="detail-value" id="profile-email">...</div>
+                    </div>
+                </div>
+
+                <!-- Jurisdiction (Editable) -->
+                <div class="detail-card editable fade-in-up" id="jurisdiction-card" style="animation-delay: 0.25s;">
+                    <div class="detail-icon green">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        </svg>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Jurisdiction <span class="edit-hint">(tap to edit)</span></div>
+                        <div class="detail-value" id="profile-jurisdiction">Not Set</div>
+                        <div class="detail-sub" id="profile-jurisdiction-detail">Tap to configure</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="profile-footer fade-in-up" style="animation-delay: 0.3s;">
+                <p>Last login: Just now</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Jurisdiction Modal -->
+    <div id="jurisdiction-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title">Set Jurisdiction</h3>
+                    <p class="modal-subtitle">Configure your area of responsibility</p>
+                </div>
+                <button id="modal-close-btn" class="modal-close">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- State -->
+                <div class="form-group">
+                    <label class="form-label">State</label>
+                    <div class="form-input-group">
+                        <input type="text" id="input-state" class="form-input" placeholder="e.g. Maharashtra">
+                        <button type="button" id="btn-verify-state" class="btn-verify">Verify</button>
+                    </div>
+                    <p id="feedback-state" class="form-feedback"></p>
+                </div>
+
+                <!-- District -->
+                <div class="form-group form-section-disabled" id="container-district">
+                    <label class="form-label">District</label>
+                    <div class="form-input-group">
+                        <input type="text" id="input-district" class="form-input" placeholder="e.g. Pune">
+                        <button type="button" id="btn-verify-district" class="btn-verify">Verify</button>
+                    </div>
+                    <p id="feedback-district" class="form-feedback"></p>
+                </div>
+
+                <!-- Sub-district (Optional) -->
+                <div class="form-group form-section-disabled" id="container-subdistrict">
+                    <div class="form-checkbox-group">
+                        <input type="checkbox" id="check-subdistrict" class="form-checkbox">
+                        <label for="check-subdistrict" class="form-checkbox-label">Add Sub-district
+                            (Tehsil/Taluka)</label>
+                    </div>
+                    <div id="wrapper-subdistrict" class="form-subsection">
+                        <div class="form-input-group">
+                            <input type="text" id="input-subdistrict" class="form-input" placeholder="e.g. Haveli">
+                            <button type="button" id="btn-verify-subdistrict" class="btn-verify">Verify</button>
+                        </div>
+                        <p id="feedback-subdistrict" class="form-feedback"></p>
+                    </div>
+                </div>
+
+                <!-- Villages (Optional) -->
+                <div class="form-group form-section-disabled" id="container-village">
+                    <div class="form-checkbox-group">
+                        <input type="checkbox" id="check-village" class="form-checkbox">
+                        <label for="check-village" class="form-checkbox-label">Specific Villages Only</label>
+                    </div>
+                    <div id="wrapper-village" class="form-subsection">
+                        <div class="form-input-group">
+                            <input type="text" id="input-village" class="form-input" placeholder="Enter village name">
+                            <button type="button" id="btn-add-village" class="btn-verify">Add</button>
+                        </div>
+                        <div id="list-villages" class="villages-list"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btn-cancel-modal" class="btn-cancel">Cancel</button>
+                <button type="button" id="btn-save-jurisdiction" class="btn-save" disabled>Save Jurisdiction</button>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script type="module" src="../static/js/authority-profile.js"></script>
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7uvvN3Xlo64pKCkJwfjGXtdqHuHIG0mI",
+            authDomain: "setu-6932f.firebaseapp.com",
+            projectId: "setu-6932f",
+            storageBucket: "setu-6932f.firebasestorage.app",
+            messagingSenderId: "1060012410845",
+            appId: "1:1060012410845:web:13da8942457a2d4ed89834"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserUid = null;
+
         document.addEventListener('DOMContentLoaded', () => {
-            const UI = {
-                themeToggles: [document.getElementById('theme-toggle-desktop')],
-                sunIcons: document.querySelectorAll('.sun-icon'),
-                moonIcons: document.querySelectorAll('.moon-icon'),
-                animatedNameDesktopSidebar: document.getElementById('animated-name-desktop-sidebar'),
-                sidebar: document.getElementById('sidebar'),
-                openMenuBtn: document.getElementById('open-menu-btn'),
-                closeMenuBtn: document.getElementById('close-menu-btn'),
-                backdrop: document.getElementById('mobile-menu-backdrop'),
+            // DOM Elements
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const openSidebarBtn = document.getElementById('open-sidebar-btn');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const sidebarUserName = document.getElementById('sidebar-user-name');
+            const sidebarUserDept = document.getElementById('sidebar-user-dept');
+
+            // Profile elements
+            const profileName = document.getElementById('profile-name');
+            const profileId = document.getElementById('profile-id');
+            const profileDept = document.getElementById('profile-dept');
+            const profileEmail = document.getElementById('profile-email');
+            const profileAvatar = document.getElementById('profile-avatar');
+            const profileJurisdiction = document.getElementById('profile-jurisdiction');
+            const profileJurisdictionDetail = document.getElementById('profile-jurisdiction-detail');
+
+            // Modal elements
+            const jurisdictionModal = document.getElementById('jurisdiction-modal');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const cancelModalBtn = document.getElementById('btn-cancel-modal');
+            const saveJurisdictionBtn = document.getElementById('btn-save-jurisdiction');
+            const emailCard = document.getElementById('email-card');
+            const jurisdictionCard = document.getElementById('jurisdiction-card');
+
+            // Sidebar Toggle
+            const openSidebar = () => {
+                sidebar.classList.add('open');
+                sidebarOverlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
             };
 
-            const applyTheme = t => { const isDark = t === 'dark'; document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light'); UI.sunIcons.forEach(i => i.classList.toggle('hidden', isDark)); UI.moonIcons.forEach(i => i.classList.toggle('hidden', !isDark)); };
-            const setupTheme = () => { const i = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); applyTheme(i); UI.themeToggles.forEach(btn => btn.addEventListener('click', () => { const n = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', n); applyTheme(n); })); };
-
-            const setupLogoAnimation = () => {
-                const names = ['Setu', 'सेतु', 'সেতু', 'सेतू', 'સેતુ', 'ಸೇತು'];
-                let currentIndex = 0;
-                const logoElement = UI.animatedNameDesktopSidebar;
-                if (!logoElement) return;
-                setInterval(() => {
-                    logoElement.classList.add('fade-out');
-                    setTimeout(() => {
-                        currentIndex = (currentIndex + 1) % names.length;
-                        logoElement.textContent = names[currentIndex];
-                        logoElement.classList.remove('fade-out');
-                    }, 400);
-                }, 4000);
+            const closeSidebar = () => {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('show');
+                document.body.style.overflow = '';
             };
 
-            // Mobile Menu Toggle
-            const openMenu = () => {
-                UI.sidebar.classList.add('open');
-                UI.backdrop.classList.remove('hidden');
-            };
-            const closeMenu = () => {
-                UI.sidebar.classList.remove('open');
-                UI.backdrop.classList.add('hidden');
+            openSidebarBtn?.addEventListener('click', openSidebar);
+            closeSidebarBtn?.addEventListener('click', closeSidebar);
+            sidebarOverlay?.addEventListener('click', closeSidebar);
+
+            // Logout
+            logoutBtn?.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userType');
+                    localStorage.removeItem('userProfile');
+                    window.location.replace('login.html');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            });
+
+            // Load cached profile data
+            const loadCachedProfile = () => {
+                const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                if (sidebarUserName) sidebarUserName.textContent = userProfile.fullname || 'Authority';
+                if (sidebarUserDept) sidebarUserDept.textContent = userProfile.department || 'General Dept';
+                if (profileName) profileName.textContent = userProfile.fullname || 'Loading...';
             };
 
-            UI.openMenuBtn.addEventListener('click', openMenu);
-            UI.closeMenuBtn.addEventListener('click', closeMenu);
-            UI.backdrop.addEventListener('click', closeMenu);
+            // Load profile data from Firebase
+            const loadProfileData = async (uid) => {
+                try {
+                    const docRef = doc(db, "users", uid);
+                    const docSnap = await getDoc(docRef);
 
-            setupTheme();
-            setupLogoAnimation();
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+
+                        // Name
+                        if (profileName) profileName.textContent = data.fullname || "Authority User";
+
+                        // ID
+                        if (profileId) profileId.textContent = data.idCard || "N/A";
+
+                        // Department
+                        let dept = data.department;
+                        if (!dept && data.idCard) {
+                            const prefix = data.idCard.substring(0, 4).toUpperCase();
+                            if (prefix === 'GPWD') dept = 'Public Works Department (PWD)';
+                            else if (prefix === 'GSWM') dept = 'Solid Waste Management (SWM)';
+                            else if (prefix === 'GDJB') dept = 'Water Supply & Sewerage Board';
+                            else if (prefix === 'GOED') dept = 'Electrical Department';
+                            else dept = 'General Administration';
+
+                            try {
+                                await updateDoc(docRef, { department: dept });
+                            } catch (e) { console.error("Auto-update department failed", e); }
+                        }
+                        if (profileDept) profileDept.textContent = dept || "General Administration";
+                        if (sidebarUserName) sidebarUserName.textContent = data.fullname || 'Authority';
+                        if (sidebarUserDept) sidebarUserDept.textContent = dept || 'General Dept';
+
+                        // Email
+                        const displayEmail = (data.email && data.email.includes('@') && !data.email.includes('placeholder.com'))
+                            ? data.email : "Add Official Email";
+                        if (profileEmail) {
+                            profileEmail.textContent = displayEmail;
+                            if (displayEmail === "Add Official Email") {
+                                profileEmail.classList.add('placeholder');
+                            } else {
+                                profileEmail.classList.remove('placeholder');
+                            }
+                        }
+
+                        // Avatar
+                        if (profileAvatar) {
+                            profileAvatar.src = data.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.fullname || 'A')}&background=3b82f6&color=fff&size=200`;
+                        }
+
+                        // Jurisdiction
+                        if (data.jurisdiction) {
+                            const j = data.jurisdiction;
+                            let mainText = j.district || '';
+                            if (j.state) mainText += `, ${j.state}`;
+
+                            let subText = "";
+                            if (j.subDistrict) subText += `Sub-district: ${j.subDistrict}`;
+                            if (j.villages && j.villages.length > 0) {
+                                subText += ` • Villages: ${j.villages.length} assigned`;
+                            } else if (j.subDistrict) {
+                                subText += " • All Villages";
+                            } else {
+                                subText = "Entire District Jurisdiction";
+                            }
+
+                            if (profileJurisdiction) profileJurisdiction.textContent = mainText || 'Not Set';
+                            if (profileJurisdictionDetail) profileJurisdictionDetail.textContent = subText || 'Tap to configure';
+                        } else {
+                            if (profileJurisdiction) profileJurisdiction.textContent = "Not Set";
+                            if (profileJurisdictionDetail) profileJurisdictionDetail.textContent = "Tap to configure";
+                        }
+
+                        // Cache for quick access
+                        localStorage.setItem('userProfile', JSON.stringify({
+                            fullname: data.fullname,
+                            department: dept,
+                            email: data.email
+                        }));
+                    }
+                } catch (e) {
+                    console.error("Error loading profile:", e);
+                }
+            };
+
+            // Email Edit
+            emailCard?.addEventListener('click', () => {
+                const currentEmail = profileEmail.textContent === "Add Official Email" ? "" : profileEmail.textContent;
+                const newEmail = prompt("Update Official Email Address:", currentEmail);
+
+                if (newEmail !== null && newEmail.trim() !== "") {
+                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+                        updateEmail(newEmail);
+                    } else {
+                        alert("Please enter a valid email address.");
+                    }
+                }
+            });
+
+            const updateEmail = async (newEmail) => {
+                if (!currentUserUid) return;
+                try {
+                    await updateDoc(doc(db, "users", currentUserUid), { email: newEmail });
+                    profileEmail.textContent = newEmail;
+                    profileEmail.classList.remove('placeholder');
+                    alert("Email updated successfully!");
+                } catch (e) {
+                    console.error("Update failed", e);
+                    alert("Failed to update email.");
+                }
+            };
+
+            // Jurisdiction Modal Logic
+            let tempJurisdiction = { state: null, district: null, subDistrict: null, villages: [] };
+
+            const openModal = () => {
+                jurisdictionModal.classList.add('show');
+                resetModal();
+            };
+
+            const closeModal = () => {
+                jurisdictionModal.classList.remove('show');
+            };
+
+            jurisdictionCard?.addEventListener('click', openModal);
+            modalCloseBtn?.addEventListener('click', closeModal);
+            cancelModalBtn?.addEventListener('click', closeModal);
+            jurisdictionModal?.addEventListener('click', (e) => {
+                if (e.target === jurisdictionModal) closeModal();
+            });
+
+            // Verify location with OSM
+            const verifyLocation = async (query) => {
+                try {
+                    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&country=India&format=json&addressdetails=1`;
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        return { valid: true, name: data[0].name, display: data[0].display_name };
+                    }
+                    return { valid: false };
+                } catch (e) {
+                    console.error(e);
+                    return { valid: false };
+                }
+            };
+
+            // State verification
+            const inputState = document.getElementById('input-state');
+            const btnVerifyState = document.getElementById('btn-verify-state');
+            const feedbackState = document.getElementById('feedback-state');
+            const containerDistrict = document.getElementById('container-district');
+
+            btnVerifyState?.addEventListener('click', async () => {
+                const val = inputState.value.trim();
+                if (!val) return;
+
+                btnVerifyState.textContent = "...";
+                const res = await verifyLocation(val);
+                btnVerifyState.textContent = "Verify";
+
+                const finalVal = res.valid ? res.name : val;
+                tempJurisdiction.state = finalVal;
+                inputState.value = finalVal;
+
+                feedbackState.textContent = `✓ ${res.valid ? 'Verified' : 'Accepted'}: ${finalVal}`;
+                feedbackState.className = 'form-feedback success';
+
+                containerDistrict.classList.remove('form-section-disabled');
+                document.getElementById('input-district').focus();
+            });
+
+            // District verification
+            const inputDistrict = document.getElementById('input-district');
+            const btnVerifyDistrict = document.getElementById('btn-verify-district');
+            const feedbackDistrict = document.getElementById('feedback-district');
+            const containerSubdistrict = document.getElementById('container-subdistrict');
+            const containerVillage = document.getElementById('container-village');
+
+            btnVerifyDistrict?.addEventListener('click', async () => {
+                const val = inputDistrict.value.trim();
+                if (!val) return;
+
+                btnVerifyDistrict.textContent = "...";
+                const query = `${val} District, ${tempJurisdiction.state}`;
+                const res = await verifyLocation(query);
+                btnVerifyDistrict.textContent = "Verify";
+
+                const finalVal = res.valid ? res.name : val;
+                tempJurisdiction.district = finalVal;
+                inputDistrict.value = finalVal;
+
+                feedbackDistrict.textContent = `✓ ${res.valid ? 'Verified' : 'Accepted'}: ${finalVal}`;
+                feedbackDistrict.className = 'form-feedback success';
+
+                containerSubdistrict.classList.remove('form-section-disabled');
+                containerVillage.classList.remove('form-section-disabled');
+                saveJurisdictionBtn.disabled = false;
+            });
+
+            // Sub-district toggle
+            const checkSubdistrict = document.getElementById('check-subdistrict');
+            const wrapperSubdistrict = document.getElementById('wrapper-subdistrict');
+
+            checkSubdistrict?.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    wrapperSubdistrict.classList.add('show');
+                } else {
+                    wrapperSubdistrict.classList.remove('show');
+                    tempJurisdiction.subDistrict = null;
+                }
+            });
+
+            // Sub-district verification
+            const inputSubdistrict = document.getElementById('input-subdistrict');
+            const btnVerifySubdistrict = document.getElementById('btn-verify-subdistrict');
+            const feedbackSubdistrict = document.getElementById('feedback-subdistrict');
+
+            btnVerifySubdistrict?.addEventListener('click', async () => {
+                const val = inputSubdistrict.value.trim();
+                if (!val) return;
+
+                btnVerifySubdistrict.textContent = "...";
+                const query = `${val}, ${tempJurisdiction.district}, ${tempJurisdiction.state}`;
+                const res = await verifyLocation(query);
+                btnVerifySubdistrict.textContent = "Verify";
+
+                const finalVal = res.valid ? res.name : val;
+                tempJurisdiction.subDistrict = finalVal;
+                inputSubdistrict.value = finalVal;
+
+                feedbackSubdistrict.textContent = `✓ ${res.valid ? 'Verified' : 'Accepted'}: ${finalVal}`;
+                feedbackSubdistrict.className = 'form-feedback success';
+            });
+
+            // Village toggle
+            const checkVillage = document.getElementById('check-village');
+            const wrapperVillage = document.getElementById('wrapper-village');
+
+            checkVillage?.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    wrapperVillage.classList.add('show');
+                } else {
+                    wrapperVillage.classList.remove('show');
+                    tempJurisdiction.villages = [];
+                    renderVillages();
+                }
+            });
+
+            // Add village
+            const inputVillage = document.getElementById('input-village');
+            const btnAddVillage = document.getElementById('btn-add-village');
+            const listVillages = document.getElementById('list-villages');
+
+            btnAddVillage?.addEventListener('click', () => {
+                const val = inputVillage.value.trim();
+                if (!val) return;
+
+                if (!tempJurisdiction.villages.includes(val)) {
+                    tempJurisdiction.villages.push(val);
+                    renderVillages();
+                    inputVillage.value = '';
+                }
+            });
+
+            const renderVillages = () => {
+                listVillages.innerHTML = tempJurisdiction.villages.map(v =>
+                    `<span class="village-tag">${v} <button type="button" data-village="${v}">×</button></span>`
+                ).join('');
+
+                listVillages.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const village = btn.dataset.village;
+                        tempJurisdiction.villages = tempJurisdiction.villages.filter(v => v !== village);
+                        renderVillages();
+                    });
+                });
+            };
+
+            const resetModal = () => {
+                tempJurisdiction = { state: null, district: null, subDistrict: null, villages: [] };
+                inputState.value = '';
+                inputDistrict.value = '';
+                inputSubdistrict.value = '';
+                inputVillage.value = '';
+                checkSubdistrict.checked = false;
+                checkVillage.checked = false;
+                wrapperSubdistrict.classList.remove('show');
+                wrapperVillage.classList.remove('show');
+                feedbackState.textContent = '';
+                feedbackDistrict.textContent = '';
+                feedbackSubdistrict.textContent = '';
+                listVillages.innerHTML = '';
+                containerDistrict.classList.add('form-section-disabled');
+                containerSubdistrict.classList.add('form-section-disabled');
+                containerVillage.classList.add('form-section-disabled');
+                saveJurisdictionBtn.disabled = true;
+            };
+
+            // Save jurisdiction
+            saveJurisdictionBtn?.addEventListener('click', async () => {
+                if (!currentUserUid || !tempJurisdiction.district) return;
+
+                saveJurisdictionBtn.textContent = "Saving...";
+
+                try {
+                    await updateDoc(doc(db, "users", currentUserUid), { jurisdiction: tempJurisdiction });
+                    alert("Jurisdiction Updated!");
+                    closeModal();
+                    loadProfileData(currentUserUid);
+                } catch (e) {
+                    console.error(e);
+                    alert("Failed to save.");
+                } finally {
+                    saveJurisdictionBtn.textContent = "Save Jurisdiction";
+                }
+            });
+
+            // Initialize
+            loadCachedProfile();
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUserUid = user.uid;
+                    loadProfileData(user.uid);
+                } else {
+                    window.location.replace('login.html');
+                }
+            });
         });
     </script>
-    <script type="module" src="../static/js/logout.js"></script>
 </body>
 
 </html>

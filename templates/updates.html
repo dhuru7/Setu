@@ -17,14 +17,6 @@
             }
         })();
     </script>
-    <script>
-        (function () {
-            try {
-                const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                document.documentElement.setAttribute('data-theme', theme);
-            } catch (e) { }
-        })();
-    </script>
     <title>Updates - Setu</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="../static/css/set1_home.css">
@@ -40,18 +32,6 @@
             --update-orange-light: #fff7ed;
             --update-purple: #8b5cf6;
             --update-purple-light: #f5f3ff;
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: #111111;
-            --bg-secondary: #1a1a1a;
-            --text-primary: #ffffff;
-            --text-muted: #888888;
-            --border-light: #333333;
-            --update-blue-light: rgba(59, 130, 246, 0.15);
-            --update-green-light: rgba(34, 197, 94, 0.15);
-            --update-orange-light: rgba(249, 115, 22, 0.15);
-            --update-purple-light: rgba(139, 92, 246, 0.15);
         }
 
         .page-container {
