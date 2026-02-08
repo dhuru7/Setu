@@ -19,31 +19,6 @@ const db = getFirestore(app);
 
 // --- 2. HEADER & UI LOGIC ---
 
-// Theme Logic
-function setupTheme() {
-    const applyTheme = (t) => {
-        const isDark = t === 'dark';
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-        document.querySelectorAll('.sun-icon').forEach(i => i.classList.toggle('hidden', isDark));
-        document.querySelectorAll('.moon-icon').forEach(i => i.classList.toggle('hidden', !isDark));
-    };
-
-    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    applyTheme(savedTheme);
-
-    const toggleBtn = document.getElementById('theme-toggle');
-    const mobileToggleBtn = document.getElementById('mobile-theme-toggle');
-
-    [toggleBtn, mobileToggleBtn].forEach(btn => {
-        if (!btn) return;
-        btn.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', next);
-            applyTheme(next);
-        });
-    });
-}
 
 // Logo Animation Logic
 function setupLogoAnimation() {
@@ -184,7 +159,6 @@ function setupLanguage() {
 
 // --- 3. PAGE INIT ---
 window.addEventListener('load', () => {
-    setupTheme();
     setupLogoAnimation();
     setupLanguage();
     initSignupProcess();

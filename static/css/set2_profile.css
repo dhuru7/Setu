@@ -32,12 +32,6 @@
     z-index: 0;
 }
 
-[data-theme="dark"] .profile-gradient-bg {
-    background: linear-gradient(180deg,
-            rgba(30, 40, 60, 0.5) 0%,
-            transparent 100%);
-}
-
 /* Details Card - Full Width Mobile */
 .profile-details-card {
     margin: 0;
@@ -299,48 +293,6 @@
     .detail-label {
         font-size: 0.8rem;
     }
-}
-
-/* ==========================================
-   Dark Theme Adjustments
-   ========================================== */
-[data-theme="dark"] .profile-image-container {
-    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
-    border-color: var(--bg-secondary);
-}
-
-[data-theme="dark"] .avatar-edit-badge {
-    background: var(--bg-primary);
-    border-color: var(--bg-secondary);
-}
-
-[data-theme="dark"] .avatar-edit-badge svg {
-    color: var(--text-secondary);
-}
-
-[data-theme="dark"] .profile-details-card {
-    border-color: var(--border-medium);
-}
-
-[data-theme="dark"] .detail-icon-wrapper,
-[data-theme="dark"] .detail-icon-label {
-    background: var(--bg-accent);
-    border-color: var(--border-medium);
-}
-
-[data-theme="dark"] .report-status-badge.pending {
-    background: #422006;
-    color: #fcd34d;
-}
-
-[data-theme="dark"] .report-status-badge.fixed {
-    background: #064e3b;
-    color: #6ee7b7;
-}
-
-[data-theme="dark"] .report-status-badge.in-progress {
-    background: #1e3a5f;
-    color: #93c5fd;
 }
 
 /* ==========================================

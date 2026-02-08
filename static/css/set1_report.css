@@ -22,22 +22,6 @@
     --report-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-[data-theme="dark"] {
-    --report-bg: #0f0f0f;
-    --report-card-bg: #1a1a1a;
-    --report-text-primary: #fafafa;
-    --report-text-secondary: #a1a1aa;
-    --report-text-muted: #71717a;
-    --report-border-light: #27272a;
-    --report-border-medium: #3f3f46;
-    --report-accent: #fafafa;
-    --report-accent-success: #22c55e;
-    --report-accent-info: #60a5fa;
-    --report-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-    --report-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
-    --report-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35);
-}
-
 /* -------------------------
    Reset & Base
    ------------------------- */
@@ -70,13 +54,6 @@ body.report-page {
     background:
         radial-gradient(ellipse at 80% 0%, rgba(209, 213, 219, 0.5) 0%, transparent 50%),
         radial-gradient(ellipse at 20% 100%, rgba(209, 213, 219, 0.4) 0%, transparent 50%);
-    background-color: var(--report-bg);
-}
-
-[data-theme="dark"] .report-bg-gradient {
-    background:
-        radial-gradient(ellipse at 80% 0%, rgba(50, 50, 60, 0.4) 0%, transparent 50%),
-        radial-gradient(ellipse at 20% 100%, rgba(50, 50, 60, 0.3) 0%, transparent 50%);
     background-color: var(--report-bg);
 }
 
@@ -356,10 +333,6 @@ body.report-page {
     box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 
-[data-theme="dark"] .report-form-input:focus {
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
-}
-
 /* Textarea */
 .report-textarea {
     min-height: 6rem;
@@ -520,18 +493,9 @@ body.report-page {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-[data-theme="dark"] .location-detect-btn {
-    background: #fafafa;
-    color: #1a1a1a;
-}
-
 .location-detect-btn:hover {
     background: #2d2d2d;
     transform: scale(1.01);
-}
-
-[data-theme="dark"] .location-detect-btn:hover {
-    background: #e5e5e5;
 }
 
 .location-detect-btn:active {
@@ -545,10 +509,6 @@ body.report-page {
 
 .location-detect-btn.success {
     background: #1a1a1a;
-}
-
-[data-theme="dark"] .location-detect-btn.success {
-    background: #fafafa;
 }
 
 .location-detect-btn.loading svg {

@@ -43,11 +43,6 @@
     border-color: #1a1a1a;
 }
 
-[data-theme="dark"] .issue-card.selected {
-    background: rgba(250, 250, 250, 0.08);
-    border-color: #fafafa;
-}
-
 .issue-card.selected .issue-card-icon {
     transform: scale(1.1);
 }
@@ -55,10 +50,6 @@
 .issue-card.selected .issue-text {
     color: #1a1a1a;
     font-weight: 700;
-}
-
-[data-theme="dark"] .issue-card.selected .issue-text {
-    color: #fafafa;
 }
 
 /* Larger icons for better visibility */
@@ -205,19 +196,6 @@
     font-size: 0.8125rem;
     color: #8b5cf6;
     margin-top: 0.125rem;
-}
-
-[data-theme="dark"] .summary-detail-box.authority {
-    background: rgba(139, 92, 246, 0.15);
-    border-color: rgba(139, 92, 246, 0.25);
-}
-
-[data-theme="dark"] .summary-detail-box.authority .summary-detail-value {
-    color: #a78bfa;
-}
-
-[data-theme="dark"] .summary-detail-box.authority .summary-detail-sub {
-    color: #c4b5fd;
 }
 
 /* -------------------------
@@ -729,11 +707,6 @@
     border-color: #1a1a1a;
 }
 
-[data-theme="dark"] .issue-type-option.selected {
-    background: rgba(250, 250, 250, 0.08);
-    border-color: #fafafa;
-}
-
 .issue-type-option.selected .issue-icon {
     transform: scale(1.1);
 }
@@ -741,10 +714,6 @@
 .issue-type-option.selected .issue-text {
     color: #1a1a1a;
     font-weight: 700;
-}
-
-[data-theme="dark"] .issue-type-option.selected .issue-text {
-    color: #fafafa;
 }
 
 /* Larger icons for better visibility */
@@ -789,10 +758,6 @@
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-[data-theme="dark"] .issue-type-option .check-icon {
-    background: #fafafa;
-}
-
 .issue-type-option.selected .check-icon {
     opacity: 1;
     transform: scale(1);
@@ -802,8 +767,4 @@
     width: 0.875rem;
     height: 0.875rem;
     color: white;
-}
-
-[data-theme="dark"] .issue-type-option .check-icon svg {
-    color: #1a1a1a;
 }

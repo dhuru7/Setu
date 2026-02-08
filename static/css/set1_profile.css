@@ -310,10 +310,6 @@
     transition: var(--profile-transition);
 }
 
-[data-theme="dark"] .detail-chevron-left {
-    color: var(--text-secondary);
-}
-
 /* ==========================================
    Swipe Card Styles (for City and Email)
    ========================================== */

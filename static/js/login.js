@@ -17,15 +17,11 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // --- UI LOGIC ---
-const theme = localStorage.getItem('theme') || 'light';
-document.documentElement.setAttribute('data-theme', theme);
-
 const loginForm = document.getElementById('login-form');
 const loginBtn = document.getElementById('login-btn');
 // Re-grabbing elements to be sure
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const mobileMenu = document.getElementById('mobile-menu');
-const themeToggles = document.querySelectorAll('.theme-toggle');
 const logoText = document.querySelector('#animated-name');
 const animatedName = document.getElementById('animated-name');
 
@@ -36,30 +32,6 @@ if (mobileMenuBtn && mobileMenu) {
         mobileMenuBtn.classList.toggle('open');
     });
 }
-
-// 2. Theme Toggle Logic
-function setTheme(isDark) {
-    const newTheme = isDark ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    updateThemeIcons(newTheme);
-}
-
-function updateThemeIcons(theme) {
-    const isDark = theme === 'dark';
-    document.querySelectorAll('.sun-icon').forEach(icon => icon.classList.toggle('hidden', isDark));
-    document.querySelectorAll('.moon-icon').forEach(icon => icon.classList.toggle('hidden', !isDark));
-}
-
-// Initialize Theme Icons
-updateThemeIcons(theme);
-
-themeToggles.forEach(toggle => {
-    toggle.addEventListener('click', () => {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        setTheme(!isDark);
-    });
-});
 
 // 3. Language Selector Logic
 const languages = {

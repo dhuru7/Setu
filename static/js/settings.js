@@ -2,8 +2,6 @@
 const Settings = {
     init() {
         this.injectPanel();
-        this.setupTheme();
-
         this.setupLanguage();
         this.setupEventListeners();
         this.setupResizing(); // Added resizing
@@ -32,29 +30,6 @@ const Settings = {
             </div>
             <div class="p-4 flex-grow overflow-y-auto">
                 <div class="space-y-6">
-                    <div>
-                        <label class="text-sm font-semibold text-[var(--text-muted)] px-1">Appearance</label>
-                        <div class="mt-2 flex items-center justify-between p-3 bg-[var(--bg-primary)] rounded-lg">
-                            <span class="font-medium text-[var(--text-primary)]">Theme</span>
-                            <button id="theme-toggle-settings"
-                                class="p-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-light)]"
-                                aria-label="Toggle theme">
-                                <svg class="w-5 h-5 sun-icon text-yellow-500" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                                    </path>
-                                </svg>
-                                <svg class="w-5 h-5 hidden moon-icon text-blue-300" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
-                                    </path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
                     <div>
                         <label class="text-sm font-semibold text-[var(--text-muted)] px-1">Content</label>
                         <div class="mt-2">
@@ -195,27 +170,6 @@ const Settings = {
             icon.classList.remove('settings-icon-spin-reverse');
             void icon.offsetWidth; // Trigger reflow
             icon.classList.add('settings-icon-spin-reverse');
-        });
-    },
-
-    setupTheme() {
-        const btn = document.getElementById('theme-toggle-settings');
-        if (!btn) return;
-
-        // Initial State
-        const applyTheme = t => {
-            const isDark = t === 'dark';
-            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-            document.querySelectorAll('.sun-icon').forEach(i => i.classList.toggle('hidden', isDark));
-            document.querySelectorAll('.moon-icon').forEach(i => i.classList.toggle('hidden', !isDark));
-        };
-        const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        applyTheme(currentTheme);
-
-        btn.addEventListener('click', () => {
-            const n = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', n);
-            applyTheme(n);
         });
     },
 

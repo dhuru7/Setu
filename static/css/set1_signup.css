@@ -45,11 +45,6 @@ body {
     top: 0 !important;
 }
 
-[data-theme="dark"] body {
-    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%) !important;
-    background-attachment: fixed !important;
-}
-
 /* ============ SIGNUP CONTAINER ============ */
 .signup-main {
     width: 100%;
@@ -144,15 +139,6 @@ body {
     stroke-width: 2.5;
 }
 
-[data-theme="dark"] .user-icon {
-    background-color: var(--bg-secondary);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="dark"] .user-icon svg {
-    color: var(--text-primary);
-}
-
 @keyframes scaleIn {
     from {
         opacity: 0;
@@ -245,11 +231,6 @@ body {
     box-shadow: 0 0 0 3px rgba(31, 41, 55, 0.08);
 }
 
-[data-theme="dark"] .input-wrapper:focus-within {
-    border-color: var(--text-secondary);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
-}
-
 .input-icon {
     width: 20px;
     height: 20px;
@@ -310,15 +291,6 @@ body {
     background-color: transparent !important;
     transition: background-color 9999s ease-out, color 9999s ease-out;
     caret-color: var(--text-primary);
-}
-
-[data-theme="dark"] .custom-input:-webkit-autofill,
-[data-theme="dark"] .custom-input:-webkit-autofill:hover,
-[data-theme="dark"] .custom-input:-webkit-autofill:focus,
-[data-theme="dark"] .custom-input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
-    -webkit-text-fill-color: var(--text-primary) !important;
-    box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
 }
 
 .custom-input.uppercase {
@@ -399,12 +371,6 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-[data-theme="dark"] .arrow-btn {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
 /* ============ BACK BUTTON ============ */
 .back-btn {
     display: flex;
@@ -467,12 +433,6 @@ body {
 .submit-btn svg {
     width: 18px;
     height: 18px;
-}
-
-[data-theme="dark"] .submit-btn {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 /* ============ LOADING SPINNER ============ */
@@ -557,10 +517,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 0.8;
-}
-
-[data-theme='dark'] input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
 }
 
 /* =================================================================

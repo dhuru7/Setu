@@ -26,34 +26,6 @@
       --success-color: #16a34a;
   }
 
-  [data-theme="dark"] {
-      /* New dark theme based on homepage */
-      --bg-primary: #111827;
-      /* Dark Slate 900 */
-      --bg-secondary: #1f2937;
-      /* Dark Slate 800 */
-      --bg-secondary-translucent: rgba(31, 41, 55, 0.85);
-      --bg-accent: #374151;
-      /* Dark Slate 700 */
-      --text-primary: #f9fafb;
-      /* Off-white */
-      --text-secondary: #d1d5db;
-      --text-muted: #9ca3af;
-      --border-light: #374151;
-      --border-medium: #4b5563;
-      --accent-primary: #f41f4e;
-      /* UPDATED: New Red */
-      --accent-primary-hover: #f64c71;
-      /* UPDATED: Lighter Red */
-      --accent-secondary: #f9fafb;
-      --accent-secondary-hover: #FFFFFF;
-      --shadow-light: rgba(0, 0, 0, 0.2);
-      --shadow-medium: rgba(0, 0, 0, 0.3);
-      --error-color: #f64c71;
-      /* UPDATED: Lighter Red */
-      --success-color: #22c55e;
-  }
-
   /* Base Styles & Transitions */
   * {
       transition: background-color 0.2s cubic-bezier(0.4, 0.0, 0.2, 1),
@@ -166,10 +138,6 @@
       border-bottom: 1px solid var(--border-light);
   }
 
-  [data-theme="dark"] .nav-header {
-      background-color: var(--bg-secondary-translucent);
-  }
-
   .logo {
       font-size: 1.5rem;
       font-weight: 800;
@@ -242,23 +210,6 @@
       border-radius: 0.375rem;
       margin-left: 0.5rem;
   }
-
-  /* Theme Toggle */
-  .theme-toggle {
-      background-color: var(--bg-accent);
-      border-radius: 0.75rem;
-      padding: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-      border: 2px solid transparent;
-      will-change: transform, background-color;
-  }
-
-  .theme-toggle:hover {
-      transform: scale(1.1) rotate(10deg);
-      border-color: var(--accent-primary);
-  }
-
 
 
   /* Common Form Styles */

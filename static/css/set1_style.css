@@ -27,26 +27,6 @@
     --success-color: #16a34a;
 }
 
-[data-theme="dark"] {
-    --bg-primary: #121212;
-    --bg-secondary: #1e1e1e;
-    /* Using 0.85 opacity */
-    --bg-secondary-translucent: rgba(30, 30, 30, 0.85);
-    --bg-accent: #2d2d2d;
-    --text-primary: #f9fafb;
-    --text-secondary: #d1d5db;
-    --text-muted: #9ca3af;
-    --border-light: #374151;
-    --border-medium: #4b5563;
-    --accent-primary: #f41f4e;
-    --accent-primary-hover: #f64c71;
-    --accent-secondary: #f9fafb;
-    --accent-secondary-hover: #FFFFFF;
-    --shadow-light: rgba(0, 0, 0, 0.2);
-    --shadow-medium: rgba(0, 0, 0, 0.3);
-    --success-color: #22c55e;
-}
-
 /* --- Global Resets & Base Styles --- */
 
 .skiptranslate {

@@ -214,10 +214,6 @@
     background-color: var(--accent-secondary);
 }
 
-[data-theme="dark"] .progress-step.completed .step-circle {
-    color: var(--bg-primary);
-}
-
 /* Redesigned Upload Options */
 .upload-option {
     background-color: var(--bg-primary);
