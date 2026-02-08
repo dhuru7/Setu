@@ -805,10 +805,9 @@
 
                             const addr = data.address;
 
-                            // Populate Full Address (road + building info)
-                            const fullAddr = [addr.road, addr.neighbourhood, addr.suburb].filter(Boolean).join(', ');
-                            UI.locationFields.full.value = fullAddr || data.display_name?.split(',')[0] || "";
-                            reportData.location.full = UI.locationFields.full.value;
+                            // Keep Full Address empty for user to fill manually
+                            UI.locationFields.full.value = "";
+                            reportData.location.full = "";
 
                             // Village/Locality - village, hamlet, or suburb
                             UI.locationFields.village.value = addr.village || addr.hamlet || addr.neighbourhood || "";
