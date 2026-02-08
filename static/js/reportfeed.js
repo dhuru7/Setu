@@ -3,8 +3,9 @@ import { getFirestore, collection, getDocs, orderBy, query, limit, startAfter, d
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { createReportCardHTML } from "./report-card.js";
 
+// Firebase Config - DO NOT COMMIT API KEY
 const firebaseConfig = {
-    apiKey: "AIzaSyB7uvvN3Xlo64pKCkJwfjGXtdqHuHIG0mI",
+    apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
     authDomain: "setu-6932f.firebaseapp.com",
     projectId: "setu-6932f",
     storageBucket: "setu-6932f.firebasestorage.app",

@@ -3,9 +3,9 @@ import { getFirestore, collection, getDocs, query, where, orderBy, limit, doc, g
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { generateResponse, clearKey } from "./setu-ai.js";
 
-// --- Firebase Config ---
+// --- Firebase Config --- DO NOT COMMIT API KEY ---
 const firebaseConfig = {
-    apiKey: "AIzaSyB7uvvN3Xlo64pKCkJwfjGXtdqHuHIG0mI",
+    apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
     authDomain: "setu-6932f.firebaseapp.com",
     projectId: "setu-6932f",
     storageBucket: "setu-6932f.firebasestorage.app",

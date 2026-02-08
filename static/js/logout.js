@@ -3,9 +3,9 @@ import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/fire
 
 console.log("Logout script loaded");
 
-// --- PASTE YOUR FIREBASE KEYS HERE ---
+// --- FIREBASE CONFIG --- DO NOT COMMIT API KEY ---
 const firebaseConfig = {
-    apiKey: "AIzaSyB7uvvN3Xlo64pKCkJwfjGXtdqHuHIG0mI",
+    apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
     authDomain: "setu-6932f.firebaseapp.com",
     projectId: "setu-6932f",
     storageBucket: "setu-6932f.firebasestorage.app",

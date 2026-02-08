@@ -3,8 +3,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+// Firebase Config - DO NOT COMMIT API KEY
 const firebaseConfig = {
-    apiKey: "AIzaSyB7uvvN3Xlo64pKCkJwfjGXtdqHuHIG0mI",
+    apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
     authDomain: "setu-6932f.firebaseapp.com",
     projectId: "setu-6932f",
     storageBucket: "setu-6932f.firebasestorage.app",

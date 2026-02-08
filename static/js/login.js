@@ -2,9 +2,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebas
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-// --- PASTE YOUR FIREBASE KEYS HERE ---
+// --- FIREBASE CONFIG --- DO NOT COMMIT API KEY ---
 const firebaseConfig = {
-    apiKey: "AIzaSyB7uvvN3Xlo64pKCkJwfjGXtdqHuHIG0mI",
+    apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
     authDomain: "setu-6932f.firebaseapp.com",
     projectId: "setu-6932f",
     storageBucket: "setu-6932f.firebasestorage.app",
