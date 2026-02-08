@@ -333,8 +333,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 [currentEditingField]: newVal
             });
 
-            // Update local state
+            // Update local state and sync cache
             currentUserData[currentEditingField] = newVal;
+            localStorage.setItem('userProfile', JSON.stringify(currentUserData));
             displayProfileData();
             showToast(`${currentEditingField} updated!`);
             window.closeEditModal();
@@ -368,6 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     email: newVal
                 });
                 currentUserData.email = newVal;
+                localStorage.setItem('userProfile', JSON.stringify(currentUserData));
                 displayProfileData();
                 showToast("Email updated!");
 
@@ -423,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (city) {
                         await updateDoc(doc(db, "users", currentUserUid), { city: city });
                         currentUserData.city = city;
+                        localStorage.setItem('userProfile', JSON.stringify(currentUserData));
                         displayProfileData();
                         showToast(`Location set to ${city}`);
                     }
@@ -700,6 +703,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (currentUserUid) {
                                 await updateDoc(doc(db, "users", currentUserUid), { avatar: compressedDataUrl });
                                 currentUserData.avatar = compressedDataUrl;
+                                // BUGFIX: Update localStorage cache so avatar persists on refresh
+                                localStorage.setItem('userProfile', JSON.stringify(currentUserData));
                                 showToast('Profile image updated!');
                             }
                         } catch (err) {
