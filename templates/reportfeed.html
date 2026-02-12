@@ -45,25 +45,90 @@
 <body
     class="antialiased pb-28 sm:pb-0 bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
     <div id="app" class="min-h-screen">
-        <header class="sticky top-0 z-40 py-4 px-4 bg-[var(--bg-primary)] border-b border-[var(--border-light)]">
-            <div class="max-w-7xl mx-auto flex items-center">
-                <a href="index.html" class="mr-4 p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                        stroke="currentColor" class="w-6 h-6 text-[var(--text-primary)]">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                    </svg>
-                </a>
-                <h1 class="text-xl font-bold text-[var(--text-primary)] flex-grow">Reports in your area</h1>
-                <button id="filter-btn"
-                    class="p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors text-[var(--text-primary)]">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 18H7.5M3.75 12H9m-5.25 0H12m0 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0" />
-                    </svg>
-                </button>
+        <!-- Header + Filter Panel — both sticky together -->
+        <div class="sticky top-0 z-40 bg-[var(--bg-primary)]">
+            <header class="py-3 px-4 border-b border-[var(--border-light)]">
+                <div class="max-w-7xl mx-auto flex items-center">
+                    <a href="index.html" class="mr-4 p-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="w-6 h-6 text-[var(--text-primary)]">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                        </svg>
+                    </a>
+                    <h1 class="text-xl font-bold text-[var(--text-primary)] flex-grow">Reports in your area</h1>
+
+                    <!-- Redesigned Filter Button -->
+                    <button id="filter-btn" class="filter-btn-redesigned" aria-label="Filter reports">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+                        </svg>
+                        Filters
+                        <span class="filter-count-badge">0</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Filter Panel (slides open below header, stays sticky) -->
+            <div id="filter-panel" class="filter-panel">
+                <div class="filter-panel-inner">
+                    <!-- Location Filter -->
+                    <div class="filter-section">
+                        <span class="filter-section-label">Location</span>
+                        <div class="filter-chips">
+                            <button class="filter-chip" data-filter-group="location" data-filter-value="nearby"
+                                id="nearby-chip">📍 Nearby (10 km)</button>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="filter-section">
+                        <span class="filter-section-label">Status</span>
+                        <div class="filter-chips">
+                            <button class="filter-chip" data-filter-group="status" data-filter-value="Pending">🟡
+                                Pending</button>
+                            <button class="filter-chip" data-filter-group="status" data-filter-value="In Progress">🔵 In
+                                Progress</button>
+                            <button class="filter-chip" data-filter-group="status" data-filter-value="Resolved">🟢
+                                Resolved</button>
+                        </div>
+                    </div>
+
+                    <!-- Issue Type Filter -->
+                    <div class="filter-section">
+                        <span class="filter-section-label">Issue Type</span>
+                        <div class="filter-chips">
+                            <button class="filter-chip" data-filter-group="type"
+                                data-filter-value="Pothole">Pothole</button>
+                            <button class="filter-chip" data-filter-group="type"
+                                data-filter-value="Garbage Dumps">Garbage Dumps</button>
+                            <button class="filter-chip" data-filter-group="type"
+                                data-filter-value="Broken Streetlight">Broken Streetlight</button>
+                            <button class="filter-chip" data-filter-group="type" data-filter-value="Water Leakage">Water
+                                Leakage</button>
+                            <button class="filter-chip" data-filter-group="type" data-filter-value="Sewage Issue">Sewage
+                                Issue</button>
+                            <button class="filter-chip" data-filter-group="type" data-filter-value="Road Damage">Road
+                                Damage</button>
+                            <button class="filter-chip" data-filter-group="type"
+                                data-filter-value="Illegal Parking">Illegal Parking</button>
+                            <button class="filter-chip" data-filter-group="type" data-filter-value="Tree Fallen">Tree
+                                Fallen</button>
+                            <button class="filter-chip" data-filter-group="type" data-filter-value="Stray Animals">Stray
+                                Animals</button>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="filter-actions">
+                        <button class="filter-clear-btn">Clear All</button>
+                        <button class="filter-apply-btn">Apply Filters</button>
+                    </div>
+                </div>
             </div>
-        </header>
+        </div>
 
         <main class="max-w-3xl mx-auto px-4 py-6">
             <!-- Feed Container -->

@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, orderBy, query, limit, startAfter, doc, getDoc, updateDoc, increment, arrayUnion, arrayRemove, where, documentId, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, orderBy, query, limit, startAfter, doc, getDoc, updateDoc, deleteDoc, increment, arrayUnion, arrayRemove, where, documentId, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { createReportCardHTML } from "./report-card.js";
 
@@ -20,10 +20,8 @@ const auth = getAuth(app);
 // Enable Offline Persistence
 enableIndexedDbPersistence(db).catch((err) => {
     if (err.code == 'failed-precondition') {
-        // Multiple tabs open, persistence can only be enabled in one tab at a a time.
         console.warn('Persistence failed: Multiple tabs open');
     } else if (err.code == 'unimplemented') {
-        // The current browser does not support all of the features required to enable persistence
         console.warn('Persistence not supported');
     }
 });
@@ -34,13 +32,59 @@ let lastVisible = null;
 let isFetching = false;
 let hasMore = true;
 const BATCH_SIZE = 5;
-const userCache = new Map(); // Cache user profiles to reduce reads
+const userCache = new Map();
+
+// Active filters state
+let activeFilters = {
+    status: null,
+    issueType: null,
+    nearby: false
+};
+
+// User's location for nearby filter
+let userLat = null;
+let userLng = null;
+const NEARBY_RADIUS_KM = 10;
 
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
 });
 
-// Global Handlers
+// ── Geolocation Helpers ─────────────────────────
+
+function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+}
+
+function calculateHaversine(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+}
+
+function getUserLocation() {
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+            resolve(null);
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+            () => resolve(null),
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+        );
+    });
+}
+
+// ── Global Handlers ─────────────────────────────
+
+// Image Viewer
 window.initViewer = (imgElement) => {
     const viewer = new Viewer(imgElement, {
         toolbar: {
@@ -53,62 +97,130 @@ window.initViewer = (imgElement) => {
     viewer.show();
 };
 
-// (Vote handler removed as per request)
+// Image Fit/Fill Toggle
+window.toggleImgFit = (toggleBtn) => {
+    const cardImage = toggleBtn.closest('.card-image');
+    const img = cardImage.querySelector('img');
+    if (!img) return;
 
+    const isContain = img.classList.toggle('img-contain');
+
+    if (isContain) {
+        toggleBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+            </svg>`;
+    } else {
+        toggleBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+            </svg>`;
+    }
+};
+
+// Three-dot menu toggle
+window.toggleCardMenu = (btn) => {
+    const wrapper = btn.closest('.card-menu-wrapper');
+    const dropdown = wrapper.querySelector('.card-menu-dropdown');
+    const card = btn.closest('.report-card');
+    const reportUserId = card?.dataset.userId || '';
+    const reportId = card?.id?.replace('report-', '') || '';
+
+    // Close all other open menus first
+    document.querySelectorAll('.card-menu-dropdown.open').forEach(d => {
+        if (d !== dropdown) d.classList.remove('open');
+    });
+
+    // Build menu items dynamically
+    if (!dropdown.dataset.built) {
+        let menuItems = '';
+
+        // Check if current user owns this report
+        if (currentUser && reportUserId && currentUser.uid === reportUserId) {
+            menuItems += `
+                <button class="card-menu-item card-menu-item-danger" onclick="event.stopPropagation(); handleDeleteFromMenu('${reportId}')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                    Delete Report
+                </button>`;
+        }
+
+        dropdown.innerHTML = menuItems || `<div class="card-menu-empty">No actions available</div>`;
+        dropdown.dataset.built = 'true';
+    }
+
+    dropdown.classList.toggle('open');
+};
+
+// Delete from menu handler
+window.handleDeleteFromMenu = async (reportId) => {
+    // Close open menu
+    document.querySelectorAll('.card-menu-dropdown.open').forEach(d => d.classList.remove('open'));
+
+    if (!confirm("Are you sure you want to delete this report? This action cannot be undone.")) return;
+
+    try {
+        await deleteDoc(doc(db, 'reports', reportId));
+        const card = document.getElementById(`report-${reportId}`);
+        if (card) {
+            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => card.remove(), 300);
+        }
+    } catch (error) {
+        console.error("Error deleting report:", error);
+        alert("Failed to delete report. Please try again.");
+    }
+};
+
+// Close menus when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.card-menu-wrapper')) {
+        document.querySelectorAll('.card-menu-dropdown.open').forEach(d => d.classList.remove('open'));
+    }
+});
+
+// Follow Handler — Fixed: no layout shift
 window.handleFollow = async (btn, reportId) => {
     if (!currentUser) { alert("Please log in to follow issues."); return; }
     try {
         const textSpan = btn.querySelector('.follow-text');
-        const isFollowing = btn.classList.contains('text-[#6366f1]');
+        const isFollowing = btn.classList.contains('text-[#2563eb]');
 
-        // Toggle State Immediately
         if (isFollowing) {
             // Unfollow
-            btn.classList.remove('text-[#6366f1]');
+            btn.classList.remove('text-[#2563eb]', 'active-follow');
+            btn.querySelector('svg').setAttribute('fill', 'none');
             textSpan.textContent = "Follow";
+            textSpan.classList.remove('animating-count');
 
-            // Decrement data attribute for consistency
             const currentCount = parseInt(btn.getAttribute('data-followers') || '0');
             btn.setAttribute('data-followers', Math.max(0, currentCount - 1));
 
             await updateDoc(doc(db, 'reports', reportId), { followers: arrayRemove(currentUser.uid) });
         } else {
             // Follow
-            btn.classList.add('text-[#6366f1]');
+            btn.classList.add('text-[#2563eb]', 'active-follow');
 
-            // Increment data attribute
             let currentCount = parseInt(btn.getAttribute('data-followers') || '0');
             btn.setAttribute('data-followers', currentCount + 1);
 
-            // ANIMATION LOGIC
-            // "tell how many more people are following... fade in animation for 5 sec and then fade back"
-
-            // Current count includes me now. So "others" = currentCount (which was old total).
-            // Example: 0 followers -> I follow -> total 1. "0 others".
-            // Example: 5 followers -> I follow -> total 6. "5 others".
-            // The prompt says "how many *more* people".
             const othersCount = currentCount;
-            const msg = othersCount > 0 ? `+ ${othersCount} others` : "You're first!";
+            const msg = othersCount > 0 ? `+${othersCount}` : "1st!";
 
             textSpan.textContent = msg;
+            textSpan.classList.remove('animating-count');
+            // Force reflow to restart animation
+            void textSpan.offsetWidth;
             textSpan.classList.add('animating-count');
 
-            // After 5 seconds, revert to "Following"
+            // After animation, revert to "Following"
             setTimeout(() => {
-                // Only revert if we are still following!
-                if (btn.classList.contains('text-[#6366f1]')) {
+                if (btn.classList.contains('text-[#2563eb]')) {
                     textSpan.classList.remove('animating-count');
-                    textSpan.textContent = "Following"; // or maintain opacity transition
-
-                    // Trigger a smooth fade back? The css removal might jump.
-                    // The CSS @keyframes ends at opacity: 0. 
-                    // To fade *back in* to "Following", we might need a 2nd step.
-                    // But simpler: Just set text and let it stay. 
-                    // Actually, the keyframes end with opacity 0?? 
-                    // Wait, `fadeInOut` in CSS goes 0 -> 1 -> 1 -> 0.
-                    // So at 5s, it is invisible (opacity 0). 
-                    // We swap text to "Following" and remove class (opacity 1 default).
-                    // This creates a "fade back in" effect implicitly if removed correctly.
+                    textSpan.textContent = "Following";
                 }
             }, 5000);
 
@@ -120,8 +232,167 @@ window.handleFollow = async (btn, reportId) => {
     }
 };
 
+// ── Main ────────────────────────────────────────
+
 document.addEventListener('DOMContentLoaded', async () => {
     const feedContainer = document.getElementById('feed-container');
+    const filterBtn = document.getElementById('filter-btn');
+    const filterPanel = document.getElementById('filter-panel');
+
+    // ── Filter Panel Logic ──────────────────────
+    if (filterBtn && filterPanel) {
+        filterBtn.addEventListener('click', () => {
+            filterPanel.classList.toggle('open');
+        });
+
+        // Chip selection
+        filterPanel.addEventListener('click', (e) => {
+            const chip = e.target.closest('.filter-chip');
+            if (!chip) return;
+
+            const group = chip.dataset.filterGroup;
+
+            // Toggle selection within group (single selection per group)
+            const siblings = filterPanel.querySelectorAll(`.filter-chip[data-filter-group="${group}"]`);
+            siblings.forEach(s => {
+                if (s === chip) {
+                    s.classList.toggle('selected');
+                } else {
+                    s.classList.remove('selected');
+                }
+            });
+        });
+
+        // Apply button
+        const applyBtn = filterPanel.querySelector('.filter-apply-btn');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', async () => {
+                // Read selected chips
+                const selectedStatus = filterPanel.querySelector('.filter-chip[data-filter-group="status"].selected');
+                const selectedType = filterPanel.querySelector('.filter-chip[data-filter-group="type"].selected');
+                const selectedNearby = filterPanel.querySelector('.filter-chip[data-filter-group="location"].selected');
+
+                activeFilters.status = selectedStatus ? selectedStatus.dataset.filterValue : null;
+                activeFilters.issueType = selectedType ? selectedType.dataset.filterValue : null;
+                activeFilters.nearby = !!selectedNearby;
+
+                // If nearby is selected, get user location
+                if (activeFilters.nearby && !userLat) {
+                    const nearbyChip = document.getElementById('nearby-chip');
+                    if (nearbyChip) nearbyChip.textContent = '📍 Getting location...';
+
+                    const loc = await getUserLocation();
+                    if (loc) {
+                        userLat = loc.lat;
+                        userLng = loc.lng;
+                        if (nearbyChip) nearbyChip.textContent = '📍 Nearby (10 km)';
+                    } else {
+                        alert('Could not get your location. Please enable location access.');
+                        activeFilters.nearby = false;
+                        if (nearbyChip) {
+                            nearbyChip.classList.remove('selected');
+                            nearbyChip.textContent = '📍 Nearby (10 km)';
+                        }
+                    }
+                }
+
+                // Update filter button badge
+                updateFilterBadge();
+
+                // Apply filters to visible cards
+                applyClientFilters();
+
+                // Close panel
+                filterPanel.classList.remove('open');
+            });
+        }
+
+        // Clear button
+        const clearBtn = filterPanel.querySelector('.filter-clear-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                filterPanel.querySelectorAll('.filter-chip.selected').forEach(c => c.classList.remove('selected'));
+                activeFilters.status = null;
+                activeFilters.issueType = null;
+                activeFilters.nearby = false;
+                updateFilterBadge();
+                applyClientFilters();
+            });
+        }
+    }
+
+    function hasActiveFilters() {
+        return activeFilters.status || activeFilters.issueType || activeFilters.nearby;
+    }
+
+    function updateFilterBadge() {
+        if (!filterBtn) return;
+        const count = (activeFilters.status ? 1 : 0) + (activeFilters.issueType ? 1 : 0) + (activeFilters.nearby ? 1 : 0);
+        const badge = filterBtn.querySelector('.filter-count-badge');
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+        filterBtn.classList.toggle('has-filters', count > 0);
+    }
+
+    function applyClientFilters() {
+        const cards = feedContainer.querySelectorAll('.report-card');
+        cards.forEach(card => {
+            let show = true;
+
+            // Status filter
+            if (activeFilters.status) {
+                const cardStatus = (card.dataset.status || '').toLowerCase();
+                if (cardStatus !== activeFilters.status.toLowerCase()) {
+                    show = false;
+                }
+            }
+
+            // Issue type filter
+            if (activeFilters.issueType) {
+                const cardType = (card.dataset.issueType || '').toLowerCase();
+                if (cardType !== activeFilters.issueType.toLowerCase()) {
+                    show = false;
+                }
+            }
+
+            // Nearby filter (10km radius)
+            if (activeFilters.nearby && userLat && userLng) {
+                const cardLat = parseFloat(card.dataset.lat);
+                const cardLng = parseFloat(card.dataset.lng);
+
+                if (!isNaN(cardLat) && !isNaN(cardLng)) {
+                    const distance = calculateHaversine(userLat, userLng, cardLat, cardLng);
+                    if (distance > NEARBY_RADIUS_KM) {
+                        show = false;
+                    }
+                } else {
+                    // No coordinates — hide when nearby filter is active
+                    show = false;
+                }
+            }
+
+            card.style.display = show ? '' : 'none';
+        });
+
+        // Show "no results" message if all hidden
+        const visibleCount = feedContainer.querySelectorAll('.report-card:not([style*="display: none"])').length;
+        let noResultsEl = feedContainer.querySelector('.filter-no-results');
+        if (visibleCount === 0 && hasActiveFilters()) {
+            if (!noResultsEl) {
+                noResultsEl = document.createElement('div');
+                noResultsEl.className = 'filter-no-results';
+                noResultsEl.style.cssText = 'text-align:center; padding:2rem 1rem; color:#9ca3af; font-size:0.9rem; font-weight:500;';
+                noResultsEl.textContent = 'No reports match your filters.';
+                feedContainer.insertBefore(noResultsEl, document.getElementById('feed-sentinel'));
+            }
+        } else if (noResultsEl) {
+            noResultsEl.remove();
+        }
+    }
+
+    // ── Feed Loading ────────────────────────────
 
     // Clear initial content
     feedContainer.innerHTML = '';
@@ -151,7 +422,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Show Skeletons
         const skeletonContainer = document.createElement('div');
         skeletonContainer.id = 'skeleton-container';
-        skeletonContainer.innerHTML = createSkeletonHTML().repeat(2); // Show 2 skeletons
+        skeletonContainer.innerHTML = createSkeletonHTML().repeat(2);
         feedContainer.insertBefore(skeletonContainer, sentinel);
 
         try {
@@ -191,7 +462,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             for (const docSnapshot of querySnapshot.docs) {
                 const reportData = docSnapshot.data();
 
-                // Get cached user info if available, else undefined (will default to Anonymous or snapshot name)
                 let cachedName = undefined;
                 let cachedPhoto = undefined;
                 if (reportData.userId && userCache.has(reportData.userId)) {
@@ -200,7 +470,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     cachedPhoto = cached.photo;
                 }
 
-                // Render with current best knowledge
                 const cardHTML = createReportCardHTML(docSnapshot.id, reportData, currentUser, {
                     userName: cachedName,
                     userPhoto: cachedPhoto
@@ -210,7 +479,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 tempDiv.innerHTML = cardHTML;
                 const cardElement = tempDiv.firstElementChild;
 
-                // Mark for hydration if needed
                 if (!cachedName && reportData.userId) {
                     cardElement.setAttribute('data-author-id', reportData.userId);
                 }
@@ -220,9 +488,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             feedContainer.insertBefore(fragment, sentinel);
 
+            // Apply filters to new cards if any active
+            if (hasActiveFilters()) {
+                applyClientFilters();
+            }
+
             // Fetch missing users in background & Hydrate DOM
             if (userIdsToFetch.size > 0) {
-                // Do NOT await this. Let it run in background.
                 fetchUsersAndHydrate(Array.from(userIdsToFetch));
             }
 
@@ -238,7 +510,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function fetchUsersAndHydrate(userIds) {
         const promises = userIds.map(async (uid) => {
             try {
-                // Check cache again in case populated
                 if (userCache.has(uid)) {
                     hydrateCardsForUser(uid, userCache.get(uid));
                     return;
@@ -261,7 +532,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             } catch (e) {
                 console.warn(`Failed to fetch user ${uid}`, e);
-                // Don't cache failure forever ideally, but for now prevent loops
                 userCache.set(uid, { name: "Anonymous", photo: null });
             }
         });
@@ -273,12 +543,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cards = document.querySelectorAll(`.report-card[data-author-id="${uid}"]`);
         cards.forEach(card => {
             const nameEl = card.querySelector('.username');
-            const avatarContainer = card.querySelector('.user-profile'); // Wrapper
+            const avatarContainer = card.querySelector('.user-profile');
 
             if (nameEl) nameEl.textContent = userInfo.name;
 
             if (avatarContainer) {
-                // Replace avatar
                 const oldAvatar = avatarContainer.querySelector('.avatar-circle');
                 if (oldAvatar) oldAvatar.remove();
 
@@ -310,12 +579,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    // Event Delegation for Swipe
+    // ── Swipe Event Delegation ──────────────────
     feedContainer.addEventListener('touchstart', (e) => {
         const card = e.target.closest('.report-card');
         if (!card) return;
-
-        // Store start coords on the card element
         card.touchStartX = e.changedTouches[0].screenX;
         card.touchStartY = e.changedTouches[0].screenY;
     }, { passive: true });

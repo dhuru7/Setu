@@ -93,7 +93,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #a855f7);
+    background: linear-gradient(135deg, #2563eb, #00C4FF);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -182,7 +182,7 @@
 }
 
 .action-item:hover {
-    color: #6366f1;
+    color: #2563eb;
 }
 
 .action-item svg {
@@ -239,7 +239,7 @@
 }
 
 .detail-group {
-    border-left: 3px solid #6366f1;
+    border-left: 3px solid #2563eb;
     padding-left: 1rem;
 }
 
@@ -286,7 +286,7 @@
     display: inline-block;
     letter-spacing: -2px;
     animation: slideRight 1.5s infinite;
-    color: #6366f1;
+    color: #2563eb;
 }
 
 @keyframes slideRight {
@@ -315,7 +315,7 @@
     background-color: transparent;
     border: none;
     border-top: 1px solid var(--border-light);
-    color: #6366f1;
+    color: #2563eb;
     font-weight: 700;
     font-size: 0.9rem;
     cursor: pointer;
@@ -323,7 +323,7 @@
 }
 
 .desktop-reveal-btn:hover {
-    background-color: rgba(99, 102, 241, 0.05);
+    background-color: rgba(37, 99, 235, 0.05);
 }
 
 @media (min-width: 768px) {
