@@ -21,7 +21,8 @@ const auth = getAuth(app);
 const MAX_RESULTS = 50;
 const RECENT_LIMIT = 3;
 const CHAT_HISTORY_KEY = 'setuAI_chatHistory';
-const CHAT_EXPIRY_DAYS = 3;
+const CHAT_EXPIRY_DAYS = 7;
+const MAX_CHATS = 5;
 const EMOJIS = ["🔴", "🟥", "🟠", "🟧", "🟡", "🟨", "🟢", "🟩", "🔵", "🟦", "🟣", "🟪", "🟤", "🟫", "⚫", "⬛", "⚪", "⬜"];
 
 let mainEmojiAnimationInterval = null;
@@ -135,6 +136,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (UI.aiInput) UI.aiInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') executeAISearch();
     });
+
+    // Mobile keyboard fix: keep input bar above keyboard
+    if (window.visualViewport) {
+        const inputArea = document.querySelector('.ai-chat-input-area');
+        if (inputArea) {
+            const adjustForKeyboard = () => {
+                const vv = window.visualViewport;
+                const bottomOffset = window.innerHeight - (vv.offsetTop + vv.height);
+                inputArea.style.bottom = bottomOffset + 'px';
+                // Adjust chat area padding to match
+                if (UI.aiChatArea) {
+                    UI.aiChatArea.style.paddingBottom = (bottomOffset + 80) + 'px';
+                }
+                scrollToBottom();
+            };
+            window.visualViewport.addEventListener('resize', adjustForKeyboard);
+            window.visualViewport.addEventListener('scroll', adjustForKeyboard);
+        }
+    }
 });
 
 // --- Emoji animation for the AI card ---
@@ -259,7 +279,7 @@ function cleanExpiredChats() {
 }
 
 function saveMessageToChat(chatId, role, text) {
-    const history = getChatHistory();
+    let history = getChatHistory();
     let chat = history.find(c => c.id === chatId);
     if (!chat) {
         chat = {
@@ -269,6 +289,10 @@ function saveMessageToChat(chatId, role, text) {
             messages: []
         };
         history.unshift(chat);
+        // Enforce max chats limit — drop oldest
+        if (history.length > MAX_CHATS) {
+            history = history.slice(0, MAX_CHATS);
+        }
     }
     chat.messages.push({ role, text, time: Date.now() });
     chat.lastActivity = Date.now();
@@ -306,20 +330,50 @@ function renderHistoryList() {
         const preview = firstA ? firstA.text.substring(0, 80) + '...' : 'No response yet';
         return `
             <div class="ai-history-item" data-chat-id="${chat.id}">
-                <div class="ai-history-item-title">${escapeHtml(chat.title)}</div>
-                <div class="ai-history-item-preview">${escapeHtml(preview)}</div>
-                <div class="ai-history-item-time">${timeAgo}</div>
+                <div class="ai-history-item-content">
+                    <div class="ai-history-item-title">${escapeHtml(chat.title)}</div>
+                    <div class="ai-history-item-preview">${escapeHtml(preview)}</div>
+                    <div class="ai-history-item-time">${timeAgo}</div>
+                </div>
+                <button class="ai-history-delete-btn" data-delete-id="${chat.id}" title="Delete chat">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                </button>
             </div>
         `;
     }).join('');
 
-    UI.aiHistoryList.querySelectorAll('.ai-history-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const chatId = item.dataset.chatId;
+    // Click to load chat
+    UI.aiHistoryList.querySelectorAll('.ai-history-item-content').forEach(content => {
+        content.addEventListener('click', () => {
+            const chatId = content.parentElement.dataset.chatId;
             loadChat(chatId);
             closeHistoryPanel();
         });
     });
+
+    // Click to delete chat
+    UI.aiHistoryList.querySelectorAll('.ai-history-delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const chatId = btn.dataset.deleteId;
+            deleteChatById(chatId);
+        });
+    });
+}
+
+function deleteChatById(chatId) {
+    let history = getChatHistory();
+    history = history.filter(c => c.id !== chatId);
+    saveChatHistory(history);
+    // If we deleted the currently active chat, reset it
+    if (currentChatId === chatId) {
+        currentChatId = null;
+        resetChatArea();
+    }
+    // Re-render the list
+    renderHistoryList();
 }
 
 function loadChat(chatId) {
@@ -398,15 +452,12 @@ function appendThinkingBubble() {
     wrapper.className = 'ai-chat-ai ai-chat-thinking';
     wrapper.id = 'ai-thinking-bubble';
 
-    const bubble = document.createElement('div');
-    bubble.className = 'ai-chat-ai-bubble';
-
     // Emoji icon
     const emojiEl = document.createElement('span');
     emojiEl.className = 'ai-thinking-emoji';
     emojiEl.textContent = EMOJIS[0];
 
-    // Info section (name + thinking label)
+    // Right side: name + thinking dots
     const infoEl = document.createElement('div');
     infoEl.className = 'ai-thinking-info';
 
@@ -414,28 +465,39 @@ function appendThinkingBubble() {
     nameEl.className = 'ai-thinking-name';
     nameEl.textContent = 'Setu AI';
 
-    const labelEl = document.createElement('div');
-    labelEl.className = 'ai-thinking-label';
-    labelEl.textContent = 'thinking...';
+    const dotsLine = document.createElement('div');
+    dotsLine.className = 'ai-thinking-dots-line';
+
+    const thinkText = document.createElement('span');
+    thinkText.textContent = 'Thinking';
+
+    const dotsSpan = document.createElement('span');
+    dotsSpan.className = 'ai-thinking-dots';
+    dotsSpan.textContent = '.';
+
+    dotsLine.appendChild(thinkText);
+    dotsLine.appendChild(dotsSpan);
 
     infoEl.appendChild(nameEl);
-    infoEl.appendChild(labelEl);
+    infoEl.appendChild(dotsLine);
 
-    bubble.appendChild(emojiEl);
-    bubble.appendChild(infoEl);
-
-    wrapper.appendChild(bubble);
+    wrapper.appendChild(emojiEl);
+    wrapper.appendChild(infoEl);
     UI.aiChatArea.appendChild(wrapper);
 
-    // Cycle emojis in order
+    // Cycle emojis — just swap, no animation
     let idx = 0;
     wrapper._emojiInterval = setInterval(() => {
         idx = (idx + 1) % EMOJIS.length;
         emojiEl.textContent = EMOJIS[idx];
-        emojiEl.style.animation = 'none';
-        void emojiEl.offsetHeight; // trigger reflow
-        emojiEl.style.animation = 'emojiPulse 0.5s ease-in-out';
     }, 600);
+
+    // Animate dots: . → .. → ...
+    let dotCount = 1;
+    wrapper._dotsInterval = setInterval(() => {
+        dotCount = (dotCount % 3) + 1;
+        dotsSpan.textContent = '.'.repeat(dotCount);
+    }, 500);
 
     scrollToBottom();
 }
@@ -444,6 +506,7 @@ function removeThinkingBubble() {
     const bubble = document.getElementById('ai-thinking-bubble');
     if (bubble) {
         if (bubble._emojiInterval) clearInterval(bubble._emojiInterval);
+        if (bubble._dotsInterval) clearInterval(bubble._dotsInterval);
         bubble.remove();
     }
 }
@@ -705,32 +768,37 @@ async function executeAISearch() {
 function detectQueryIntent(prompt) {
     const lower = prompt.toLowerCase();
     const intents = { needsData: false, types: [] };
-    const issueKw = ['pothole', 'streetlight', 'garbage', 'water', 'sewage', 'drainage', 'road', 'traffic', 'waste', 'light', 'broken', 'damage', 'dump', 'flood', 'leak', 'electricity', 'sewer'];
+    const issueKw = ['pothole', 'streetlight', 'garbage', 'water', 'sewage', 'drainage', 'road', 'traffic', 'waste', 'light', 'broken', 'damage', 'dump', 'flood', 'leak', 'electricity', 'sewer', 'park', 'footpath', 'sidewalk', 'bridge', 'signal', 'noise', 'pollution', 'stray', 'animal', 'manhole', 'pipeline'];
 
-    if (/\b(my report|my complaint|my issue|my submission|i reported|i submitted|i filed|did i)\b/i.test(lower)) {
+    if (/\b(my report|my complaint|my issue|my submission|i reported|i submitted|i filed|did i|have i)\b/i.test(lower)) {
         intents.needsData = true; intents.types.push('my_reports');
     }
-    if ((/\b(status|progress|update|resolved|pending|submitted|in progress|detail|info|check)\b/i.test(lower) &&
-        /\b(report|complaint|issue|problem)\b/i.test(lower)) || issueKw.some(k => lower.includes(k))) {
+    if ((/\b(status|progress|update|resolved|pending|submitted|in progress|detail|info|check|show|find|get|fetch|look|search|any|what|which|where|list|tell)\b/i.test(lower) &&
+        /\b(report|complaint|issue|problem|case|ticket)\b/i.test(lower)) || issueKw.some(k => lower.includes(k))) {
         intents.needsData = true;
         if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
     }
-    if (/\b(reported by|who reported|filed by|submitted by|complaints?\s*(of|by|from))\b/i.test(lower)) {
+    if (/\b(reported by|who reported|filed by|submitted by|complaints?\s*(of|by|from)|reports?\s*(of|by|from))\b/i.test(lower)) {
         intents.needsData = true;
         if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
     }
-    if (/\b(officer|authority|authorities|department|who.*(handl|assign|responsible|work)|assign.*(to|officer)|in\s*charge)\b/i.test(lower)) {
+    if (/\b(officer|authority|authorities|department|who.*(handl|assign|responsible|work)|assign.*(to|officer)|in\s*charge|municipal|corporation|nagar|panchayat)\b/i.test(lower)) {
         intents.needsData = true; intents.types.push('officer_info');
     }
-    if (/\b(how many|count|total|statistic|stats|number of|pending report|resolved report)\b/i.test(lower)) {
+    if (/\b(how many|count|total|statistic|stats|number of|pending report|resolved report|summary|overview|data|analytics|trend)\b/i.test(lower)) {
         intents.needsData = true; intents.types.push('stats');
         if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
     }
-    if (/\b(in my area|nearby|my city|around me|my local|my district|my village)\b/i.test(lower)) {
+    if (/\b(in my area|nearby|my city|around me|my local|my district|my village|in my|near me|my town|my block|my ward|my zone)\b/i.test(lower)) {
         intents.needsData = true; intents.types.push('area_reports');
         if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
     }
-    if (/\b(all report|recent report|latest report|show report|list report|recent issue|all issue)\b/i.test(lower)) {
+    if (/\b(all report|recent report|latest report|show report|list report|recent issue|all issue|every report|open report|active report)\b/i.test(lower)) {
+        intents.needsData = true;
+        if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
+    }
+    // Catch-all: if user mentions a city name or location with report context
+    if (/\b(reports?|issues?|complaints?)\b/i.test(lower) && !intents.needsData) {
         intents.needsData = true;
         if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
     }
@@ -1002,7 +1070,15 @@ Home, Search, Report, Updates, Profile, Report Feed, Your Reports.
 
 IMPORTANT: You are chatting with a real user. Their profile data is provided below. Use their NAME to greet them personally. Be warm and conversational like a helpful friend.
 
-YOU HAVE REAL-TIME DATABASE ACCESS. When database data is provided after "[REAL-TIME DATABASE DATA]", that data is REAL and ACCURATE — use it to give specific, factual answers. Do NOT say you cannot access the database or you don't have access. The data IS provided to you.
+YOU HAVE REAL-TIME DATABASE ACCESS. When database data is provided after "[REAL-TIME DATABASE DATA]", that data is REAL and ACCURATE from the live Firestore database. You MUST use it to give specific, factual answers. ABSOLUTELY DO NOT say "I can't access the database" or "I don't have access to your data" — the data IS right there in the message. Read it carefully and answer from it.
+
+IMPORTANT DATA INSTRUCTIONS:
+- The data sections labeled "--- THIS USER'S OWN REPORTS ---" contain the logged-in user's personal reports. USE THEM when they ask about "my reports".
+- The data sections labeled "--- ALL REPORTS IN SYSTEM ---" contain all public reports. USE THEM when they ask about any reports, issues, or civic problems.
+- The data sections labeled "--- OFFICERS ---" contain authority/officer details. USE THEM when asked about officers or departments.
+- The data sections labeled "--- STATISTICS ---" contain aggregate numbers. USE THEM when asked about counts, totals, or stats.
+- If a specific report/issue is asked about, SEARCH through the provided data and pick matching entries.
+- If the data section says "No matching reports found", then say so honestly.
 
 STRICT PRIVACY RULES:
 1. CITIZENS: Only mention their NAME when saying who reported an issue. NEVER reveal phone, email, DOB, Aadhaar, or ID numbers.
@@ -1010,28 +1086,29 @@ STRICT PRIVACY RULES:
 3. NEVER expose system IDs, passwords, or internal data.
 
 PERSONALIZATION:
-- Always greet the user by their first name (e.g. "Hey Rahul! 👋")
+- Greet the user by their first name (e.g. "Hey Rahul!")
 - Reference their city when relevant
-- Be friendly, warm, and conversational — not robotic
+- Be friendly and warm — not robotic
 
 RESPONSE FORMAT (MANDATORY):
 - Start with a brief personalized 1-line greeting.
 - Then leave an empty line.
 - Use dash bullet points (- ) for each detail item. Example: "- **Status:** In Progress"
 - Each piece of information MUST be its own bullet point on a new line.
-- Use short punchy bullet points — not paragraphs.
 - For report listings, use numbered lists (1. 2. 3.).
-- Use **bold** for labels like **Status:**, **Location:**, **Reported by:**
+- Use **bold** for labels.
 - Leave empty lines between sections.
 - End with a helpful closing line.
 
+RESPONSE LENGTH: Keep responses under 150 words. Be concise and punchy. Do NOT write essays.
+
 RESPONSE RULES:
-1. When database data is provided, give SPECIFIC answers using actual data. NEVER say "I don't have access to your data" when data IS provided.
+1. When database data is provided, ALWAYS give SPECIFIC answers using ACTUAL data from it. NEVER ignore the data.
 2. ALWAYS use bullet points or numbered lists.
 3. Be friendly, warm, and concise.
 4. Statuses: "Submitted" = pending, "In Progress" = being worked on, "Resolved" = fixed.
-5. If no matching data, say so and suggest alternatives.
-6. If asked about unrelated topics, redirect politely.
+5. If no matching data, say so honestly and suggest alternatives.
+6. If asked about unrelated topics, redirect politely in 1-2 sentences.
 7. When no database data is provided, answer from general Setu knowledge.
 
 SETU PLATFORM KNOWLEDGE:
