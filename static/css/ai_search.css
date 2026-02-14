@@ -143,23 +143,21 @@
 @keyframes rainbow-shift {
     0% {
         background-position: 0% center;
-        transform: scale(1);
     }
 
     50% {
         background-position: 100% center;
-        transform: scale(1.05);
     }
 
     100% {
         background-position: 200% center;
-        transform: scale(1);
     }
 }
 
 .typing-word {
     display: inline;
-    transition: all 0.3s ease;
+    transition: color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: color;
 }
 
 /* Loading sparkle animation */
@@ -182,8 +180,22 @@
     }
 }
 
-/* Typing container */
+/* Typing container — 7% larger text, premium spacing */
 #ai-typing-container {
-    line-height: 1.8;
-    word-spacing: 0.1em;
+    font-size: 0.936rem;
+    /* 7% increase from 0.875rem (text-sm) */
+    line-height: 1.9;
+    word-spacing: 0.08em;
+    letter-spacing: 0.005em;
+}
+
+/* Bullet point formatting for AI responses */
+#ai-typing-container ul,
+#ai-typing-container ol {
+    padding-left: 1.25rem;
+    margin: 0.5rem 0;
+}
+
+#ai-typing-container li {
+    margin-bottom: 0.25rem;
 }

@@ -140,9 +140,25 @@ function startMainEmojiAnimation() {
 function toggleView(viewName) {
     if (viewName === 'ai') {
         document.body.classList.add('ai-view-active');
-        // Show recent questions when entering AI view
         if (UI.recentQuestionsSection) UI.recentQuestionsSection.style.display = 'block';
         setTimeout(() => UI.aiInput && UI.aiInput.focus(), 100);
+
+        // Magical color wash transition
+        const aiView = document.getElementById('search-view-ai');
+        if (aiView) {
+            // Color wash overlay
+            aiView.classList.remove('ai-color-wash');
+            void aiView.offsetWidth;
+            aiView.classList.add('ai-color-wash');
+            // Background pulse
+            aiView.classList.remove('ai-bg-pulse');
+            void aiView.offsetWidth;
+            aiView.classList.add('ai-bg-pulse');
+            // Auto-cleanup so it doesn't interfere later
+            setTimeout(() => {
+                aiView.classList.remove('ai-color-wash', 'ai-bg-pulse');
+            }, 2000);
+        }
     } else {
         document.body.classList.remove('ai-view-active');
     }
@@ -291,148 +307,421 @@ async function executeAISearch() {
     }
 }
 
+// ===== DATA-AWARE AI HELPERS (RAG) =====
+
+function detectQueryIntent(prompt) {
+    const lower = prompt.toLowerCase();
+    const intents = { needsData: false, types: [] };
+    const issueKw = ['pothole', 'streetlight', 'garbage', 'water', 'sewage', 'drainage', 'road', 'traffic', 'waste', 'light', 'broken', 'damage', 'dump', 'flood', 'leak', 'electricity', 'sewer'];
+
+    if (/\b(my report|my complaint|my issue|my submission|i reported|i submitted|i filed|did i)\b/i.test(lower)) {
+        intents.needsData = true; intents.types.push('my_reports');
+    }
+    if ((/\b(status|progress|update|resolved|pending|submitted|in progress|detail|info|check)\b/i.test(lower) &&
+        /\b(report|complaint|issue|problem)\b/i.test(lower)) || issueKw.some(k => lower.includes(k))) {
+        intents.needsData = true;
+        if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
+    }
+    if (/\b(reported by|who reported|filed by|submitted by|complaints?\s*(of|by|from))\b/i.test(lower)) {
+        intents.needsData = true;
+        if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
+    }
+    if (/\b(officer|authority|authorities|department|who.*(handl|assign|responsible|work)|assign.*(to|officer)|in\s*charge)\b/i.test(lower)) {
+        intents.needsData = true; intents.types.push('officer_info');
+    }
+    if (/\b(how many|count|total|statistic|stats|number of|pending report|resolved report)\b/i.test(lower)) {
+        intents.needsData = true; intents.types.push('stats');
+        if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
+    }
+    if (/\b(in my area|nearby|my city|around me|my local|my district|my village)\b/i.test(lower)) {
+        intents.needsData = true; intents.types.push('area_reports');
+        if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
+    }
+    if (/\b(all report|recent report|latest report|show report|list report|recent issue|all issue)\b/i.test(lower)) {
+        intents.needsData = true;
+        if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
+    }
+    return intents;
+}
+
+function formatAITimestamp(ts) {
+    if (!ts) return 'Unknown date';
+    try {
+        const date = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
+        return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch { return 'Unknown date'; }
+}
+
+async function fetchRelevantData(intent) {
+    const result = { myReports: [], reports: [], officers: [], stats: null, currentUser: null, userCity: '' };
+    const currentUser = auth.currentUser;
+
+    // Current user profile
+    if (currentUser) {
+        try {
+            const uDoc = await getDoc(doc(db, 'users', currentUser.uid));
+            if (uDoc.exists()) {
+                const ud = uDoc.data();
+                result.currentUser = { name: ud.fullname || 'User', city: ud.city || '', role: ud.role || 'citizen' };
+                result.userCity = ud.city || '';
+            }
+        } catch (e) { console.warn('[AI] User profile fetch failed:', e.message); }
+    }
+
+    // User's own reports
+    if (intent.types.includes('my_reports') && currentUser) {
+        try {
+            let q;
+            try { q = query(collection(db, 'reports'), where('userId', '==', currentUser.uid), orderBy('createdAt', 'desc'), limit(20)); }
+            catch { q = query(collection(db, 'reports'), where('userId', '==', currentUser.uid), limit(20)); }
+            const snap = await getDocs(q);
+            snap.forEach(d => {
+                const r = d.data();
+                result.myReports.push({
+                    id: d.id, issueType: r.issueType || 'Unknown', description: (r.description || '').substring(0, 120),
+                    status: r.status || 'Unknown', location: r.location?.full || r.location?.city || 'Unknown',
+                    city: r.location?.city || '', createdAt: formatAITimestamp(r.createdAt),
+                    department: r.assignedDepartment || r.department || 'Not assigned'
+                });
+            });
+        } catch (e) { console.warn('[AI] My reports fetch failed:', e.message); }
+    }
+
+    // All reports (for lookup, stats, area)
+    if (intent.types.includes('report_lookup') || intent.types.includes('stats') || intent.types.includes('area_reports')) {
+        try {
+            let q;
+            try { q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(50)); }
+            catch { q = query(collection(db, 'reports'), limit(50)); }
+            const snap = await getDocs(q);
+            const uidSet = new Set();
+            const raw = [];
+            snap.forEach(d => { const r = d.data(); raw.push({ id: d.id, ...r }); if (r.userId) uidSet.add(r.userId); });
+
+            // Batch fetch reporter names
+            const nameMap = {};
+            await Promise.all([...uidSet].slice(0, 30).map(async uid => {
+                try { const ud = await getDoc(doc(db, 'users', uid)); if (ud.exists()) nameMap[uid] = ud.data().fullname || 'Anonymous'; }
+                catch { nameMap[uid] = 'Anonymous'; }
+            }));
+
+            raw.forEach(r => {
+                result.reports.push({
+                    id: r.id, issueType: r.issueType || 'Unknown', description: (r.description || '').substring(0, 120),
+                    status: r.status || 'Unknown', location: r.location?.full || r.location?.city || 'Unknown',
+                    city: r.location?.city || '', area: r.location?.area || '', district: r.location?.district || '',
+                    createdAt: formatAITimestamp(r.createdAt), department: r.assignedDepartment || r.department || 'Not assigned',
+                    reporterName: nameMap[r.userId] || 'Anonymous'
+                });
+            });
+        } catch (e) { console.warn('[AI] Reports fetch failed:', e.message); }
+    }
+
+    // Officers
+    if (intent.types.includes('officer_info')) {
+        try {
+            const q = query(collection(db, 'users'), where('role', '==', 'authority'));
+            const snap = await getDocs(q);
+            snap.forEach(d => {
+                const u = d.data();
+                const o = { name: u.fullname || 'Unknown', department: u.department || 'Not specified', city: u.city || 'Not specified' };
+                if (u.jurisdiction) {
+                    o.state = u.jurisdiction.state || ''; o.district = u.jurisdiction.district || '';
+                    o.subDistrict = u.jurisdiction.subDistrict || ''; o.villages = (u.jurisdiction.villages || []).join(', ');
+                }
+                result.officers.push(o);
+            });
+        } catch (e) { console.warn('[AI] Officers fetch failed:', e.message); }
+    }
+
+    // Stats
+    if (intent.types.includes('stats') && result.reports.length > 0) {
+        const s = { total: result.reports.length, submitted: 0, inProgress: 0, resolved: 0, byType: {}, byCity: {} };
+        result.reports.forEach(r => {
+            if (r.status === 'Submitted') s.submitted++;
+            else if (r.status === 'In Progress') s.inProgress++;
+            else if (r.status === 'Resolved') s.resolved++;
+            s.byType[r.issueType] = (s.byType[r.issueType] || 0) + 1;
+            if (r.city) s.byCity[r.city] = (s.byCity[r.city] || 0) + 1;
+        });
+        result.stats = s;
+    }
+
+    return result;
+}
+
+function buildDataContext(data, intent) {
+    let ctx = '';
+    if (data.currentUser) ctx += `\n--- CURRENT USER ---\nName: ${data.currentUser.name} | City: ${data.currentUser.city || 'Not set'} | Role: ${data.currentUser.role}\n`;
+
+    if (data.myReports.length > 0) {
+        ctx += `\n--- USER'S OWN REPORTS (${data.myReports.length}) ---\n`;
+        data.myReports.forEach((r, i) => {
+            ctx += `${i + 1}. [${r.issueType}] Status: ${r.status} | Location: ${r.location} | Date: ${r.createdAt} | Dept: ${r.department}`;
+            if (r.description) ctx += ` | Info: ${r.description}`;
+            ctx += '\n';
+        });
+    }
+
+    if (intent.types.includes('report_lookup') || intent.types.includes('area_reports')) {
+        let reps = data.reports;
+        if (intent.types.includes('area_reports') && data.userCity) {
+            const uc = data.userCity.toLowerCase();
+            const filtered = reps.filter(r => [r.city, r.area, r.district, r.location].some(f => (f || '').toLowerCase().includes(uc)));
+            if (filtered.length > 0) reps = filtered;
+        }
+        const show = reps.slice(0, 20);
+        if (show.length > 0) {
+            ctx += `\n--- REPORTS (${show.length} of ${reps.length}) ---\n`;
+            show.forEach((r, i) => {
+                ctx += `${i + 1}. [${r.issueType}] Status: ${r.status} | Location: ${r.location} | Date: ${r.createdAt} | By: ${r.reporterName} | Dept: ${r.department}`;
+                if (r.description) ctx += ` | Info: ${r.description}`;
+                ctx += '\n';
+            });
+            if (reps.length > 20) ctx += `...and ${reps.length - 20} more\n`;
+        } else { ctx += '\n--- No matching reports found ---\n'; }
+    }
+
+    if (data.officers.length > 0) {
+        ctx += `\n--- OFFICERS (${data.officers.length}) ---\n`;
+        data.officers.forEach((o, i) => {
+            ctx += `${i + 1}. ${o.name} | Dept: ${o.department} | City: ${o.city}`;
+            if (o.state) ctx += ` | State: ${o.state}`;
+            if (o.district) ctx += ` | District: ${o.district}`;
+            if (o.subDistrict) ctx += ` | Sub-Dist: ${o.subDistrict}`;
+            if (o.villages) ctx += ` | Villages: ${o.villages}`;
+            ctx += '\n';
+        });
+    }
+
+    if (data.stats) {
+        ctx += `\n--- STATISTICS ---\nTotal: ${data.stats.total} | Submitted: ${data.stats.submitted} | In Progress: ${data.stats.inProgress} | Resolved: ${data.stats.resolved}\n`;
+        if (Object.keys(data.stats.byType).length) ctx += 'By Type: ' + Object.entries(data.stats.byType).sort((a, b) => b[1] - a[1]).map(([t, c]) => `${t}(${c})`).join(', ') + '\n';
+        if (Object.keys(data.stats.byCity).length) ctx += 'By City: ' + Object.entries(data.stats.byCity).sort((a, b) => b[1] - a[1]).map(([c, n]) => `${c}(${n})`).join(', ') + '\n';
+    }
+
+    return ctx;
+}
+
+// ===== END RAG HELPERS =====
+
 async function askSetuAI(prompt, thinkingInterval) {
     if (typeof puter === 'undefined') {
         clearInterval(thinkingInterval);
         throw new Error("AI Service not ready");
     }
 
-    // Comprehensive knowledge base about the Setu platform
+    // === RAG: Detect intent and fetch real database data ===
+    const intent = detectQueryIntent(prompt);
+    let dataContext = '';
+
+    if (intent.needsData) {
+        console.log('[Setu AI] Data query detected. Intents:', intent.types);
+        try {
+            const data = await fetchRelevantData(intent);
+            dataContext = buildDataContext(data, intent);
+            console.log('[Setu AI] Data context built, length:', dataContext.length);
+        } catch (e) {
+            console.warn('[Setu AI] Data fetch error, falling back:', e.message);
+        }
+    }
+
     const SETU_KNOWLEDGE = `
 === ABOUT SETU ===
-Setu is a civic issue reporting platform that bridges the gap between citizens and municipal authorities.
-The name "Setu" means "bridge" in Hindi/Sanskrit, symbolizing the connection it creates.
-Setu's mission: In every community, small issues can become major frustrations. Setu streamlines the reporting process by providing a simple, direct line of communication between citizens and local authorities.
+Setu is a civic issue reporting platform bridging citizens and municipal authorities.
+"Setu" means "bridge" in Hindi/Sanskrit.
 
-=== HOW SETU WORKS FOR CITIZENS ===
-1. SNAP & SEND: Report an issue with a photo and location. The app makes it effortless to document and submit problems on the go.
-2. TRACK PROGRESS: Receive real-time status updates from "Submitted" to "In Progress" to "Resolved".
-3. STAY INFORMED: See other reported issues in your area on a live map.
+=== HOW IT WORKS ===
+Citizens: Snap & Send (report with photo+location), Track Progress (real-time status), Stay Informed (community map).
+Authorities: Unified Dashboard, Assign & Act (auto-routing), Analyze Data (insights).
 
-=== HOW SETU WORKS FOR MUNICIPAL AUTHORITIES ===
-1. UNIFIED DASHBOARD: View, sort, and manage all citizen reports in one intuitive dashboard.
-2. ASSIGN & ACT: Issues are automatically routed to the correct department.
-3. ANALYZE DATA: Gain insights on issue hotspots and department performance.
+=== ISSUE TYPES ===
+Potholes, streetlights, garbage/waste, water supply, sewage/drainage, public property damage, traffic signals, other civic issues.
 
-=== TYPES OF ISSUES YOU CAN REPORT ===
-Potholes, road damage, streetlight issues, garbage/waste management, water supply problems, sewage/drainage issues, public property damage, traffic signals, and other civic issues.
+=== STATUSES ===
+Submitted = pending review, In Progress = being worked on, Resolved = fixed.
 
-=== REPORT STATUSES ===
-- "Submitted": Report received and awaiting review
-- "In Progress": Department is working on resolving the issue
-- "Resolved": Issue has been fixed
-
-=== KEY FEATURES ===
-1. INTUITIVE DESIGN: Easy for all ages and technical abilities
-2. MULTILINGUAL SUPPORT: Hindi, Bengali, Telugu, Marathi, Tamil, Urdu, Gujarati, Kannada, Malayalam, Punjabi, Odia, Assamese, Nepali
-3. COMPLETE TRANSPARENCY: Citizens and authorities share the same view on status
-4. DATA-DRIVEN INSIGHTS: Analytics help municipal bodies identify trends
-
-=== SETU AI (Me!) ===
-I provide: Personalized Guidance, Effortless Reporting assistance, and 24/7 Instant Support for questions about the platform.
+=== FEATURES ===
+Intuitive design, multilingual (14 Indian languages), full transparency, data-driven insights.
 
 === APP SECTIONS ===
-Home (dashboard), Search (find reports or ask me), Report (submit issues), Updates (news), Profile (settings), Report Feed (browse reports), Your Reports (your submissions)
-
-=== IMPORTANT ===
-- Login required to report issues
-- Reports deletable within 48 hours
-- Location captured automatically or manually
-- Photos/videos can be attached
-- Reports are publicly visible
+Home, Search, Report, Updates, Profile, Report Feed, Your Reports.
 `;
 
-    const SETU_AI_PERSONA = `You are Setu AI, the official AI assistant for the Setu civic issue reporting platform.
+    const SETU_AI_PERSONA = `You are Setu AI, the official assistant for the Setu civic issue reporting platform.
 
-CRITICAL RULES:
-1. ONLY answer based on the Setu platform knowledge below. Do NOT make up features.
-2. If asked about something unrelated to Setu, say: "I'm Setu AI, here to help with civic issue reporting on Setu. How can I help you with that?"
-3. If asked about unknown features, say: "I don't have specific information about that. Here's what I know about Setu..." 
-4. Be friendly and concise (2-4 sentences).
-5. Use Setu terminology like "Snap & Send", "Track Progress", "Stay Informed".
+YOU HAVE REAL-TIME DATABASE ACCESS. When database data is provided after the user's question, use it for specific, accurate answers.
+
+STRICT PRIVACY RULES:
+1. CITIZENS: Only mention their NAME when saying who reported an issue. NEVER reveal phone, email, DOB, Aadhaar, or ID numbers.
+2. OFFICERS/AUTHORITIES: You may share their NAME, DEPARTMENT, CITY, and JURISDICTION (state, district, sub-district, villages). NEVER reveal phone, email, DOB, or ID.
+3. NEVER expose system IDs, passwords, or internal data.
+
+RESPONSE FORMAT (MANDATORY):
+- Start with a brief 1-line greeting or summary, then use bullet points for details.
+- Use dash bullet points (- ) for each item. Example: "- Status: In Progress"
+- Each piece of information should be its own bullet point on a new line.
+- Use short, punchy bullet points — not walls of text.
+- For report listings, use numbered lists (1. 2. 3.) with key details on each line.
+- Use bold text with ** for important labels like **Status:**, **Location:**, **Reported by:**
+
+RESPONSE RULES:
+1. When database data is provided, give SPECIFIC answers using actual names, statuses, locations, and dates from the data.
+2. ALWAYS use bullet points or numbered lists. Never write paragraphs.
+3. Be friendly, conversational, and concise.
+4. Statuses: "Submitted" = pending, "In Progress" = being worked on, "Resolved" = fixed.
+5. If no matching data found, say so and suggest alternatives.
+6. If asked about unrelated topics, redirect politely.
+7. When no database data is provided, answer from general Setu knowledge below.
 
 SETU PLATFORM KNOWLEDGE:
 ${SETU_KNOWLEDGE}
 
-Remember: Stay on-topic, be accurate, only share actual Setu information.`;
+Use REAL DATA when available. Be accurate, helpful, and protect user privacy.`;
+
+    // Build augmented user message with data context
+    let userMessage = prompt;
+    if (dataContext) {
+        userMessage = `${prompt}\n\n[REAL-TIME DATABASE DATA]:\n${dataContext}`;
+    }
 
     const response = await puter.ai.chat([
         { role: 'system', content: SETU_AI_PERSONA },
-        { role: 'user', content: prompt }
+        { role: 'user', content: userMessage }
     ]);
 
     let text = response?.message?.content || response?.content || JSON.stringify(response);
 
-    // Stop the "thinking" animation - freeze the icon at current state
+    // Stop the "thinking" animation
     clearInterval(thinkingInterval);
 
-    // Get the current emoji from the thinking icon before replacing
     const currentThinkingIcon = document.getElementById('ai-thinking-icon');
     const frozenEmoji = currentThinkingIcon ? currentThinkingIcon.textContent : '🔴';
 
-    // Container Setup for typing response
     UI.aiResponseArea.innerHTML = `
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100">
              <div class="flex items-center gap-2 mb-3">
                 <div id="ai-response-icon" class="w-8 h-8 flex items-center justify-center text-xl">${frozenEmoji}</div>
                 <span class="font-bold text-gray-900">Setu AI</span>
              </div>
-             <div id="ai-typing-container" class="prose text-sm leading-relaxed font-medium"></div>
+             <div id="ai-typing-container" class="prose leading-relaxed font-medium"></div>
         </div>
     `;
 
-    // Rainbow Typing Animation
     const container = document.getElementById('ai-typing-container');
     const typedSpans = await typeWithRainbow(text, container);
 
-    // After typing is complete, fade ALL remaining colored words to dark
     typedSpans.forEach(span => {
-        span.style.color = '#374151'; // dark gray
+        span.style.color = '#374151';
     });
 }
 
 async function typeWithRainbow(text, container) {
-    // Rainbow colors matching the reference images
-    const rainbowColors = [
-        '#ff6b6b', // red/coral
-        '#ffa94d', // orange
-        '#ffe066', // yellow (softer)
-        '#69db7c', // green
-        '#74c0fc', // blue
-        '#b197fc', // purple
-        '#f783ac'  // pink
+    // Premium gradient colors
+    const gradientColors = [
+        '#ff6b6b', '#ff8e72', '#ffa94d', '#ffd43b',
+        '#69db7c', '#38d9a9', '#74c0fc', '#748ffc',
+        '#b197fc', '#e599f7', '#f783ac', '#ff6b6b'
     ];
+    const WAVE_WIDTH = 10;
+    const TYPING_SPEED = 30;
+    const spans = [];
+    let wordIndex = 0;
 
-    const COLORED_WORDS_COUNT = 7; // How many words stay colored at a time
-    const words = text.split(' ');
-    const spans = []; // Track all word spans
-
-    for (let i = 0; i < words.length; i++) {
-        const word = words[i];
-        const span = document.createElement('span');
-        span.textContent = word + ' ';
-        span.style.transition = 'color 0.5s ease';
-
-        // Assign rainbow color based on position in cycle
-        const colorIndex = i % rainbowColors.length;
-        span.style.color = rainbowColors[colorIndex];
-        span.style.fontWeight = '500';
-
-        container.appendChild(span);
-        spans.push(span);
-
-        // Fade older words to dark gray (keep only last N words colored)
-        if (spans.length > COLORED_WORDS_COUNT) {
-            const oldSpan = spans[spans.length - COLORED_WORDS_COUNT - 1];
-            if (oldSpan) {
-                oldSpan.style.color = '#374151'; // dark gray
-            }
-        }
-
-        await new Promise(r => setTimeout(r, 45)); // Typing speed
+    function lerpColor(a, b, t) {
+        const ah = parseInt(a.slice(1), 16), bh = parseInt(b.slice(1), 16);
+        const ar = (ah >> 16) & 0xff, ag = (ah >> 8) & 0xff, ab = ah & 0xff;
+        const br = (bh >> 16) & 0xff, bg = (bh >> 8) & 0xff, bb = bh & 0xff;
+        return `rgb(${Math.round(ar + (br - ar) * t)},${Math.round(ag + (bg - ag) * t)},${Math.round(ab + (bb - ab) * t)})`;
     }
 
-    // Return spans array so caller can finalize all colors
+    function getGradientColor(pos) {
+        const scaled = pos * (gradientColors.length - 1);
+        const idx = Math.floor(scaled);
+        const t = scaled - idx;
+        return lerpColor(gradientColors[Math.min(idx, gradientColors.length - 1)], gradientColors[Math.min(idx + 1, gradientColors.length - 1)], t);
+    }
+
+    // Split text into lines first, then process each line
+    const lines = text.split('\n');
+
+    for (let li = 0; li < lines.length; li++) {
+        const line = lines[li].trim();
+
+        // Empty line = paragraph break
+        if (line === '') {
+            if (li > 0) {
+                const spacer = document.createElement('div');
+                spacer.style.height = '8px';
+                container.appendChild(spacer);
+            }
+            continue;
+        }
+
+        // Detect bullet or numbered list items
+        const bulletMatch = line.match(/^([•\-\*]\s+|\d+\.\s+)/);
+        let lineContainer = container;
+
+        if (bulletMatch) {
+            // Create a bullet line wrapper
+            const bulletDiv = document.createElement('div');
+            bulletDiv.style.cssText = 'display:flex; gap:6px; align-items:flex-start; padding:3px 0 3px 4px; margin:2px 0;';
+
+            // Bullet marker
+            const marker = document.createElement('span');
+            marker.textContent = line.match(/^\d+\./) ? bulletMatch[0].trim() : '•';
+            marker.style.cssText = 'color:#b197fc; flex-shrink:0; font-weight:600; min-width:16px;';
+            bulletDiv.appendChild(marker);
+
+            // Content area
+            const content = document.createElement('span');
+            content.style.cssText = 'flex:1;';
+            bulletDiv.appendChild(content);
+
+            container.appendChild(bulletDiv);
+            lineContainer = content;
+
+            // Remove bullet prefix from text to type
+            var wordsInLine = line.substring(bulletMatch[0].length).split(' ').filter(w => w);
+        } else {
+            var wordsInLine = line.split(' ').filter(w => w);
+        }
+
+        // Type each word in the line
+        for (let wi = 0; wi < wordsInLine.length; wi++) {
+            let word = wordsInLine[wi];
+            const span = document.createElement('span');
+            span.style.transition = 'color 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            span.style.willChange = 'color';
+
+            // Handle **bold** markdown
+            const isBold = word.includes('**');
+            word = word.replace(/\*\*/g, '');
+            span.textContent = word + ' ';
+            span.style.fontWeight = isBold ? '700' : '500';
+
+            const wavePos = (wordIndex % WAVE_WIDTH) / WAVE_WIDTH;
+            span.style.color = getGradientColor(wavePos);
+
+            lineContainer.appendChild(span);
+            spans.push(span);
+            wordIndex++;
+
+            // Fade older words
+            if (spans.length > WAVE_WIDTH) {
+                const fadeSpan = spans[spans.length - WAVE_WIDTH - 1];
+                if (fadeSpan) fadeSpan.style.color = '#374151';
+            }
+
+            await new Promise(r => setTimeout(r, TYPING_SPEED));
+        }
+
+        // Line break between non-empty lines (unless it was a bullet)
+        if (!bulletMatch && li < lines.length - 1 && lines[li + 1]?.trim() !== '') {
+            container.appendChild(document.createElement('br'));
+        }
+    }
+
     return spans;
 }
 

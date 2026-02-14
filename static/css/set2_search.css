@@ -6,6 +6,8 @@
     min-height: 100vh;
     display: none;
     /* Hidden by default */
+    position: relative;
+    overflow: hidden;
 }
 
 /* Active state helper */
@@ -17,6 +19,117 @@
     display: block;
 }
 
+/* ===== MAGICAL COLOR TRANSITION ANIMATION ===== */
+
+/* Background color wash that sweeps across when entering AI mode */
+@keyframes ai-color-wash {
+    0% {
+        opacity: 0;
+        background-position: -100% 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 0.6;
+    }
+
+    100% {
+        opacity: 0;
+        background-position: 200% 0;
+    }
+}
+
+/* Shimmer line at top */
+@keyframes ai-shimmer-line {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    30% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Subtle page background pulse */
+@keyframes ai-bg-pulse {
+    0% {
+        background-color: var(--bg-primary);
+    }
+
+    25% {
+        background-color: #f8f0ff;
+    }
+
+    50% {
+        background-color: #f0f4ff;
+    }
+
+    75% {
+        background-color: #f0fff4;
+    }
+
+    100% {
+        background-color: var(--bg-primary);
+    }
+}
+
+/* Color wash overlay - doesn't affect children at all */
+.ai-color-wash::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 107, 107, 0.15) 15%,
+            rgba(255, 169, 77, 0.15) 30%,
+            rgba(105, 219, 124, 0.12) 45%,
+            rgba(116, 192, 252, 0.15) 60%,
+            rgba(177, 151, 252, 0.15) 75%,
+            rgba(247, 131, 172, 0.12) 90%,
+            transparent 100%);
+    background-size: 200% 100%;
+    animation: ai-color-wash 1.5s ease-out forwards;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* Shimmer line at the very top */
+.ai-color-wash::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60%;
+    height: 3px;
+    background: linear-gradient(90deg,
+            transparent,
+            #ff6b6b, #ffa94d, #69db7c, #74c0fc, #b197fc, #f783ac,
+            transparent);
+    border-radius: 999px;
+    animation: ai-shimmer-line 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    pointer-events: none;
+    z-index: 10000;
+}
+
+/* Background pulse on the container */
+.ai-bg-pulse {
+    animation: ai-bg-pulse 1.2s ease-out forwards;
+}
+
+/* ===== END COLOR TRANSITION ===== */
+
 /* Header */
 .ai-header-title {
     font-size: 2rem;
@@ -27,6 +140,8 @@
     margin-bottom: 32px;
     font-family: 'Inter', sans-serif;
     letter-spacing: -0.02em;
+    position: relative;
+    z-index: 2;
 }
 
 @keyframes rainbow-text {
@@ -59,37 +174,42 @@
 
 @keyframes rainbow-border {
     0% {
-        border-color: #ff0000;
+        border-color: #ff6b6b;
     }
 
-    20% {
-        border-color: #ffff00;
+    17% {
+        border-color: #ffa94d;
     }
 
-    40% {
-        border-color: #00ff00;
+    33% {
+        border-color: #69db7c;
     }
 
-    60% {
-        border-color: #00ffff;
+    50% {
+        border-color: #74c0fc;
     }
 
-    80% {
-        border-color: #0000ff;
+    67% {
+        border-color: #b197fc;
+    }
+
+    83% {
+        border-color: #f783ac;
     }
 
     100% {
-        border-color: #ff00ff;
+        border-color: #ff6b6b;
     }
 }
 
 .ai-header-highlight {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     display: block;
-    /* Elegant purple-pink gradient */
+    animation: shimmer-text 4s ease-in-out infinite;
 }
 
 /* AI Input */
@@ -108,6 +228,7 @@
     min-height: 60px;
     box-sizing: border-box;
     animation: rainbow-border 4s linear infinite;
+    z-index: 2;
 }
 
 .ai-input {
