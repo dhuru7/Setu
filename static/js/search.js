@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where, orderBy, limit, doc, getDoc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { generateResponse, clearKey } from "./setu-ai.js";
 
 // --- Firebase Config --- DO NOT COMMIT API KEY ---
@@ -20,12 +20,15 @@ const auth = getAuth(app);
 // --- Constants & State ---
 const MAX_RESULTS = 50;
 const RECENT_LIMIT = 3;
+const CHAT_HISTORY_KEY = 'setuAI_chatHistory';
+const CHAT_EXPIRY_DAYS = 3;
 const EMOJIS = ["🔴", "🟥", "🟠", "🟧", "🟡", "🟨", "🟢", "🟩", "🔵", "🟦", "🟣", "🟪", "🟤", "🟫", "⚫", "⬛", "⚪", "⬜"];
 
-// State for emoji animation on the main "Ask Setu AI" card (slow, 5s)
 let mainEmojiAnimationInterval = null;
+let currentChatId = null;
+let currentFirebaseUser = null; // Cached auth user
+let cachedUserProfile = null;  // Cached user profile from Firestore
 
-// Styles for standard search results
 const statusStyles = {
     "Submitted": { bg: "bg-yellow-100", text: "text-yellow-800" },
     "In Progress": { bg: "bg-blue-100", text: "text-blue-800" },
@@ -34,11 +37,10 @@ const statusStyles = {
 
 // --- DOM Elements ---
 const UI = {
-    // Views
     mainView: document.getElementById('search-view-main'),
     aiView: document.getElementById('search-view-ai'),
+    transitionOverlay: document.getElementById('ai-transition-overlay'),
 
-    // Main View Elements
     mainSearchInput: document.getElementById('main-search-input'),
     mainSearchBtn: document.getElementById('main-search-btn'),
     aiEntryCard: document.getElementById('ai-entry-card'),
@@ -47,48 +49,72 @@ const UI = {
     standardResultsContainer: document.getElementById('standard-results-container'),
     searchResultsList: document.getElementById('search-results-list'),
     closeResultsBtn: document.getElementById('close-results-btn'),
-
-    // Sections to toggle
     tagsSection: document.querySelector('.tags-section'),
     recentSection: document.querySelector('.recent-section'),
-
-    // AI Logo for animation (on the main search page card)
     aiLogoCircle: document.querySelector('.ai-logo-circle'),
+    bottomNav: document.getElementById('bottom-nav'),
 
-    // AI View Elements
     aiInput: document.getElementById('ai-input'),
     aiSendBtn: document.getElementById('ai-send-btn'),
-    recentQuestionsList: document.getElementById('recent-questions-list'),
-    recentQuestionsSection: document.querySelector('.recent-questions-section'),
-    aiResponseArea: document.getElementById('ai-response-area'),
+    aiChatArea: document.getElementById('ai-chat-area'),
+    aiWelcome: document.getElementById('ai-welcome'),
+    aiBackBtn: document.getElementById('ai-back-btn'),
+    aiHistoryBtn: document.getElementById('ai-history-btn'),
+    aiHistoryPanel: document.getElementById('ai-history-panel'),
+    aiHistoryBackdrop: document.getElementById('ai-history-backdrop'),
+    aiHistoryClose: document.getElementById('ai-history-close'),
+    aiHistoryList: document.getElementById('ai-history-list'),
+    aiWelcomeNameText: document.getElementById('ai-welcome-name-text'),
 };
+
+// --- Firebase Auth Listener - cache user as soon as auth resolves ---
+onAuthStateChanged(auth, async (user) => {
+    currentFirebaseUser = user;
+    if (user) {
+        try {
+            const uDoc = await getDoc(doc(db, 'users', user.uid));
+            if (uDoc.exists()) {
+                cachedUserProfile = uDoc.data();
+                console.log('[AI] User profile cached:', cachedUserProfile.fullname);
+            }
+        } catch (e) {
+            console.warn('[AI] Failed to cache user profile:', e.message);
+        }
+    }
+    // Also try localStorage
+    if (!cachedUserProfile) {
+        try {
+            const lsProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            if (lsProfile.fullname) cachedUserProfile = lsProfile;
+        } catch (e) { /* ignore */ }
+    }
+});
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     loadRecentSearches();
-    loadRecentQuestions();
-    startMainEmojiAnimation(); // Slow animation for the card icon
+    startMainEmojiAnimation();
+    cleanExpiredChats();
 
-    // Navigation (card click to enter AI mode)
     if (UI.aiEntryCard) UI.aiEntryCard.addEventListener('click', () => toggleView('ai'));
+    if (UI.aiBackBtn) UI.aiBackBtn.addEventListener('click', () => toggleView('main'));
 
-    // Main Search
+    if (UI.aiHistoryBtn) UI.aiHistoryBtn.addEventListener('click', openHistoryPanel);
+    if (UI.aiHistoryClose) UI.aiHistoryClose.addEventListener('click', closeHistoryPanel);
+    if (UI.aiHistoryBackdrop) UI.aiHistoryBackdrop.addEventListener('click', closeHistoryPanel);
+
     if (UI.mainSearchBtn) UI.mainSearchBtn.addEventListener('click', executeStandardSearch);
     if (UI.mainSearchInput) UI.mainSearchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') executeStandardSearch();
     });
     if (UI.closeResultsBtn) UI.closeResultsBtn.addEventListener('click', () => {
         UI.standardResultsContainer.classList.add('hidden');
-
-        // Show sections again
         if (UI.tagsSection) UI.tagsSection.style.display = 'block';
         if (UI.recentSection) UI.recentSection.style.display = 'block';
-
         UI.searchResultsList.innerHTML = '';
         UI.mainSearchInput.value = '';
     });
 
-    // Tags
     if (UI.tagBtns) UI.tagBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             UI.mainSearchInput.value = btn.dataset.search;
@@ -96,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Fade out sections on typing (Main Search)
     if (UI.mainSearchInput) {
         UI.mainSearchInput.addEventListener('input', (e) => {
             if (e.target.value.trim().length > 0) {
@@ -106,66 +131,477 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Fade out recent questions on typing (AI Search)
-    if (UI.aiInput) {
-        UI.aiInput.addEventListener('input', (e) => {
-            if (e.target.value.trim().length > 0) {
-                if (UI.recentQuestionsSection) UI.recentQuestionsSection.style.display = 'none';
-            } else {
-                if (UI.recentQuestionsSection) UI.recentQuestionsSection.style.display = 'block';
-            }
-        });
-    }
-
-    // AI Search
     if (UI.aiSendBtn) UI.aiSendBtn.addEventListener('click', executeAISearch);
     if (UI.aiInput) UI.aiInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') executeAISearch();
     });
 });
 
-// Slow animation for the "Ask Setu AI" card on the main search page (5 second interval)
+// --- Emoji animation for the AI card ---
 function startMainEmojiAnimation() {
     if (!UI.aiLogoCircle) return;
     let index = 0;
     UI.aiLogoCircle.textContent = EMOJIS[0];
-
     mainEmojiAnimationInterval = setInterval(() => {
         index = (index + 1) % EMOJIS.length;
         UI.aiLogoCircle.textContent = EMOJIS[index];
-    }, 5000); // 5 seconds
+    }, 5000);
 }
 
 // --- View Management ---
 function toggleView(viewName) {
     if (viewName === 'ai') {
-        document.body.classList.add('ai-view-active');
-        if (UI.recentQuestionsSection) UI.recentQuestionsSection.style.display = 'block';
-        setTimeout(() => UI.aiInput && UI.aiInput.focus(), 100);
+        // Smooth fade-in transition
+        UI.transitionOverlay.classList.remove('fade-out');
+        UI.transitionOverlay.classList.add('fade-in');
 
-        // Magical color wash transition
-        const aiView = document.getElementById('search-view-ai');
-        if (aiView) {
-            // Color wash overlay
-            aiView.classList.remove('ai-color-wash');
-            void aiView.offsetWidth;
-            aiView.classList.add('ai-color-wash');
-            // Background pulse
-            aiView.classList.remove('ai-bg-pulse');
-            void aiView.offsetWidth;
-            aiView.classList.add('ai-bg-pulse');
-            // Auto-cleanup so it doesn't interfere later
-            setTimeout(() => {
-                aiView.classList.remove('ai-color-wash', 'ai-bg-pulse');
-            }, 2000);
-        }
+        // Switch views at the peak of the overlay opacity
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                document.body.classList.add('ai-view-active');
+                if (!currentChatId) {
+                    currentChatId = 'chat_' + Date.now();
+                }
+                typeWelcomeName();
+                setTimeout(() => UI.aiInput && UI.aiInput.focus(), 150);
+            });
+        }, 140);
+
+        setTimeout(() => {
+            UI.transitionOverlay.classList.remove('fade-in');
+        }, 380);
+
     } else {
-        document.body.classList.remove('ai-view-active');
+        // Smooth fade-out transition
+        UI.transitionOverlay.classList.remove('fade-in');
+        UI.transitionOverlay.classList.add('fade-out');
+
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                document.body.classList.remove('ai-view-active');
+            });
+        }, 110);
+
+        setTimeout(() => {
+            UI.transitionOverlay.classList.remove('fade-out');
+        }, 350);
+
+        currentChatId = null;
+        resetChatArea();
     }
 }
 
-// --- Local Storage Management ---
+function resetChatArea() {
+    if (!UI.aiChatArea) return;
+    const messages = UI.aiChatArea.querySelectorAll('.ai-chat-user, .ai-chat-ai, .ai-chat-time');
+    messages.forEach(m => m.remove());
+    if (UI.aiWelcome) UI.aiWelcome.style.display = 'flex';
+    if (UI.aiInput) UI.aiInput.value = '';
+    if (UI.aiWelcomeNameText) UI.aiWelcomeNameText.textContent = '';
+}
 
+// --- Welcome name typing animation ---
+let welcomeTypingTimeout = null;
+function typeWelcomeName() {
+    if (!UI.aiWelcomeNameText) return;
+    // Clear any previous animation
+    if (welcomeTypingTimeout) clearTimeout(welcomeTypingTimeout);
+    UI.aiWelcomeNameText.textContent = '';
+
+    // Get user's first name
+    let firstName = 'there';
+    if (cachedUserProfile && cachedUserProfile.fullname) {
+        firstName = cachedUserProfile.fullname.split(' ')[0];
+    } else {
+        try {
+            const lsProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            if (lsProfile.fullname) firstName = lsProfile.fullname.split(' ')[0];
+        } catch (e) { /* ignore */ }
+    }
+
+    const fullText = `Hey ${firstName}, ask me anything`;
+    let charIndex = 0;
+
+    function typeNextChar() {
+        if (charIndex < fullText.length) {
+            UI.aiWelcomeNameText.textContent += fullText[charIndex];
+            charIndex++;
+            welcomeTypingTimeout = setTimeout(typeNextChar, 35 + Math.random() * 25);
+        }
+    }
+
+    // Start with a small delay after view opens
+    welcomeTypingTimeout = setTimeout(typeNextChar, 250);
+}
+
+// ===== CHAT HISTORY MANAGEMENT =====
+
+function getChatHistory() {
+    try {
+        return JSON.parse(localStorage.getItem(CHAT_HISTORY_KEY) || '[]');
+    } catch {
+        return [];
+    }
+}
+
+function saveChatHistory(history) {
+    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history));
+}
+
+function cleanExpiredChats() {
+    const history = getChatHistory();
+    const now = Date.now();
+    const expiryMs = CHAT_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+    const filtered = history.filter(chat => (now - chat.createdAt) < expiryMs);
+    if (filtered.length !== history.length) {
+        saveChatHistory(filtered);
+    }
+}
+
+function saveMessageToChat(chatId, role, text) {
+    const history = getChatHistory();
+    let chat = history.find(c => c.id === chatId);
+    if (!chat) {
+        chat = {
+            id: chatId,
+            title: text.substring(0, 60),
+            createdAt: Date.now(),
+            messages: []
+        };
+        history.unshift(chat);
+    }
+    chat.messages.push({ role, text, time: Date.now() });
+    chat.lastActivity = Date.now();
+    saveChatHistory(history);
+}
+
+function openHistoryPanel() {
+    renderHistoryList();
+    UI.aiHistoryPanel.classList.add('open');
+    UI.aiHistoryBackdrop.classList.add('open');
+}
+
+function closeHistoryPanel() {
+    UI.aiHistoryPanel.classList.remove('open');
+    UI.aiHistoryBackdrop.classList.remove('open');
+}
+
+function renderHistoryList() {
+    cleanExpiredChats();
+    const history = getChatHistory();
+
+    if (history.length === 0) {
+        UI.aiHistoryList.innerHTML = `
+            <div class="ai-history-empty">
+                <div class="ai-history-empty-icon">💬</div>
+                <div class="ai-history-empty-text">No chat history yet.<br>Start a conversation!</div>
+            </div>
+        `;
+        return;
+    }
+
+    UI.aiHistoryList.innerHTML = history.map(chat => {
+        const firstA = chat.messages.find(m => m.role === 'ai');
+        const timeAgo = getTimeAgo(chat.createdAt);
+        const preview = firstA ? firstA.text.substring(0, 80) + '...' : 'No response yet';
+        return `
+            <div class="ai-history-item" data-chat-id="${chat.id}">
+                <div class="ai-history-item-title">${escapeHtml(chat.title)}</div>
+                <div class="ai-history-item-preview">${escapeHtml(preview)}</div>
+                <div class="ai-history-item-time">${timeAgo}</div>
+            </div>
+        `;
+    }).join('');
+
+    UI.aiHistoryList.querySelectorAll('.ai-history-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const chatId = item.dataset.chatId;
+            loadChat(chatId);
+            closeHistoryPanel();
+        });
+    });
+}
+
+function loadChat(chatId) {
+    const history = getChatHistory();
+    const chat = history.find(c => c.id === chatId);
+    if (!chat) return;
+
+    currentChatId = chatId;
+
+    const messages = UI.aiChatArea.querySelectorAll('.ai-chat-user, .ai-chat-ai, .ai-chat-time');
+    messages.forEach(m => m.remove());
+    if (UI.aiWelcome) UI.aiWelcome.style.display = 'none';
+
+    chat.messages.forEach(msg => {
+        if (msg.role === 'user') {
+            appendUserBubble(msg.text);
+        } else {
+            appendAIBubble(msg.text, false);
+        }
+    });
+
+    scrollToBottom();
+}
+
+function getTimeAgo(timestamp) {
+    const diff = Date.now() - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return `${days}d ago`;
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// ===== CHAT UI HELPERS =====
+
+function appendUserBubble(text) {
+    if (UI.aiWelcome) UI.aiWelcome.style.display = 'none';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ai-chat-user';
+    wrapper.innerHTML = `<div class="ai-chat-user-bubble">${escapeHtml(text)}</div>`;
+    UI.aiChatArea.appendChild(wrapper);
+    scrollToBottom();
+}
+
+function appendAIBubble(text, animate = true) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ai-chat-ai';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'ai-chat-ai-bubble';
+
+    wrapper.appendChild(bubble);
+    UI.aiChatArea.appendChild(wrapper);
+
+    if (animate) {
+        typeFormattedText(text, bubble);
+    } else {
+        bubble.innerHTML = formatAIResponse(text);
+    }
+
+    scrollToBottom();
+    return bubble;
+}
+
+function appendThinkingBubble() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ai-chat-ai ai-chat-thinking';
+    wrapper.id = 'ai-thinking-bubble';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'ai-chat-ai-bubble';
+
+    // Emoji icon
+    const emojiEl = document.createElement('span');
+    emojiEl.className = 'ai-thinking-emoji';
+    emojiEl.textContent = EMOJIS[0];
+
+    // Info section (name + thinking label)
+    const infoEl = document.createElement('div');
+    infoEl.className = 'ai-thinking-info';
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'ai-thinking-name';
+    nameEl.textContent = 'Setu AI';
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'ai-thinking-label';
+    labelEl.textContent = 'thinking...';
+
+    infoEl.appendChild(nameEl);
+    infoEl.appendChild(labelEl);
+
+    bubble.appendChild(emojiEl);
+    bubble.appendChild(infoEl);
+
+    wrapper.appendChild(bubble);
+    UI.aiChatArea.appendChild(wrapper);
+
+    // Cycle emojis in order
+    let idx = 0;
+    wrapper._emojiInterval = setInterval(() => {
+        idx = (idx + 1) % EMOJIS.length;
+        emojiEl.textContent = EMOJIS[idx];
+        emojiEl.style.animation = 'none';
+        void emojiEl.offsetHeight; // trigger reflow
+        emojiEl.style.animation = 'emojiPulse 0.5s ease-in-out';
+    }, 600);
+
+    scrollToBottom();
+}
+
+function removeThinkingBubble() {
+    const bubble = document.getElementById('ai-thinking-bubble');
+    if (bubble) {
+        if (bubble._emojiInterval) clearInterval(bubble._emojiInterval);
+        bubble.remove();
+    }
+}
+
+function scrollToBottom() {
+    if (UI.aiChatArea) {
+        setTimeout(() => {
+            UI.aiChatArea.scrollTop = UI.aiChatArea.scrollHeight;
+        }, 50);
+    }
+}
+
+// ===== AI RESPONSE FORMATTING =====
+
+function formatAIResponse(text) {
+    const lines = text.split('\n');
+    let html = '';
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+
+        if (line === '') {
+            html += '<div class="ai-spacer"></div>';
+            continue;
+        }
+
+        const bulletMatch = line.match(/^([•\-\*]\s+|\d+\.\s+)/);
+
+        if (bulletMatch) {
+            const isNumbered = /^\d+\./.test(line);
+            const marker = isNumbered ? bulletMatch[0].trim() : '•';
+            const content = line.substring(bulletMatch[0].length);
+            html += `<div class="ai-bullet-item">
+                <span class="ai-bullet-marker">${marker}</span>
+                <span class="ai-bullet-text">${formatInlineMarkdown(content)}</span>
+            </div>`;
+        } else {
+            html += `<div class="ai-line">${formatInlineMarkdown(line)}</div>`;
+        }
+    }
+
+    return html;
+}
+
+function formatInlineMarkdown(text) {
+    return text.replace(/\*\*(.+?)\*\*/g, '<span class="ai-bold">$1</span>');
+}
+
+// Typing animation for AI responses
+async function typeFormattedText(text, container) {
+    const gradientColors = [
+        '#ff6b6b', '#ff8e72', '#ffa94d', '#ffd43b',
+        '#69db7c', '#38d9a9', '#74c0fc', '#748ffc',
+        '#b197fc', '#e599f7', '#f783ac', '#ff6b6b'
+    ];
+    const WAVE_WIDTH = 10;
+    const TYPING_SPEED = 25;
+    const spans = [];
+    let wordIndex = 0;
+
+    function lerpColor(a, b, t) {
+        const ah = parseInt(a.slice(1), 16), bh = parseInt(b.slice(1), 16);
+        const ar = (ah >> 16) & 0xff, ag = (ah >> 8) & 0xff, ab = ah & 0xff;
+        const br = (bh >> 16) & 0xff, bg = (bh >> 8) & 0xff, bb = bh & 0xff;
+        return `rgb(${Math.round(ar + (br - ar) * t)},${Math.round(ag + (bg - ag) * t)},${Math.round(ab + (bb - ab) * t)})`;
+    }
+
+    function getGradientColor(pos) {
+        const scaled = pos * (gradientColors.length - 1);
+        const idx = Math.floor(scaled);
+        const t = scaled - idx;
+        return lerpColor(gradientColors[Math.min(idx, gradientColors.length - 1)], gradientColors[Math.min(idx + 1, gradientColors.length - 1)], t);
+    }
+
+    const lines = text.split('\n');
+
+    for (let li = 0; li < lines.length; li++) {
+        const line = lines[li].trim();
+
+        if (line === '') {
+            if (li > 0) {
+                const spacer = document.createElement('div');
+                spacer.className = 'ai-spacer';
+                container.appendChild(spacer);
+            }
+            continue;
+        }
+
+        const bulletMatch = line.match(/^([•\-\*]\s+|\d+\.\s+)/);
+        let lineContainer = container;
+
+        if (bulletMatch) {
+            const bulletDiv = document.createElement('div');
+            bulletDiv.className = 'ai-bullet-item';
+
+            const marker = document.createElement('span');
+            marker.className = 'ai-bullet-marker';
+            marker.textContent = line.match(/^\d+\./) ? bulletMatch[0].trim() : '•';
+            bulletDiv.appendChild(marker);
+
+            const content = document.createElement('span');
+            content.className = 'ai-bullet-text';
+            bulletDiv.appendChild(content);
+
+            container.appendChild(bulletDiv);
+            lineContainer = content;
+
+            var wordsInLine = line.substring(bulletMatch[0].length).split(' ').filter(w => w);
+        } else {
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'ai-line';
+            container.appendChild(lineDiv);
+            lineContainer = lineDiv;
+
+            var wordsInLine = line.split(' ').filter(w => w);
+        }
+
+        for (let wi = 0; wi < wordsInLine.length; wi++) {
+            let word = wordsInLine[wi];
+            const span = document.createElement('span');
+            span.style.transition = 'color 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            span.style.willChange = 'color';
+
+            const isBold = word.includes('**');
+            word = word.replace(/\*\*/g, '');
+            span.textContent = word + ' ';
+            span.style.fontWeight = isBold ? '700' : '450';
+            if (isBold) span.style.color = '#1a1a1a';
+
+            const wavePos = (wordIndex % WAVE_WIDTH) / WAVE_WIDTH;
+            if (!isBold) span.style.color = getGradientColor(wavePos);
+
+            lineContainer.appendChild(span);
+            spans.push(span);
+            wordIndex++;
+
+            if (spans.length > WAVE_WIDTH) {
+                const fadeSpan = spans[spans.length - WAVE_WIDTH - 1];
+                if (fadeSpan && fadeSpan.style.fontWeight !== '700') {
+                    fadeSpan.style.color = '#374151';
+                }
+            }
+
+            scrollToBottom();
+            await new Promise(r => setTimeout(r, TYPING_SPEED));
+        }
+    }
+
+    spans.forEach(span => {
+        if (span.style.fontWeight !== '700') {
+            span.style.color = '#374151';
+        }
+    });
+
+    return spans;
+}
+
+// --- Local Storage Management ---
 function getRecent(key) {
     try {
         return JSON.parse(localStorage.getItem(key) || '[]');
@@ -183,7 +619,6 @@ function saveRecent(key, item) {
 }
 
 // --- Logic: Standard Search ---
-
 function loadRecentSearches() {
     if (!UI.recentSearchesList) return;
     const list = getRecent('recentSearches');
@@ -213,11 +648,6 @@ window.handleRecentClick = (text, type) => {
         if (UI.tagsSection) UI.tagsSection.style.display = 'none';
         if (UI.recentSection) UI.recentSection.style.display = 'none';
         executeStandardSearch();
-    } else {
-        // AI: Just fill the input, don't execute
-        UI.aiInput.value = text;
-        UI.aiInput.focus();
-        if (UI.recentQuestionsSection) UI.recentQuestionsSection.style.display = 'none';
     }
 };
 
@@ -248,62 +678,25 @@ async function executeStandardSearch() {
 }
 
 // --- Logic: AI Search ---
-
-function loadRecentQuestions() {
-    if (!UI.recentQuestionsList) return;
-    const list = getRecent('recentQuestions');
-    UI.recentQuestionsList.innerHTML = list.map(item => `
-        <div class="ai-recent-item cursor-pointer" onclick="handleRecentClick('${item.text}', 'ai')">
-            <div class="ai-recent-content">
-                <div class="ai-recent-question">${item.text}</div>
-                <div class="ai-recent-sub">Setu AI Answered</div>
-            </div>
-             <div class="recent-arrow">
-                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-            </div>
-        </div>
-    `).join('');
-}
-
 async function executeAISearch() {
     const queryText = UI.aiInput.value.trim();
     if (!queryText) return;
 
-    saveRecent('recentQuestions', { text: queryText, time: 'Just now' });
-    loadRecentQuestions();
+    if (!currentChatId) {
+        currentChatId = 'chat_' + Date.now();
+    }
 
-    if (UI.recentQuestionsSection) UI.recentQuestionsSection.style.display = 'none';
+    appendUserBubble(queryText);
+    saveMessageToChat(currentChatId, 'user', queryText);
+    UI.aiInput.value = '';
 
-    UI.aiResponseArea.classList.remove('hidden');
-
-    // "Thinking" state with fast-animating icon
-    UI.aiResponseArea.innerHTML = `
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100">
-             <div class="flex items-center gap-2 mb-3">
-                <div id="ai-thinking-icon" class="w-8 h-8 flex items-center justify-center text-xl">🔴</div>
-                <span class="font-bold text-gray-900">Setu AI</span>
-             </div>
-             <p class="text-gray-700 animate-pulse">Thinking...</p>
-        </div>
-    `;
-
-    // Fast emoji animation during "thinking" (0.5s interval)
-    const thinkingIconEl = document.getElementById('ai-thinking-icon');
-    let thinkingIndex = 0;
-    const thinkingInterval = setInterval(() => {
-        if (thinkingIconEl) {
-            thinkingIndex = (thinkingIndex + 1) % EMOJIS.length;
-            thinkingIconEl.textContent = EMOJIS[thinkingIndex];
-        }
-    }, 500);
+    appendThinkingBubble();
 
     try {
-        await askSetuAI(queryText, thinkingInterval);
+        await askSetuAI(queryText);
     } catch (e) {
-        clearInterval(thinkingInterval);
-        UI.aiResponseArea.innerHTML = `<p class="text-red-500">Error: ${e.message}</p>`;
+        removeThinkingBubble();
+        appendAIBubble(`Sorry, I encountered an error: ${e.message}. Please try again.`, false);
     }
 }
 
@@ -354,26 +747,55 @@ function formatAITimestamp(ts) {
 
 async function fetchRelevantData(intent) {
     const result = { myReports: [], reports: [], officers: [], stats: null, currentUser: null, userCity: '' };
-    const currentUser = auth.currentUser;
 
-    // Current user profile
-    if (currentUser) {
+    // Use cached user or try to get from auth
+    const user = currentFirebaseUser || auth.currentUser;
+
+    // Always get user profile for personalization
+    if (user) {
         try {
-            const uDoc = await getDoc(doc(db, 'users', currentUser.uid));
-            if (uDoc.exists()) {
-                const ud = uDoc.data();
-                result.currentUser = { name: ud.fullname || 'User', city: ud.city || '', role: ud.role || 'citizen' };
+            // Use cached profile if available, otherwise fetch
+            let ud = cachedUserProfile;
+            if (!ud) {
+                const uDoc = await getDoc(doc(db, 'users', user.uid));
+                if (uDoc.exists()) {
+                    ud = uDoc.data();
+                    cachedUserProfile = ud;
+                }
+            }
+            if (ud) {
+                result.currentUser = {
+                    name: ud.fullname || 'User',
+                    city: ud.city || '',
+                    role: ud.role || 'citizen',
+                    email: ud.email || '',
+                    phone: ud.phone || ''
+                };
                 result.userCity = ud.city || '';
             }
         } catch (e) { console.warn('[AI] User profile fetch failed:', e.message); }
     }
 
-    // User's own reports
-    if (intent.types.includes('my_reports') && currentUser) {
+    // Also try getting from localStorage as fallback
+    if (!result.currentUser) {
+        try {
+            const lsProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            if (lsProfile.fullname) {
+                result.currentUser = {
+                    name: lsProfile.fullname,
+                    city: lsProfile.city || '',
+                    role: lsProfile.role || 'citizen'
+                };
+                result.userCity = lsProfile.city || '';
+            }
+        } catch (e) { /* ignore parse error */ }
+    }
+
+    if (intent.types.includes('my_reports') && user) {
         try {
             let q;
-            try { q = query(collection(db, 'reports'), where('userId', '==', currentUser.uid), orderBy('createdAt', 'desc'), limit(20)); }
-            catch { q = query(collection(db, 'reports'), where('userId', '==', currentUser.uid), limit(20)); }
+            try { q = query(collection(db, 'reports'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'), limit(20)); }
+            catch { q = query(collection(db, 'reports'), where('userId', '==', user.uid), limit(20)); }
             const snap = await getDocs(q);
             snap.forEach(d => {
                 const r = d.data();
@@ -387,7 +809,6 @@ async function fetchRelevantData(intent) {
         } catch (e) { console.warn('[AI] My reports fetch failed:', e.message); }
     }
 
-    // All reports (for lookup, stats, area)
     if (intent.types.includes('report_lookup') || intent.types.includes('stats') || intent.types.includes('area_reports')) {
         try {
             let q;
@@ -398,7 +819,6 @@ async function fetchRelevantData(intent) {
             const raw = [];
             snap.forEach(d => { const r = d.data(); raw.push({ id: d.id, ...r }); if (r.userId) uidSet.add(r.userId); });
 
-            // Batch fetch reporter names
             const nameMap = {};
             await Promise.all([...uidSet].slice(0, 30).map(async uid => {
                 try { const ud = await getDoc(doc(db, 'users', uid)); if (ud.exists()) nameMap[uid] = ud.data().fullname || 'Anonymous'; }
@@ -417,7 +837,6 @@ async function fetchRelevantData(intent) {
         } catch (e) { console.warn('[AI] Reports fetch failed:', e.message); }
     }
 
-    // Officers
     if (intent.types.includes('officer_info')) {
         try {
             const q = query(collection(db, 'users'), where('role', '==', 'authority'));
@@ -434,7 +853,6 @@ async function fetchRelevantData(intent) {
         } catch (e) { console.warn('[AI] Officers fetch failed:', e.message); }
     }
 
-    // Stats
     if (intent.types.includes('stats') && result.reports.length > 0) {
         const s = { total: result.reports.length, submitted: 0, inProgress: 0, resolved: 0, byType: {}, byCity: {} };
         result.reports.forEach(r => {
@@ -452,10 +870,10 @@ async function fetchRelevantData(intent) {
 
 function buildDataContext(data, intent) {
     let ctx = '';
-    if (data.currentUser) ctx += `\n--- CURRENT USER ---\nName: ${data.currentUser.name} | City: ${data.currentUser.city || 'Not set'} | Role: ${data.currentUser.role}\n`;
+    if (data.currentUser) ctx += `\n--- CURRENT USER (the person asking this question) ---\nName: ${data.currentUser.name} | City: ${data.currentUser.city || 'Not set'} | Role: ${data.currentUser.role}\n`;
 
     if (data.myReports.length > 0) {
-        ctx += `\n--- USER'S OWN REPORTS (${data.myReports.length}) ---\n`;
+        ctx += `\n--- THIS USER'S OWN REPORTS (${data.myReports.length}) ---\n`;
         data.myReports.forEach((r, i) => {
             ctx += `${i + 1}. [${r.issueType}] Status: ${r.status} | Location: ${r.location} | Date: ${r.createdAt} | Dept: ${r.department}`;
             if (r.description) ctx += ` | Info: ${r.description}`;
@@ -472,7 +890,7 @@ function buildDataContext(data, intent) {
         }
         const show = reps.slice(0, 20);
         if (show.length > 0) {
-            ctx += `\n--- REPORTS (${show.length} of ${reps.length}) ---\n`;
+            ctx += `\n--- ALL REPORTS IN SYSTEM (${show.length} of ${reps.length}) ---\n`;
             show.forEach((r, i) => {
                 ctx += `${i + 1}. [${r.issueType}] Status: ${r.status} | Location: ${r.location} | Date: ${r.createdAt} | By: ${r.reporterName} | Dept: ${r.department}`;
                 if (r.description) ctx += ` | Info: ${r.description}`;
@@ -505,15 +923,47 @@ function buildDataContext(data, intent) {
 
 // ===== END RAG HELPERS =====
 
-async function askSetuAI(prompt, thinkingInterval) {
+async function askSetuAI(prompt) {
     if (typeof puter === 'undefined') {
-        clearInterval(thinkingInterval);
-        throw new Error("AI Service not ready");
+        removeThinkingBubble();
+        throw new Error("AI Service not ready. Please refresh the page.");
     }
 
-    // === RAG: Detect intent and fetch real database data ===
+    // ALWAYS detect intent and try to fetch data
     const intent = detectQueryIntent(prompt);
     let dataContext = '';
+
+    // Always fetch user profile for personalization, even if no data intent
+    const user = currentFirebaseUser || auth.currentUser;
+    let userCtx = '';
+
+    if (user || cachedUserProfile) {
+        try {
+            let profile = cachedUserProfile;
+            if (!profile && user) {
+                const uDoc = await getDoc(doc(db, 'users', user.uid));
+                if (uDoc.exists()) {
+                    profile = uDoc.data();
+                    cachedUserProfile = profile;
+                }
+            }
+            if (profile) {
+                userCtx = `\n--- CURRENT USER (who is asking this question) ---\nName: ${profile.fullname || 'User'} | City: ${profile.city || 'Not set'} | Role: ${profile.role || 'citizen'}\n`;
+            }
+        } catch (e) {
+            console.warn('[AI] Profile fetch for context failed:', e.message);
+        }
+    }
+
+    // Fallback: try localStorage
+    if (!userCtx) {
+        try {
+            const lsProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            if (lsProfile.fullname) {
+                userCtx = `\n--- CURRENT USER (who is asking this question) ---\nName: ${lsProfile.fullname} | City: ${lsProfile.city || 'Not set'} | Role: ${lsProfile.role || 'citizen'}\n`;
+            }
+        } catch (e) { /* ignore parse error */ }
+    }
 
     if (intent.needsData) {
         console.log('[Setu AI] Data query detected. Intents:', intent.types);
@@ -550,40 +1000,56 @@ Home, Search, Report, Updates, Profile, Report Feed, Your Reports.
 
     const SETU_AI_PERSONA = `You are Setu AI, the official assistant for the Setu civic issue reporting platform.
 
-YOU HAVE REAL-TIME DATABASE ACCESS. When database data is provided after the user's question, use it for specific, accurate answers.
+IMPORTANT: You are chatting with a real user. Their profile data is provided below. Use their NAME to greet them personally. Be warm and conversational like a helpful friend.
+
+YOU HAVE REAL-TIME DATABASE ACCESS. When database data is provided after "[REAL-TIME DATABASE DATA]", that data is REAL and ACCURATE — use it to give specific, factual answers. Do NOT say you cannot access the database or you don't have access. The data IS provided to you.
 
 STRICT PRIVACY RULES:
 1. CITIZENS: Only mention their NAME when saying who reported an issue. NEVER reveal phone, email, DOB, Aadhaar, or ID numbers.
-2. OFFICERS/AUTHORITIES: You may share their NAME, DEPARTMENT, CITY, and JURISDICTION (state, district, sub-district, villages). NEVER reveal phone, email, DOB, or ID.
+2. OFFICERS/AUTHORITIES: You may share their NAME, DEPARTMENT, CITY, and JURISDICTION. NEVER reveal phone, email, DOB, or ID.
 3. NEVER expose system IDs, passwords, or internal data.
 
+PERSONALIZATION:
+- Always greet the user by their first name (e.g. "Hey Rahul! 👋")
+- Reference their city when relevant
+- Be friendly, warm, and conversational — not robotic
+
 RESPONSE FORMAT (MANDATORY):
-- Start with a brief 1-line greeting or summary, then use bullet points for details.
-- Use dash bullet points (- ) for each item. Example: "- Status: In Progress"
-- Each piece of information should be its own bullet point on a new line.
-- Use short, punchy bullet points — not walls of text.
-- For report listings, use numbered lists (1. 2. 3.) with key details on each line.
-- Use bold text with ** for important labels like **Status:**, **Location:**, **Reported by:**
+- Start with a brief personalized 1-line greeting.
+- Then leave an empty line.
+- Use dash bullet points (- ) for each detail item. Example: "- **Status:** In Progress"
+- Each piece of information MUST be its own bullet point on a new line.
+- Use short punchy bullet points — not paragraphs.
+- For report listings, use numbered lists (1. 2. 3.).
+- Use **bold** for labels like **Status:**, **Location:**, **Reported by:**
+- Leave empty lines between sections.
+- End with a helpful closing line.
 
 RESPONSE RULES:
-1. When database data is provided, give SPECIFIC answers using actual names, statuses, locations, and dates from the data.
-2. ALWAYS use bullet points or numbered lists. Never write paragraphs.
-3. Be friendly, conversational, and concise.
+1. When database data is provided, give SPECIFIC answers using actual data. NEVER say "I don't have access to your data" when data IS provided.
+2. ALWAYS use bullet points or numbered lists.
+3. Be friendly, warm, and concise.
 4. Statuses: "Submitted" = pending, "In Progress" = being worked on, "Resolved" = fixed.
-5. If no matching data found, say so and suggest alternatives.
+5. If no matching data, say so and suggest alternatives.
 6. If asked about unrelated topics, redirect politely.
-7. When no database data is provided, answer from general Setu knowledge below.
+7. When no database data is provided, answer from general Setu knowledge.
 
 SETU PLATFORM KNOWLEDGE:
 ${SETU_KNOWLEDGE}
 
-Use REAL DATA when available. Be accurate, helpful, and protect user privacy.`;
+Use REAL DATA when available. Be accurate, helpful, personalized, and protect user privacy.`;
 
-    // Build augmented user message with data context
+    // Build the full message with all context
     let userMessage = prompt;
-    if (dataContext) {
-        userMessage = `${prompt}\n\n[REAL-TIME DATABASE DATA]:\n${dataContext}`;
+    const contextParts = [];
+    if (userCtx) contextParts.push(userCtx);
+    if (dataContext) contextParts.push(dataContext);
+
+    if (contextParts.length > 0) {
+        userMessage = `${prompt}\n\n[REAL-TIME DATABASE DATA]:\n${contextParts.join('\n')}`;
     }
+
+    console.log('[Setu AI] Sending to AI with context length:', userMessage.length);
 
     const response = await puter.ai.chat([
         { role: 'system', content: SETU_AI_PERSONA },
@@ -592,137 +1058,9 @@ Use REAL DATA when available. Be accurate, helpful, and protect user privacy.`;
 
     let text = response?.message?.content || response?.content || JSON.stringify(response);
 
-    // Stop the "thinking" animation
-    clearInterval(thinkingInterval);
-
-    const currentThinkingIcon = document.getElementById('ai-thinking-icon');
-    const frozenEmoji = currentThinkingIcon ? currentThinkingIcon.textContent : '🔴';
-
-    UI.aiResponseArea.innerHTML = `
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100">
-             <div class="flex items-center gap-2 mb-3">
-                <div id="ai-response-icon" class="w-8 h-8 flex items-center justify-center text-xl">${frozenEmoji}</div>
-                <span class="font-bold text-gray-900">Setu AI</span>
-             </div>
-             <div id="ai-typing-container" class="prose leading-relaxed font-medium"></div>
-        </div>
-    `;
-
-    const container = document.getElementById('ai-typing-container');
-    const typedSpans = await typeWithRainbow(text, container);
-
-    typedSpans.forEach(span => {
-        span.style.color = '#374151';
-    });
-}
-
-async function typeWithRainbow(text, container) {
-    // Premium gradient colors
-    const gradientColors = [
-        '#ff6b6b', '#ff8e72', '#ffa94d', '#ffd43b',
-        '#69db7c', '#38d9a9', '#74c0fc', '#748ffc',
-        '#b197fc', '#e599f7', '#f783ac', '#ff6b6b'
-    ];
-    const WAVE_WIDTH = 10;
-    const TYPING_SPEED = 30;
-    const spans = [];
-    let wordIndex = 0;
-
-    function lerpColor(a, b, t) {
-        const ah = parseInt(a.slice(1), 16), bh = parseInt(b.slice(1), 16);
-        const ar = (ah >> 16) & 0xff, ag = (ah >> 8) & 0xff, ab = ah & 0xff;
-        const br = (bh >> 16) & 0xff, bg = (bh >> 8) & 0xff, bb = bh & 0xff;
-        return `rgb(${Math.round(ar + (br - ar) * t)},${Math.round(ag + (bg - ag) * t)},${Math.round(ab + (bb - ab) * t)})`;
-    }
-
-    function getGradientColor(pos) {
-        const scaled = pos * (gradientColors.length - 1);
-        const idx = Math.floor(scaled);
-        const t = scaled - idx;
-        return lerpColor(gradientColors[Math.min(idx, gradientColors.length - 1)], gradientColors[Math.min(idx + 1, gradientColors.length - 1)], t);
-    }
-
-    // Split text into lines first, then process each line
-    const lines = text.split('\n');
-
-    for (let li = 0; li < lines.length; li++) {
-        const line = lines[li].trim();
-
-        // Empty line = paragraph break
-        if (line === '') {
-            if (li > 0) {
-                const spacer = document.createElement('div');
-                spacer.style.height = '8px';
-                container.appendChild(spacer);
-            }
-            continue;
-        }
-
-        // Detect bullet or numbered list items
-        const bulletMatch = line.match(/^([•\-\*]\s+|\d+\.\s+)/);
-        let lineContainer = container;
-
-        if (bulletMatch) {
-            // Create a bullet line wrapper
-            const bulletDiv = document.createElement('div');
-            bulletDiv.style.cssText = 'display:flex; gap:6px; align-items:flex-start; padding:3px 0 3px 4px; margin:2px 0;';
-
-            // Bullet marker
-            const marker = document.createElement('span');
-            marker.textContent = line.match(/^\d+\./) ? bulletMatch[0].trim() : '•';
-            marker.style.cssText = 'color:#b197fc; flex-shrink:0; font-weight:600; min-width:16px;';
-            bulletDiv.appendChild(marker);
-
-            // Content area
-            const content = document.createElement('span');
-            content.style.cssText = 'flex:1;';
-            bulletDiv.appendChild(content);
-
-            container.appendChild(bulletDiv);
-            lineContainer = content;
-
-            // Remove bullet prefix from text to type
-            var wordsInLine = line.substring(bulletMatch[0].length).split(' ').filter(w => w);
-        } else {
-            var wordsInLine = line.split(' ').filter(w => w);
-        }
-
-        // Type each word in the line
-        for (let wi = 0; wi < wordsInLine.length; wi++) {
-            let word = wordsInLine[wi];
-            const span = document.createElement('span');
-            span.style.transition = 'color 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-            span.style.willChange = 'color';
-
-            // Handle **bold** markdown
-            const isBold = word.includes('**');
-            word = word.replace(/\*\*/g, '');
-            span.textContent = word + ' ';
-            span.style.fontWeight = isBold ? '700' : '500';
-
-            const wavePos = (wordIndex % WAVE_WIDTH) / WAVE_WIDTH;
-            span.style.color = getGradientColor(wavePos);
-
-            lineContainer.appendChild(span);
-            spans.push(span);
-            wordIndex++;
-
-            // Fade older words
-            if (spans.length > WAVE_WIDTH) {
-                const fadeSpan = spans[spans.length - WAVE_WIDTH - 1];
-                if (fadeSpan) fadeSpan.style.color = '#374151';
-            }
-
-            await new Promise(r => setTimeout(r, TYPING_SPEED));
-        }
-
-        // Line break between non-empty lines (unless it was a bullet)
-        if (!bulletMatch && li < lines.length - 1 && lines[li + 1]?.trim() !== '') {
-            container.appendChild(document.createElement('br'));
-        }
-    }
-
-    return spans;
+    removeThinkingBubble();
+    saveMessageToChat(currentChatId, 'ai', text);
+    appendAIBubble(text, true);
 }
 
 // --- Fetch Helpers ---
@@ -732,15 +1070,12 @@ async function fetchReports(queryText) {
     console.log('[Search] Searching for:', qLower);
 
     try {
-        // Fetch recent reports from Firestore
         const reportsRef = collection(db, 'reports');
         let q;
 
         try {
-            // Try with ordering first
             q = query(reportsRef, orderBy('createdAt', 'desc'), limit(50));
         } catch (indexError) {
-            // Fallback without ordering if index doesn't exist
             console.warn('[Search] Index not available, fetching without order');
             q = query(reportsRef, limit(50));
         }
@@ -751,7 +1086,6 @@ async function fetchReports(queryText) {
         const reports = [];
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
-            // Search in multiple fields
             const searchableText = [
                 data.description || '',
                 data.issueType || '',

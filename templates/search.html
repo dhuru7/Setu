@@ -115,46 +115,76 @@
             </div>
         </main>
 
-        <!-- View 2: AI Search Interface -->
-        <main id="search-view-ai" class="search-container-ai">
-            <!-- Header -->
-            <div class="mb-4">
-                <h1 class="ai-header-title">What would you like <span class="ai-header-highlight">to ask Setu AI?</span>
-                </h1>
-            </div>
+        <!-- Transition Overlay (Portal effect) -->
+        <div id="ai-transition-overlay" class="ai-transition-overlay"></div>
 
-            <!-- AI Input -->
-            <div class="ai-input-wrapper">
-                <input type="text" id="ai-input" class="ai-input" placeholder="Ask anything...">
-                <button id="ai-send-btn" class="ai-send-btn">
+        <!-- View 2: AI Chat Interface (Full Screen Chat) -->
+        <main id="search-view-ai" class="search-container-ai">
+            <!-- AI Top Bar -->
+            <div class="ai-top-bar">
+                <button id="ai-history-btn" class="ai-top-btn" title="Chat History">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                        stroke="currentColor" width="20" height="20">
+                        stroke="currentColor" width="22" height="22">
                         <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
+                <div class="ai-top-title">
+                    <span class="ai-top-title-dot"></span>
+                    Setu AI
+                </div>
+                <button id="ai-back-btn" class="ai-top-btn" title="Back to Search">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" width="22" height="22">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
-            <!-- Recent Questions -->
-            <div class="recent-questions-section">
-                <div class="recent-questions-label">RECENT QUESTIONS</div>
-                <div id="recent-questions-list" class="recent-list">
-                    <!-- Populated by JS, reusing recent-list class for similar style or override -->
+            <!-- Chat Messages Area -->
+            <div id="ai-chat-area" class="ai-chat-area">
+                <!-- Welcome State -->
+                <div id="ai-welcome" class="ai-welcome">
+                    <div class="ai-welcome-name">
+                        <span id="ai-welcome-name-text"></span><span class="ai-welcome-cursor"></span>
+                    </div>
                 </div>
+                <!-- Chat messages will be inserted here -->
             </div>
 
-            <!-- AI Response Area -->
-            <div id="ai-response-area" class="mt-8 hidden">
-                <!-- AI Output Rendered Here -->
+            <!-- Chat Input (Fixed at bottom) -->
+            <div class="ai-chat-input-area">
+                <div class="ai-chat-input-wrapper">
+                    <input type="text" id="ai-input" class="ai-chat-input" placeholder="Type your question...">
+                    <button id="ai-send-btn" class="ai-chat-send-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" width="20" height="20">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </main>
 
     </div>
 
+    <!-- History Sidebar (Outside AI container to prevent animation inheritance) -->
+    <div id="ai-history-backdrop" class="ai-history-backdrop"></div>
+    <div id="ai-history-panel" class="ai-history-panel">
+        <div class="ai-history-header">
+            <h3>Chat History</h3>
+            <button id="ai-history-close" class="ai-history-close">&times;</button>
+        </div>
+        <div id="ai-history-list" class="ai-history-list">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
     <div id="google_translate_element"></div>
 
     <!-- Bottom Navigation -->
-    <div class="bottom-nav-container">
+    <div id="bottom-nav" class="bottom-nav-container">
         <nav class="bottom-nav">
             <a href="index.html" class="nav-item">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
