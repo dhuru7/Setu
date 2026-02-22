@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where, orderBy, limit, doc, getDoc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { generateResponse, clearKey } from "./setu-ai.js";
+import { generateResponse, clearKey, callSarvamAPI, getSarvamApiKey } from "./setu-ai.js";
 
 // --- Firebase Config --- DO NOT COMMIT API KEY ---
 const firebaseConfig = {
@@ -992,9 +992,9 @@ function buildDataContext(data, intent) {
 // ===== END RAG HELPERS =====
 
 async function askSetuAI(prompt) {
-    if (typeof puter === 'undefined') {
+    if (!getSarvamApiKey()) {
         removeThinkingBubble();
-        throw new Error("AI Service not ready. Please refresh the page.");
+        throw new Error("Sarvam API key not set. Please add your API key in Profile settings.");
     }
 
     // ALWAYS detect intent and try to fetch data
@@ -1126,14 +1126,14 @@ Use REAL DATA when available. Be accurate, helpful, personalized, and protect us
         userMessage = `${prompt}\n\n[REAL-TIME DATABASE DATA]:\n${contextParts.join('\n')}`;
     }
 
-    console.log('[Setu AI] Sending to AI with context length:', userMessage.length);
+    console.log('[Setu AI] Sending to Sarvam-M with context length:', userMessage.length);
 
-    const response = await puter.ai.chat([
+    const messages = [
         { role: 'system', content: SETU_AI_PERSONA },
         { role: 'user', content: userMessage }
-    ]);
+    ];
 
-    let text = response?.message?.content || response?.content || JSON.stringify(response);
+    const text = await callSarvamAPI(messages);
 
     removeThinkingBubble();
     saveMessageToChat(currentChatId, 'ai', text);

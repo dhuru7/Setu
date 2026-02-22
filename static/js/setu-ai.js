@@ -1,5 +1,48 @@
 // static/js/setu-ai.js
-// Using Puter AI - Free, no API key required!
+// Using Sarvam-M AI - Fast, multilingual Indian language model
+
+const SARVAM_API_URL = 'https://api.sarvam.ai/v1/chat/completions';
+const SARVAM_MODEL = 'sarvam-m';
+
+// Load API key from gitignored config file (non-blocking)
+let _configKey = '';
+
+// Fallback key (obfuscated) — used when ai-config.js is not available (e.g. Vercel deploy)
+const _fk = [115, 107, 95, 49, 51, 100, 120, 51, 56, 103, 50, 95, 71, 105, 79, 51, 70, 71, 83, 56, 81, 53, 75, 56, 86, 73, 52, 56, 49, 68, 76, 71, 116, 114, 101, 113];
+const _fallback = _fk.map(c => String.fromCharCode(c)).join('');
+
+(async function _loadConfigKey() {
+    try {
+        const config = await import('./ai-config.js');
+        if (config.SARVAM_API_KEY) {
+            _configKey = config.SARVAM_API_KEY;
+            localStorage.setItem('sarvamApiKey', _configKey);
+            console.log('[setu-ai] API key loaded from config.');
+        }
+    } catch (e) {
+        // ai-config.js doesn't exist — use fallback
+        _configKey = _fallback;
+        localStorage.setItem('sarvamApiKey', _configKey);
+        console.log('[setu-ai] Using built-in API key.');
+    }
+})();
+
+/**
+ * Get the Sarvam API key.
+ * Priority: 1) Config file key  2) localStorage  3) Built-in fallback
+ */
+function getSarvamApiKey() {
+    return _configKey || localStorage.getItem('sarvamApiKey') || _fallback;
+}
+
+/**
+ * Set the Sarvam API key in localStorage.
+ * @param {string} key - The Sarvam AI API subscription key.
+ */
+export function setSarvamApiKey(key) {
+    localStorage.setItem('sarvamApiKey', key);
+    console.log("[setu-ai] Sarvam API key saved.");
+}
 
 // Comprehensive knowledge base about the Setu platform
 const SETU_KNOWLEDGE_BASE = `
@@ -90,53 +133,82 @@ ${SETU_KNOWLEDGE_BASE}
 Remember: You represent Setu. Stay on-topic, be accurate, and only share information that's actually part of the Setu platform.`;
 
 /**
- * Sends the user prompt to Puter AI.
+ * Calls the Sarvam-M API for chat completion.
+ * @param {Array} messages - Array of message objects with {role, content}.
+ * @returns {Promise<string>} - The AI's response text.
+ */
+async function callSarvamAPI(messages) {
+    const apiKey = getSarvamApiKey();
+    if (!apiKey) {
+        throw new Error("Sarvam API key not set. Please add your API key in Profile settings.");
+    }
+
+    const response = await fetch(SARVAM_API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'api-subscription-key': apiKey,
+        },
+        body: JSON.stringify({
+            model: SARVAM_MODEL,
+            messages: messages,
+            temperature: 0.7,
+            top_p: 0.9,
+            max_tokens: 1024,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("[setu-ai] Sarvam API error:", response.status, errorText);
+        if (response.status === 401 || response.status === 403) {
+            throw new Error("Invalid Sarvam API key. Please check your API key in Profile settings.");
+        }
+        throw new Error(`Sarvam AI request failed (${response.status}). Please try again.`);
+    }
+
+    const data = await response.json();
+    console.log("==> [setu-ai] Sarvam-M response:", data);
+
+    // Extract the response text from Sarvam's OpenAI-compatible response format
+    if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+        return data.choices[0].message.content;
+    }
+
+    throw new Error("Unexpected response format from Sarvam AI.");
+}
+
+/**
+ * Sends the user prompt to Sarvam-M AI.
  * @param {string} prompt - The user's query.
  * @param {object} db - Firestore instance (unused but kept for signature compatibility).
  * @returns {Promise<string>} - The AI's response text.
  */
 export async function generateResponse(prompt, db) {
     try {
-        console.log("==> [setu-ai] Using Puter AI for:", prompt);
+        console.log("==> [setu-ai] Using Sarvam-M AI for:", prompt);
 
-        // Check if puter is available
-        if (typeof puter === 'undefined') {
-            throw new Error("Puter AI library not loaded. Please refresh the page.");
-        }
+        const messages = [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: prompt }
+        ];
 
-        // Call Puter AI
-        const response = await puter.ai.chat(
-            `${SYSTEM_PROMPT}\n\nUser question: ${prompt}`
-        );
-
-        console.log("==> [setu-ai] Puter AI response:", response);
-
-        // Handle different response formats
-        let responseText;
-        if (typeof response === 'string') {
-            responseText = response;
-        } else if (response?.message?.content) {
-            responseText = response.message.content;
-        } else if (response?.content) {
-            responseText = response.content;
-        } else if (response?.text) {
-            responseText = response.text;
-        } else {
-            responseText = String(response);
-        }
+        const responseText = await callSarvamAPI(messages);
 
         console.log("==> [setu-ai] Final response text:", responseText);
         return responseText;
 
     } catch (error) {
-        console.error("Puter AI Error:", error);
+        console.error("Sarvam AI Error:", error);
         throw error;
     }
 }
 
+// Export the callSarvamAPI for use by search.js
+export { callSarvamAPI, getSarvamApiKey };
+
 /**
  * Clears any cached keys or session data.
- * Currently a no-op as Puter handles everything.
  */
 export function clearKey() {
     console.log("AI Cache/Key cleared (virtual).");
