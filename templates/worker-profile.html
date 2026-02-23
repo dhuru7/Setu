@@ -122,6 +122,19 @@
                         <!-- Initials will be filled by JS -->
                     </div>
                     <div class="profile-active-dot"></div>
+                    <div class="avatar-upload-btn" id="avatar-upload-btn" title="Change profile picture">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                        </svg>
+                    </div>
+                    <div class="avatar-uploading-overlay" id="avatar-uploading">
+                        <div class="avatar-spinner"></div>
+                    </div>
+                    <input type="file" id="avatar-file-input" accept="image/*" style="display:none;">
                 </div>
                 <div class="profile-info">
                     <h2 class="profile-name" id="profile-name">Loading...</h2>
@@ -682,12 +695,87 @@
                 align-items: center;
             }
         }
+
+        /* Worker Avatar Upload */
+        .profile-avatar-wrapper {
+            cursor: pointer;
+        }
+
+        .avatar-upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            background: var(--worker-blue, #3b82f6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--worker-card-bg, #fff);
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 2;
+        }
+
+        .avatar-upload-btn:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
+
+        .avatar-upload-btn svg {
+            width: 13px;
+            height: 13px;
+            color: white;
+        }
+
+        .avatar-uploading-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+        }
+
+        .avatar-uploading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .avatar-spinner {
+            width: 26px;
+            height: 26px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin-avatar 0.8s linear infinite;
+        }
+
+        @keyframes spin-avatar {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
     </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
@@ -701,6 +789,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         let currentUserUid = null;
         let selectedOfficerId = null;
@@ -724,7 +813,11 @@
             document.getElementById('profile-name').textContent = name;
             document.getElementById('sidebar-user-name').textContent = name;
             const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-            document.getElementById('profile-avatar').textContent = initials || 'W';
+            const avatarEl = document.getElementById('profile-avatar');
+            avatarEl.textContent = initials || 'W';
+            if (userProfile.avatar) {
+                avatarEl.innerHTML = `<img src="${userProfile.avatar}" alt="Profile">`;
+            }
             if (userProfile.email) document.getElementById('profile-email').textContent = userProfile.email;
             if (userProfile.phone) document.getElementById('profile-phone').textContent = userProfile.phone;
             if (userProfile.department) {
@@ -747,6 +840,58 @@
             };
             document.getElementById('logout-btn')?.addEventListener('click', performLogout);
             document.getElementById('logout-card')?.addEventListener('click', performLogout);
+
+            // ========= PROFILE PICTURE UPLOAD =========
+            const avatarUploadBtn = document.getElementById('avatar-upload-btn');
+            const avatarFileInput = document.getElementById('avatar-file-input');
+            const avatarUploading = document.getElementById('avatar-uploading');
+            const avatarWrapper = document.querySelector('.profile-avatar-wrapper');
+
+            avatarWrapper?.addEventListener('click', (e) => {
+                if (e.target.closest('.setup-modal-overlay')) return;
+                avatarFileInput?.click();
+            });
+
+            avatarFileInput?.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file || !currentUserUid) return;
+
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file.');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Image must be under 5MB.');
+                    return;
+                }
+
+                try {
+                    avatarUploading.classList.add('show');
+
+                    const storageRef = ref(storage, `profile-pictures/${currentUserUid}`);
+                    await uploadBytes(storageRef, file);
+                    const downloadURL = await getDownloadURL(storageRef);
+
+                    await updateDoc(doc(db, 'users', currentUserUid), { avatar: downloadURL });
+
+                    // Update avatar UI
+                    const avatarEl = document.getElementById('profile-avatar');
+                    avatarEl.innerHTML = `<img src="${downloadURL}" alt="Profile">`;
+
+                    // Update cache
+                    const cached = JSON.parse(localStorage.getItem('userProfile')) || {};
+                    cached.avatar = downloadURL;
+                    localStorage.setItem('userProfile', JSON.stringify(cached));
+
+                    avatarUploading.classList.remove('show');
+                } catch (err) {
+                    console.error('Upload failed:', err);
+                    avatarUploading.classList.remove('show');
+                    alert('Failed to upload image. Please try again.');
+                }
+
+                avatarFileInput.value = '';
+            });
 
             // ========= MODAL SETUP FLOW =========
             const modal = document.getElementById('setup-modal');
@@ -921,6 +1066,12 @@
                             if (data.idCard) document.getElementById('profile-id').textContent = data.idCard;
                             if (data.mobile) document.getElementById('profile-phone').textContent = data.mobile;
 
+                            // Load avatar from Firestore
+                            if (data.avatar) {
+                                const avatarEl = document.getElementById('profile-avatar');
+                                avatarEl.innerHTML = `<img src="${data.avatar}" alt="Profile">`;
+                            }
+
                             // Check if profile is already set up
                             if (data.profileSetupComplete && data.supervisorOfficerId) {
                                 const area = [data.district, data.state].filter(Boolean).join(', ');
@@ -937,6 +1088,7 @@
                             if (data.email) cached.email = data.email;
                             if (data.state) cached.state = data.state;
                             if (data.district) cached.district = data.district;
+                            if (data.avatar) cached.avatar = data.avatar;
                             if (data.profileSetupComplete) cached.profileSetupComplete = true;
                             localStorage.setItem('userProfile', JSON.stringify(cached));
                         }
