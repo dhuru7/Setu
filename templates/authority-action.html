@@ -393,106 +393,6 @@
             width: 20px;
             height: 20px;
         }
-
-        /* Worker Select Styles */
-        .worker-select-wrapper {
-            position: relative;
-        }
-
-        .worker-select {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--auth-bg);
-            border: 1px solid var(--auth-border);
-            border-radius: 10px;
-            font-size: 0.9375rem;
-            color: var(--auth-text-primary);
-            cursor: pointer;
-            transition: all 0.2s;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 18px;
-            padding-right: 40px;
-        }
-
-        .worker-select:focus {
-            outline: none;
-            border-color: var(--auth-blue);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .worker-task-count {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 20px;
-            height: 20px;
-            padding: 0 6px;
-            border-radius: 10px;
-            font-size: 0.6875rem;
-            font-weight: 700;
-            margin-left: 6px;
-        }
-
-        .task-count-low {
-            background: var(--auth-green-light);
-            color: var(--auth-green);
-        }
-
-        .task-count-mid {
-            background: var(--auth-orange-light);
-            color: var(--auth-orange);
-        }
-
-        .task-count-full {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-        }
-
-        .conflict-warning {
-            background: rgba(245, 158, 11, 0.08);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-top: 8px;
-            display: none;
-            align-items: flex-start;
-            gap: 8px;
-            font-size: 0.8125rem;
-            color: #b45309;
-            line-height: 1.4;
-        }
-
-        .conflict-warning.show {
-            display: flex;
-        }
-
-        .conflict-warning svg {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        .worker-info-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 14px;
-            background: var(--auth-blue-light);
-            border-radius: 10px;
-            margin-top: 8px;
-            font-size: 0.8125rem;
-            color: var(--auth-blue);
-            font-weight: 500;
-        }
-
-        .worker-info-badge svg {
-            width: 16px;
-            height: 16px;
-        }
     </style>
 </head>
 
@@ -647,28 +547,15 @@
                     <input type="hidden" id="report-id" name="reportId">
 
                     <div class="form-group">
-                        <label class="form-label" for="worker-select">Assign Worker *</label>
-                        <div class="worker-select-wrapper">
-                            <select id="worker-select" name="workerId" class="worker-select" required>
-                                <option value="">Loading workers...</option>
-                            </select>
-                        </div>
-                        <div id="worker-info-display" class="worker-info-badge" style="display:none;">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                            </svg>
-                            <span id="worker-info-text"></span>
-                        </div>
-                        <div id="conflict-warning" class="conflict-warning">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                            </svg>
-                            <span id="conflict-text"></span>
-                        </div>
+                        <label class="form-label" for="officer-name">Assigned Officer Name *</label>
+                        <input type="text" id="officer-name" name="officerName" class="form-input"
+                            placeholder="Enter officer's full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="officer-phone">Officer Contact Number *</label>
+                        <input type="tel" id="officer-phone" name="officerPhone" class="form-input"
+                            placeholder="Enter phone number" required>
                     </div>
 
                     <div class="form-row">
@@ -700,7 +587,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Assign & Start Work
+                        Start Work
                     </button>
                 </div>
             </form>
@@ -719,8 +606,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { fetchOfficerReports, updateReportStatus, createUpdateNotification, getReportById } from "../static/js/authority-utils.js?v=8";
-        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { fetchOfficerReports, updateReportStatus, createUpdateNotification, getReportById } from "../static/js/authority-utils.js?v=7";
 
         // Firebase config - DO NOT COMMIT API KEY
         const firebaseConfig = {
@@ -738,8 +624,6 @@
         // Store reports globally for filtering
         let allReports = [];
         let currentFilter = 'pending';
-        let squadWorkers = []; // Workers in officer's squad
-        let workerAssignments = {}; // workerId -> [{startDate, endDate, reportId}]
 
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
@@ -955,163 +839,9 @@
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('start-date').value = today;
 
-                // Reset conflict warning
-                document.getElementById('conflict-warning').classList.remove('show');
-                document.getElementById('worker-info-display').style.display = 'none';
-                document.getElementById('worker-select').value = '';
-
-                // Populate worker dropdown
-                populateWorkerSelect();
-
                 actionModal.classList.add('show');
                 document.body.style.overflow = 'hidden';
             };
-
-            // Duration to days mapping
-            const durationToDays = (duration) => {
-                switch (duration) {
-                    case '1 day': return 1;
-                    case '2-3 days': return 3;
-                    case '1 week': return 7;
-                    case '2 weeks': return 14;
-                    case '1 month': return 30;
-                    case '2+ months': return 60;
-                    default: return 7;
-                }
-            };
-
-            // Check time collision for a worker
-            const checkTimeConflict = (workerId, startDate, duration) => {
-                const assignments = workerAssignments[workerId] || [];
-                const newStart = new Date(startDate);
-                const newEnd = new Date(newStart);
-                newEnd.setDate(newEnd.getDate() + durationToDays(duration));
-
-                for (const assign of assignments) {
-                    const existStart = new Date(assign.startDate);
-                    const existEnd = new Date(existStart);
-                    existEnd.setDate(existEnd.getDate() + durationToDays(assign.duration));
-
-                    // Check overlap: new task starts before existing ends AND new task ends after existing starts
-                    if (newStart < existEnd && newEnd > existStart) {
-                        return {
-                            conflict: true,
-                            existingStart: existStart.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
-                            existingEnd: existEnd.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
-                            reportTitle: assign.reportTitle || 'another task'
-                        };
-                    }
-                }
-                return { conflict: false };
-            };
-
-            // Load squad workers and their assignments
-            const loadSquadWorkers = async (user) => {
-                const db = getFirestore();
-                try {
-                    const workersRef = collection(db, 'users');
-                    const q = query(workersRef, where('supervisorOfficerId', '==', user.uid));
-                    const snapshot = await getDocs(q);
-
-                    squadWorkers = [];
-                    snapshot.forEach(docSnap => {
-                        const data = docSnap.data();
-                        if (data.role === 'worker') {
-                            squadWorkers.push({ id: docSnap.id, ...data });
-                        }
-                    });
-
-                    // Count assignments per worker from reports
-                    workerAssignments = {};
-                    allReports.forEach(report => {
-                        if (report.assignedWorkerId && (report.status?.toLowerCase() === 'in progress')) {
-                            if (!workerAssignments[report.assignedWorkerId]) {
-                                workerAssignments[report.assignedWorkerId] = [];
-                            }
-                            workerAssignments[report.assignedWorkerId].push({
-                                startDate: report.workStartDate || '',
-                                duration: report.resolutionDuration || '1 week',
-                                reportId: report.id,
-                                reportTitle: report.issueType || 'Task'
-                            });
-                        }
-                    });
-
-                } catch (error) {
-                    console.error('Error loading squad workers:', error);
-                }
-            };
-
-            // Populate worker dropdown
-            const populateWorkerSelect = () => {
-                const select = document.getElementById('worker-select');
-                if (squadWorkers.length === 0) {
-                    select.innerHTML = '<option value="">No workers in your squad</option>';
-                    return;
-                }
-
-                let options = '<option value="">Select a worker</option>';
-                squadWorkers.forEach(worker => {
-                    const name = worker.fullname || 'Worker';
-                    const taskCount = (workerAssignments[worker.id] || []).length;
-                    const isFull = taskCount >= 3;
-                    const countLabel = taskCount === 0 ? '0 tasks' : `${taskCount} task${taskCount > 1 ? 's' : ''}`;
-                    options += `<option value="${worker.id}" ${isFull ? 'disabled' : ''} data-name="${name}" data-phone="${worker.mobile || ''}" data-tasks="${taskCount}">${name} — ${countLabel}${isFull ? ' (MAX)' : ''}</option>`;
-                });
-                select.innerHTML = options;
-            };
-
-            // Worker select change handler
-            document.getElementById('worker-select')?.addEventListener('change', (e) => {
-                const selectedOption = e.target.selectedOptions[0];
-                const workerInfoDisplay = document.getElementById('worker-info-display');
-                const conflictWarning = document.getElementById('conflict-warning');
-
-                if (!selectedOption || !selectedOption.value) {
-                    workerInfoDisplay.style.display = 'none';
-                    conflictWarning.classList.remove('show');
-                    return;
-                }
-
-                const name = selectedOption.dataset.name;
-                const phone = selectedOption.dataset.phone;
-                const taskCount = parseInt(selectedOption.dataset.tasks || '0');
-
-                // Show worker info
-                let countClass = taskCount === 0 ? 'task-count-low' : taskCount < 3 ? 'task-count-mid' : 'task-count-full';
-                document.getElementById('worker-info-text').innerHTML = `${name}${phone ? ' • ' + phone : ''} <span class="worker-task-count ${countClass}">${taskCount}/3</span>`;
-                workerInfoDisplay.style.display = 'flex';
-
-                // Check conflicts
-                validateConflicts();
-            });
-
-            // Validate conflicts when date or duration changes
-            const validateConflicts = () => {
-                const workerId = document.getElementById('worker-select').value;
-                const startDate = document.getElementById('start-date').value;
-                const duration = document.getElementById('resolution-duration').value;
-                const conflictWarning = document.getElementById('conflict-warning');
-                const submitBtn = document.getElementById('submit-btn');
-
-                if (!workerId || !startDate || !duration) {
-                    conflictWarning.classList.remove('show');
-                    return;
-                }
-
-                const result = checkTimeConflict(workerId, startDate, duration);
-                if (result.conflict) {
-                    document.getElementById('conflict-text').textContent = `Schedule conflict! This worker is assigned to "${result.reportTitle}" from ${result.existingStart} to ${result.existingEnd}. Choose a different time or worker.`;
-                    conflictWarning.classList.add('show');
-                    submitBtn.disabled = true;
-                } else {
-                    conflictWarning.classList.remove('show');
-                    submitBtn.disabled = false;
-                }
-            };
-
-            document.getElementById('start-date')?.addEventListener('change', validateConflicts);
-            document.getElementById('resolution-duration')?.addEventListener('change', validateConflicts);
 
             const closeActionModal = () => {
                 actionModal.classList.remove('show');
@@ -1143,46 +873,11 @@
                 submitBtn.innerHTML = 'Updating...';
 
                 const formData = new FormData(actionForm);
-                const workerId = formData.get('workerId');
-                const selectedOption = document.getElementById('worker-select').selectedOptions[0];
-                const workerName = selectedOption?.dataset?.name || '';
-                const workerPhone = selectedOption?.dataset?.phone || '';
-
-                // Validate worker selection
-                if (!workerId) {
-                    showToast('Please select a worker', true);
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                    return;
-                }
-
-                // Check task count limit
-                const currentTasks = (workerAssignments[workerId] || []).length;
-                if (currentTasks >= 3) {
-                    showToast('This worker already has 3 tasks (maximum)', true);
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                    return;
-                }
-
-                // Check time conflict one more time
-                const startDate = formData.get('startDate');
-                const duration = formData.get('resolutionDuration');
-                const conflictCheck = checkTimeConflict(workerId, startDate, duration);
-                if (conflictCheck.conflict) {
-                    showToast('Schedule conflict detected. Choose a different time or worker.', true);
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                    return;
-                }
-
                 const actionData = {
-                    officerName: workerName,
-                    officerPhone: workerPhone,
-                    assignedWorkerId: workerId,
-                    assignedWorkerName: workerName,
-                    startDate: startDate,
-                    resolutionDuration: duration,
+                    officerName: formData.get('officerName'),
+                    officerPhone: formData.get('officerPhone'),
+                    startDate: formData.get('startDate'),
+                    resolutionDuration: formData.get('resolutionDuration'),
                     status: 'In Progress'
                 };
 
@@ -1227,10 +922,9 @@
             // Initialize
             loadCachedProfile();
 
-            onAuthStateChanged(auth, async (user) => {
+            onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    await loadReports(user);
-                    await loadSquadWorkers(user);
+                    loadReports(user);
                 }
             });
         });
