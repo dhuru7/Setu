@@ -67,6 +67,30 @@
             "destination": "/templates/authority-map.html"
         },
         {
+            "source": "/authority-feedback.html",
+            "destination": "/templates/authority-feedback.html"
+        },
+        {
+            "source": "/authority-squad.html",
+            "destination": "/templates/authority-squad.html"
+        },
+        {
+            "source": "/worker-home.html",
+            "destination": "/templates/worker-home.html"
+        },
+        {
+            "source": "/worker-assignments.html",
+            "destination": "/templates/worker-assignments.html"
+        },
+        {
+            "source": "/worker-messages.html",
+            "destination": "/templates/worker-messages.html"
+        },
+        {
+            "source": "/worker-profile.html",
+            "destination": "/templates/worker-profile.html"
+        },
+        {
             "source": "/Userreport.html",
             "destination": "/templates/Userreport.html"
         },
