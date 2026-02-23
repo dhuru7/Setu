@@ -750,8 +750,8 @@
                     </div>
                 </div>
 
-                <!-- Contact Number (Editable) -->
-                <div class="detail-card editable fade-in-up" id="phone-card" style="animation-delay: 0.22s;">
+                <!-- Contact Number -->
+                <div class="detail-card fade-in-up" id="phone-card" style="animation-delay: 0.22s;">
                     <div class="detail-icon" style="background: rgba(20, 184, 166, 0.1);">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" style="color: #14b8a6;">
@@ -760,7 +760,7 @@
                         </svg>
                     </div>
                     <div class="detail-content">
-                        <div class="detail-label">Contact Number <span class="edit-hint">(tap to edit)</span></div>
+                        <div class="detail-label">Contact Number</div>
                         <div class="detail-value" id="profile-phone">...</div>
                     </div>
                 </div>
@@ -914,7 +914,6 @@
             const cancelModalBtn = document.getElementById('btn-cancel-modal');
             const saveJurisdictionBtn = document.getElementById('btn-save-jurisdiction');
             const emailCard = document.getElementById('email-card');
-            const phoneCard = document.getElementById('phone-card');
             const jurisdictionCard = document.getElementById('jurisdiction-card');
 
             // Sidebar Toggle
@@ -1125,35 +1124,6 @@
                 } catch (e) {
                     console.error("Update failed", e);
                     alert("Failed to update email.");
-                }
-            };
-
-            // Phone Edit
-            phoneCard?.addEventListener('click', () => {
-                const currentPhone = profilePhone.textContent === 'Add Contact Number' ? '' : profilePhone.textContent;
-                const newPhone = prompt('Update Contact Number:', currentPhone);
-
-                if (newPhone !== null && newPhone.trim() !== '') {
-                    // Basic phone validation
-                    const cleaned = newPhone.replace(/[^\d+\-\s()]/g, '');
-                    if (cleaned.length >= 10) {
-                        updatePhone(cleaned.trim());
-                    } else {
-                        alert('Please enter a valid phone number (at least 10 digits).');
-                    }
-                }
-            });
-
-            const updatePhone = async (newPhone) => {
-                if (!currentUserUid) return;
-                try {
-                    await updateDoc(doc(db, "users", currentUserUid), { mobile: newPhone });
-                    profilePhone.textContent = newPhone;
-                    profilePhone.classList.remove('placeholder');
-                    alert('Contact number updated successfully!');
-                } catch (e) {
-                    console.error('Update failed', e);
-                    alert('Failed to update contact number.');
                 }
             };
 
