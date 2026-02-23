@@ -210,7 +210,7 @@ export async function updateReportStatus(reportId, actionData) {
 
         const reportRef = doc(db, "reports", reportId);
 
-        await updateDoc(reportRef, {
+        const updatePayload = {
             status: actionData.status || "In Progress",
             assignedOfficerName: actionData.officerName,
             assignedOfficerPhone: actionData.officerPhone,
@@ -218,7 +218,17 @@ export async function updateReportStatus(reportId, actionData) {
             resolutionDuration: actionData.resolutionDuration,
             actionTakenAt: serverTimestamp(),
             lastUpdatedAt: serverTimestamp()
-        });
+        };
+
+        // Add worker assignment fields if present
+        if (actionData.assignedWorkerId) {
+            updatePayload.assignedWorkerId = actionData.assignedWorkerId;
+        }
+        if (actionData.assignedWorkerName) {
+            updatePayload.assignedWorkerName = actionData.assignedWorkerName;
+        }
+
+        await updateDoc(reportRef, updatePayload);
 
         console.log("Report status updated successfully");
         return { success: true };

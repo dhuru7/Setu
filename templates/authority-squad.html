@@ -109,9 +109,9 @@
         }
 
         .worker-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -119,6 +119,13 @@
             font-size: 1rem;
             color: white;
             flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .worker-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .worker-avatar.blue {
@@ -174,45 +181,19 @@
             display: inline-block;
         }
 
-        .worker-status {
+        .worker-contact {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             gap: 6px;
         }
 
-        .status-dot {
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        .worker-phone {
             font-size: 0.75rem;
-            font-weight: 600;
+            color: var(--auth-text-secondary);
+            font-weight: 500;
         }
 
-        .status-dot::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .status-dot.active::before {
-            background: #22c55e;
-            box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
-        }
-
-        .status-dot.active {
-            color: #22c55e;
-        }
-
-        .status-dot.inactive::before {
-            background: #9ca3af;
-        }
-
-        .status-dot.inactive {
-            color: #9ca3af;
-        }
 
         .worker-contact-btn {
             width: 36px;
@@ -447,10 +428,6 @@
                         <div class="squad-stat-value" id="total-workers">--</div>
                         <div class="squad-stat-label">Total Workers</div>
                     </div>
-                    <div class="squad-stat">
-                        <div class="squad-stat-value" id="active-workers">--</div>
-                        <div class="squad-stat-label">Active</div>
-                    </div>
                 </div>
             </div>
 
@@ -567,7 +544,6 @@
 
                     // Update stats
                     document.getElementById('total-workers').textContent = allWorkers.length;
-                    document.getElementById('active-workers').textContent = allWorkers.length; // All active by default
 
                     renderWorkers(allWorkers);
                 } catch (error) {
@@ -614,7 +590,7 @@
                     const hasAvatar = worker.avatar && worker.avatar.startsWith('http');
 
                     const avatarContent = hasAvatar
-                        ? `<div class="worker-avatar ${color}" style="padding:0;overflow:hidden;"><img src="${worker.avatar}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;"></div>`
+                        ? `<div class="worker-avatar ${color}"><img src="${worker.avatar}" alt="${name}"></div>`
                         : `<div class="worker-avatar ${color}">${initials}</div>`;
 
                     return `
@@ -625,8 +601,8 @@
                                 <div class="worker-dept">${dept}</div>
                                 <span class="worker-id-tag">${workerId}</span>
                             </div>
-                            <div class="worker-status">
-                                <span class="status-dot active">Active</span>
+                            <div class="worker-contact">
+                                ${phone ? `<span class="worker-phone">${phone}</span>` : ''}
                                 ${phone ? `
                                     <a href="tel:${phone}" class="worker-contact-btn" title="Call ${name}">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
