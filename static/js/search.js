@@ -773,6 +773,13 @@ function detectQueryIntent(prompt) {
     if (/\b(my report|my complaint|my issue|my submission|i reported|i submitted|i filed|did i|have i)\b/i.test(lower)) {
         intents.needsData = true; intents.types.push('my_reports');
     }
+    // Detect update/status queries — also fetch officer info and notifications
+    if (/\b(update|updates|any update|latest update|what.*(happen|update|progress|going on)|status update|news on|follow.?up|action taken|work start|work began|resolution|when.*(fix|resolv|complet|start)|is.*(being|anyone|officer).*(work|handl|look|assign))\b/i.test(lower)) {
+        intents.needsData = true;
+        if (!intents.types.includes('report_updates')) intents.types.push('report_updates');
+        if (!intents.types.includes('my_reports')) intents.types.push('my_reports');
+        if (!intents.types.includes('officer_info')) intents.types.push('officer_info');
+    }
     if ((/\b(status|progress|update|resolved|pending|submitted|in progress|detail|info|check|show|find|get|fetch|look|search|any|what|which|where|list|tell)\b/i.test(lower) &&
         /\b(report|complaint|issue|problem|case|ticket)\b/i.test(lower)) || issueKw.some(k => lower.includes(k))) {
         intents.needsData = true;
@@ -782,8 +789,9 @@ function detectQueryIntent(prompt) {
         intents.needsData = true;
         if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
     }
-    if (/\b(officer|authority|authorities|department|who.*(handl|assign|responsible|work)|assign.*(to|officer)|in\s*charge|municipal|corporation|nagar|panchayat)\b/i.test(lower)) {
-        intents.needsData = true; intents.types.push('officer_info');
+    if (/\b(officer|authority|authorities|department|who.*(handl|assign|responsible|work)|assign.*(to|officer)|in\s*charge|municipal|corporation|nagar|panchayat|jurisdiction)\b/i.test(lower)) {
+        intents.needsData = true;
+        if (!intents.types.includes('officer_info')) intents.types.push('officer_info');
     }
     if (/\b(how many|count|total|statistic|stats|number of|pending report|resolved report|summary|overview|data|analytics|trend)\b/i.test(lower)) {
         intents.needsData = true; intents.types.push('stats');
@@ -814,7 +822,7 @@ function formatAITimestamp(ts) {
 }
 
 async function fetchRelevantData(intent) {
-    const result = { myReports: [], reports: [], officers: [], stats: null, currentUser: null, userCity: '' };
+    const result = { myReports: [], reports: [], officers: [], stats: null, currentUser: null, userCity: '', notifications: [] };
 
     // Use cached user or try to get from auth
     const user = currentFirebaseUser || auth.currentUser;
@@ -871,10 +879,47 @@ async function fetchRelevantData(intent) {
                     id: d.id, issueType: r.issueType || 'Unknown', description: (r.description || '').substring(0, 120),
                     status: r.status || 'Unknown', location: r.location?.full || r.location?.city || 'Unknown',
                     city: r.location?.city || '', createdAt: formatAITimestamp(r.createdAt),
-                    department: r.assignedDepartment || r.department || 'Not assigned'
+                    department: r.assignedDepartment || r.department || 'Not assigned',
+                    assignedOfficerName: r.assignedOfficerName || '',
+                    assignedOfficerPhone: r.assignedOfficerPhone || '',
+                    workStartDate: r.workStartDate || '',
+                    resolutionDuration: r.resolutionDuration || '',
+                    actionTakenAt: formatAITimestamp(r.actionTakenAt),
+                    lastUpdatedAt: formatAITimestamp(r.lastUpdatedAt)
                 });
             });
         } catch (e) { console.warn('[AI] My reports fetch failed:', e.message); }
+    }
+
+    // Fetch notifications for the user (report updates from officers)
+    if (intent.types.includes('report_updates') && user) {
+        try {
+            const nq = query(collection(db, 'notifications'), where('recipientId', '==', user.uid));
+            const nsnap = await getDocs(nq);
+            nsnap.forEach(d => {
+                const n = d.data();
+                result.notifications.push({
+                    reportId: n.reportId || '',
+                    type: n.type || '',
+                    title: n.title || '',
+                    message: n.message || '',
+                    officerName: n.actionData?.officerName || '',
+                    officerPhone: n.actionData?.officerPhone || '',
+                    startDate: n.actionData?.startDate || '',
+                    resolutionDuration: n.actionData?.resolutionDuration || '',
+                    previousStatus: n.actionData?.previousStatus || '',
+                    newStatus: n.actionData?.newStatus || '',
+                    department: n.department || '',
+                    createdAt: formatAITimestamp(n.createdAt),
+                    isRead: n.isRead || false
+                });
+            });
+            // Sort newest first
+            result.notifications.sort((a, b) => {
+                const at = a.createdAt || ''; const bt = b.createdAt || '';
+                return bt.localeCompare(at);
+            });
+        } catch (e) { console.warn('[AI] Notifications fetch failed:', e.message); }
     }
 
     if (intent.types.includes('report_lookup') || intent.types.includes('stats') || intent.types.includes('area_reports')) {
@@ -898,8 +943,14 @@ async function fetchRelevantData(intent) {
                     id: r.id, issueType: r.issueType || 'Unknown', description: (r.description || '').substring(0, 120),
                     status: r.status || 'Unknown', location: r.location?.full || r.location?.city || 'Unknown',
                     city: r.location?.city || '', area: r.location?.area || '', district: r.location?.district || '',
+                    state: r.location?.state || '',
                     createdAt: formatAITimestamp(r.createdAt), department: r.assignedDepartment || r.department || 'Not assigned',
-                    reporterName: nameMap[r.userId] || 'Anonymous'
+                    reporterName: nameMap[r.userId] || 'Anonymous',
+                    assignedOfficerName: r.assignedOfficerName || '',
+                    workStartDate: r.workStartDate || '',
+                    resolutionDuration: r.resolutionDuration || '',
+                    actionTakenAt: formatAITimestamp(r.actionTakenAt),
+                    lastUpdatedAt: formatAITimestamp(r.lastUpdatedAt)
                 });
             });
         } catch (e) { console.warn('[AI] Reports fetch failed:', e.message); }
@@ -911,7 +962,7 @@ async function fetchRelevantData(intent) {
             const snap = await getDocs(q);
             snap.forEach(d => {
                 const u = d.data();
-                const o = { name: u.fullname || 'Unknown', department: u.department || 'Not specified', city: u.city || 'Not specified' };
+                const o = { name: u.fullname || 'Unknown', department: u.department || 'Not specified', city: u.city || 'Not specified', phone: u.phone || '' };
                 if (u.jurisdiction) {
                     o.state = u.jurisdiction.state || ''; o.district = u.jurisdiction.district || '';
                     o.subDistrict = u.jurisdiction.subDistrict || ''; o.villages = (u.jurisdiction.villages || []).join(', ');
@@ -944,7 +995,28 @@ function buildDataContext(data, intent) {
         ctx += `\n--- THIS USER'S OWN REPORTS (${data.myReports.length}) ---\n`;
         data.myReports.forEach((r, i) => {
             ctx += `${i + 1}. [${r.issueType}] Status: ${r.status} | Location: ${r.location} | Date: ${r.createdAt} | Dept: ${r.department}`;
+            if (r.assignedOfficerName) ctx += ` | Assigned Officer: ${r.assignedOfficerName}`;
+            if (r.workStartDate) ctx += ` | Work Start: ${r.workStartDate}`;
+            if (r.resolutionDuration) ctx += ` | Est. Resolution: ${r.resolutionDuration}`;
+            if (r.actionTakenAt && r.actionTakenAt !== 'Unknown date') ctx += ` | Action Taken On: ${r.actionTakenAt}`;
+            if (r.lastUpdatedAt && r.lastUpdatedAt !== 'Unknown date') ctx += ` | Last Updated: ${r.lastUpdatedAt}`;
             if (r.description) ctx += ` | Info: ${r.description}`;
+            ctx += '\n';
+        });
+    }
+
+    // Include notifications / updates for the user
+    if (data.notifications && data.notifications.length > 0) {
+        ctx += `\n--- REPORT UPDATES & NOTIFICATIONS (${data.notifications.length}) ---\n`;
+        data.notifications.slice(0, 15).forEach((n, i) => {
+            ctx += `${i + 1}. ${n.title}`;
+            if (n.message) ctx += ` — ${n.message}`;
+            if (n.officerName) ctx += ` | Officer: ${n.officerName}`;
+            if (n.department) ctx += ` | Dept: ${n.department}`;
+            if (n.startDate) ctx += ` | Work Start: ${n.startDate}`;
+            if (n.resolutionDuration) ctx += ` | Est. Resolution: ${n.resolutionDuration}`;
+            if (n.previousStatus && n.newStatus) ctx += ` | Status Change: ${n.previousStatus} → ${n.newStatus}`;
+            ctx += ` | Date: ${n.createdAt}`;
             ctx += '\n';
         });
     }
@@ -961,6 +1033,10 @@ function buildDataContext(data, intent) {
             ctx += `\n--- ALL REPORTS IN SYSTEM (${show.length} of ${reps.length}) ---\n`;
             show.forEach((r, i) => {
                 ctx += `${i + 1}. [${r.issueType}] Status: ${r.status} | Location: ${r.location} | Date: ${r.createdAt} | By: ${r.reporterName} | Dept: ${r.department}`;
+                if (r.assignedOfficerName) ctx += ` | Assigned Officer: ${r.assignedOfficerName}`;
+                if (r.workStartDate) ctx += ` | Work Start: ${r.workStartDate}`;
+                if (r.resolutionDuration) ctx += ` | Est. Resolution: ${r.resolutionDuration}`;
+                if (r.lastUpdatedAt && r.lastUpdatedAt !== 'Unknown date') ctx += ` | Last Updated: ${r.lastUpdatedAt}`;
                 if (r.description) ctx += ` | Info: ${r.description}`;
                 ctx += '\n';
             });
@@ -969,13 +1045,13 @@ function buildDataContext(data, intent) {
     }
 
     if (data.officers.length > 0) {
-        ctx += `\n--- OFFICERS (${data.officers.length}) ---\n`;
+        ctx += `\n--- OFFICERS / AUTHORITIES (${data.officers.length}) ---\n`;
         data.officers.forEach((o, i) => {
             ctx += `${i + 1}. ${o.name} | Dept: ${o.department} | City: ${o.city}`;
             if (o.state) ctx += ` | State: ${o.state}`;
             if (o.district) ctx += ` | District: ${o.district}`;
             if (o.subDistrict) ctx += ` | Sub-Dist: ${o.subDistrict}`;
-            if (o.villages) ctx += ` | Villages: ${o.villages}`;
+            if (o.villages) ctx += ` | Villages/Jurisdiction: ${o.villages}`;
             ctx += '\n';
         });
     }
@@ -1074,11 +1150,20 @@ YOU HAVE REAL-TIME DATABASE ACCESS. When database data is provided after "[REAL-
 
 IMPORTANT DATA INSTRUCTIONS:
 - The data sections labeled "--- THIS USER'S OWN REPORTS ---" contain the logged-in user's personal reports. USE THEM when they ask about "my reports".
+- The data sections labeled "--- REPORT UPDATES & NOTIFICATIONS ---" contain status updates from officers/authorities, including which officer was assigned, when work started, and estimated resolution time. USE THEM when the user asks about updates or progress.
 - The data sections labeled "--- ALL REPORTS IN SYSTEM ---" contain all public reports. USE THEM when they ask about any reports, issues, or civic problems.
-- The data sections labeled "--- OFFICERS ---" contain authority/officer details. USE THEM when asked about officers or departments.
+- The data sections labeled "--- OFFICERS / AUTHORITIES ---" contain authority/officer details including their JURISDICTION (state, district, sub-district, villages). USE THEM when asked about officers, departments, or who is in charge of an area.
 - The data sections labeled "--- STATISTICS ---" contain aggregate numbers. USE THEM when asked about counts, totals, or stats.
 - If a specific report/issue is asked about, SEARCH through the provided data and pick matching entries.
 - If the data section says "No matching reports found", then say so honestly.
+
+OFFICER & UPDATE RESPONSE RULES:
+- When a report has an "Assigned Officer" field, ALWAYS tell the user the officer's name.
+- When a report has "Work Start" or "Est. Resolution", share those dates/timelines.
+- When the user asks "any updates?", check BOTH their report statuses AND the notifications section for detailed update info.
+- When the user asks about the officer handling their report, check: 1) The "Assigned Officer" field in their reports, 2) The notifications for officer assignment info, 3) The "OFFICERS / AUTHORITIES" section to find jurisdiction-matching officers (match by report location vs officer's jurisdiction district/villages).
+- If no officer has been assigned yet (Assigned Officer is empty), tell the user honestly: the report is still pending assignment, and mention which department it falls under.
+- If an officer's jurisdiction matches the report's location, you can tell the user that this officer is responsible for their area.
 
 STRICT PRIVACY RULES:
 1. CITIZENS: Only mention their NAME when saying who reported an issue. NEVER reveal phone, email, DOB, Aadhaar, or ID numbers.
@@ -1100,16 +1185,17 @@ RESPONSE FORMAT (MANDATORY):
 - Leave empty lines between sections.
 - End with a helpful closing line.
 
-RESPONSE LENGTH: Keep responses under 150 words. Be concise and punchy. Do NOT write essays.
+RESPONSE LENGTH: Keep responses under 200 words. Be concise and punchy. Do NOT write essays.
 
 RESPONSE RULES:
 1. When database data is provided, ALWAYS give SPECIFIC answers using ACTUAL data from it. NEVER ignore the data.
 2. ALWAYS use bullet points or numbered lists.
 3. Be friendly, warm, and concise.
-4. Statuses: "Submitted" = pending, "In Progress" = being worked on, "Resolved" = fixed.
+4. Statuses: "Submitted" = pending review/assignment, "In Progress" = officer assigned and working on it, "Resolved" = fixed.
 5. If no matching data, say so honestly and suggest alternatives.
 6. If asked about unrelated topics, redirect politely in 1-2 sentences.
 7. When no database data is provided, answer from general Setu knowledge.
+8. When user asks for updates, provide: current status, assigned officer (if any), work start date (if set), estimated resolution time (if available), and which department is handling it.
 
 SETU PLATFORM KNOWLEDGE:
 ${SETU_KNOWLEDGE}
