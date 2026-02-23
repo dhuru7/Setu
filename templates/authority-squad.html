@@ -174,44 +174,26 @@
             display: inline-block;
         }
 
-        .worker-status {
+        .worker-contact-info {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             gap: 6px;
         }
 
-        .status-dot {
+        .worker-phone {
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.8125rem;
+            color: var(--auth-text-secondary);
+            font-weight: 500;
         }
 
-        .status-dot::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .status-dot.active::before {
-            background: #22c55e;
-            box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
-        }
-
-        .status-dot.active {
-            color: #22c55e;
-        }
-
-        .status-dot.inactive::before {
-            background: #9ca3af;
-        }
-
-        .status-dot.inactive {
-            color: #9ca3af;
+        .worker-phone svg {
+            width: 14px;
+            height: 14px;
+            color: var(--auth-text-muted);
         }
 
         .worker-contact-btn {
@@ -447,10 +429,6 @@
                         <div class="squad-stat-value" id="total-workers">--</div>
                         <div class="squad-stat-label">Total Workers</div>
                     </div>
-                    <div class="squad-stat">
-                        <div class="squad-stat-value" id="active-workers">--</div>
-                        <div class="squad-stat-label">Active</div>
-                    </div>
                 </div>
             </div>
 
@@ -567,7 +545,6 @@
 
                     // Update stats
                     document.getElementById('total-workers').textContent = allWorkers.length;
-                    document.getElementById('active-workers').textContent = allWorkers.length; // All active by default
 
                     renderWorkers(allWorkers);
                 } catch (error) {
@@ -625,15 +602,20 @@
                                 <div class="worker-dept">${dept}</div>
                                 <span class="worker-id-tag">${workerId}</span>
                             </div>
-                            <div class="worker-status">
-                                <span class="status-dot active">Active</span>
+                            <div class="worker-contact-info">
                                 ${phone ? `
+                                    <div class="worker-phone">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                                        </svg>
+                                        ${phone}
+                                    </div>
                                     <a href="tel:${phone}" class="worker-contact-btn" title="Call ${name}">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                                         </svg>
                                     </a>
-                                ` : ''}
+                                ` : `<span style="font-size:0.75rem;color:var(--auth-text-muted);">No contact</span>`}
                             </div>
                         </div>
                     `;

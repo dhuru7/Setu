@@ -210,7 +210,7 @@ export async function updateReportStatus(reportId, actionData) {
 
         const reportRef = doc(db, "reports", reportId);
 
-        await updateDoc(reportRef, {
+        const updateData = {
             status: actionData.status || "In Progress",
             assignedOfficerName: actionData.officerName,
             assignedOfficerPhone: actionData.officerPhone,
@@ -218,7 +218,15 @@ export async function updateReportStatus(reportId, actionData) {
             resolutionDuration: actionData.resolutionDuration,
             actionTakenAt: serverTimestamp(),
             lastUpdatedAt: serverTimestamp()
-        });
+        };
+
+        // Add worker assignment data if present
+        if (actionData.assignedWorkerId) {
+            updateData.assignedWorkerId = actionData.assignedWorkerId;
+            updateData.assignedWorkerName = actionData.officerName;
+        }
+
+        await updateDoc(reportRef, updateData);
 
         console.log("Report status updated successfully");
         return { success: true };
@@ -323,6 +331,51 @@ export async function fetchUserNotifications(userId) {
 
     } catch (error) {
         console.error("Error fetching notifications:", error);
+        return [];
+    }
+}
+
+// --- FETCH SQUAD WORKERS ---
+export async function fetchSquadWorkers(officerUid) {
+    try {
+        const workersRef = collection(db, 'users');
+        const q = query(workersRef, where('supervisorOfficerId', '==', officerUid));
+        const snapshot = await getDocs(q);
+
+        const workers = [];
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data.role === 'worker') {
+                workers.push({ id: docSnap.id, ...data });
+            }
+        });
+
+        return workers;
+    } catch (error) {
+        console.error('Error fetching squad workers:', error);
+        return [];
+    }
+}
+
+// --- FETCH WORKER TASKS (Active assignments) ---
+export async function fetchWorkerTasks(workerId) {
+    try {
+        const q = query(
+            collection(db, 'reports'),
+            where('assignedWorkerId', '==', workerId)
+        );
+        const snapshot = await getDocs(q);
+        const tasks = [];
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            // Only count non-resolved tasks
+            if ((data.status || '').toLowerCase() !== 'resolved') {
+                tasks.push({ id: docSnap.id, ...data });
+            }
+        });
+        return tasks;
+    } catch (error) {
+        console.error('Error fetching worker tasks:', error);
         return [];
     }
 }

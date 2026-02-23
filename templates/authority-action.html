@@ -393,6 +393,86 @@
             width: 20px;
             height: 20px;
         }
+
+        /* Worker Select Styles */
+        .worker-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .worker-task-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
+        .worker-task-badge.available {
+            background: var(--auth-green-light);
+            color: var(--auth-green);
+        }
+
+        .worker-task-badge.busy {
+            background: var(--auth-orange-light);
+            color: var(--auth-orange);
+        }
+
+        .worker-task-badge.full {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .conflict-warning {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .conflict-warning.show {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .conflict-warning svg {
+            width: 20px;
+            height: 20px;
+            color: #f59e0b;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .conflict-warning-text {
+            font-size: 0.8125rem;
+            color: #92400e;
+            line-height: 1.5;
+        }
+
+        .conflict-warning-text strong {
+            font-weight: 600;
+        }
+
+        .worker-select-info {
+            font-size: 0.75rem;
+            color: var(--auth-text-muted);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .worker-select-info svg {
+            width: 14px;
+            height: 14px;
+        }
     </style>
 </head>
 
@@ -547,15 +627,18 @@
                     <input type="hidden" id="report-id" name="reportId">
 
                     <div class="form-group">
-                        <label class="form-label" for="officer-name">Assigned Officer Name *</label>
-                        <input type="text" id="officer-name" name="officerName" class="form-input"
-                            placeholder="Enter officer's full name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="officer-phone">Officer Contact Number *</label>
-                        <input type="tel" id="officer-phone" name="officerPhone" class="form-input"
-                            placeholder="Enter phone number" required>
+                        <label class="form-label" for="worker-select">Assign Worker *</label>
+                        <select id="worker-select" name="workerSelect" class="form-input" required>
+                            <option value="">Loading workers...</option>
+                        </select>
+                        <div class="worker-select-info" id="worker-info">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                            </svg>
+                            Select a worker from your squad. Max 3 tasks per worker.
+                        </div>
                     </div>
 
                     <div class="form-row">
@@ -568,14 +651,24 @@
                             <label class="form-label" for="resolution-duration">Est. Duration *</label>
                             <select id="resolution-duration" name="resolutionDuration" class="form-input" required>
                                 <option value="">Select duration</option>
-                                <option value="1 day">1 Day</option>
-                                <option value="2-3 days">2-3 Days</option>
-                                <option value="1 week">1 Week</option>
-                                <option value="2 weeks">2 Weeks</option>
-                                <option value="1 month">1 Month</option>
-                                <option value="2+ months">2+ Months</option>
+                                <option value="1">1 Day</option>
+                                <option value="3">2-3 Days</option>
+                                <option value="7">1 Week</option>
+                                <option value="14">2 Weeks</option>
+                                <option value="30">1 Month</option>
+                                <option value="60">2+ Months</option>
                             </select>
                         </div>
+                    </div>
+
+                    <!-- Schedule Conflict Warning -->
+                    <div id="conflict-warning" class="conflict-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        <div class="conflict-warning-text" id="conflict-text"></div>
                     </div>
                 </div>
 
@@ -587,7 +680,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Start Work
+                        Assign & Start Work
                     </button>
                 </div>
             </form>
@@ -606,7 +699,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { fetchOfficerReports, updateReportStatus, createUpdateNotification, getReportById } from "../static/js/authority-utils.js?v=7";
+        import { fetchOfficerReports, updateReportStatus, createUpdateNotification, getReportById, fetchSquadWorkers, fetchWorkerTasks } from "../static/js/authority-utils.js?v=8";
 
         // Firebase config - DO NOT COMMIT API KEY
         const firebaseConfig = {
@@ -624,6 +717,8 @@
         // Store reports globally for filtering
         let allReports = [];
         let currentFilter = 'pending';
+        let squadWorkers = []; // Cache squad workers
+        let workerTasksCache = {}; // Cache worker tasks { workerId: [tasks] }
 
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
@@ -831,13 +926,53 @@
             });
 
             // Modal functions
-            const openActionModal = (reportId, reportTitle) => {
+            const openActionModal = async (reportId, reportTitle) => {
                 document.getElementById('report-id').value = reportId;
                 document.getElementById('modal-report-title').textContent = reportTitle + ' - #' + reportId.substring(0, 8).toUpperCase();
 
                 // Set default start date to today
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('start-date').value = today;
+
+                // Populate worker dropdown
+                const workerSelect = document.getElementById('worker-select');
+                workerSelect.innerHTML = '<option value="">Loading workers...</option>';
+
+                const user = auth.currentUser;
+                if (user && squadWorkers.length === 0) {
+                    squadWorkers = await fetchSquadWorkers(user.uid);
+                }
+
+                // Fetch task counts for all workers
+                workerSelect.innerHTML = '<option value="">Select a worker...</option>';
+
+                for (const worker of squadWorkers) {
+                    if (!workerTasksCache[worker.id]) {
+                        workerTasksCache[worker.id] = await fetchWorkerTasks(worker.id);
+                    }
+                    const taskCount = workerTasksCache[worker.id].length;
+                    const isFull = taskCount >= 3;
+                    const badgeClass = isFull ? 'full' : (taskCount > 0 ? 'busy' : 'available');
+                    const badgeText = `${taskCount}/3 tasks`;
+                    const name = worker.fullname || 'Worker';
+                    const phone = worker.mobile || '';
+
+                    const option = document.createElement('option');
+                    option.value = worker.id;
+                    option.textContent = `${name}${phone ? ' — ' + phone : ''} — 📋 ${badgeText}`;
+                    option.dataset.name = name;
+                    option.dataset.phone = phone;
+                    option.dataset.taskCount = taskCount;
+                    if (isFull) option.disabled = true;
+                    workerSelect.appendChild(option);
+                }
+
+                if (squadWorkers.length === 0) {
+                    workerSelect.innerHTML = '<option value="">No workers in your squad</option>';
+                }
+
+                // Reset conflict warning
+                document.getElementById('conflict-warning').classList.remove('show');
 
                 actionModal.classList.add('show');
                 document.body.style.overflow = 'hidden';
@@ -863,6 +998,75 @@
                 setTimeout(() => toast.classList.remove('show'), 3000);
             };
 
+            // Schedule conflict check helper
+            const getDurationDays = (durationValue) => {
+                return parseInt(durationValue) || 1;
+            };
+
+            const checkScheduleConflict = (workerTasks, startDate, durationDays) => {
+                const newStart = new Date(startDate);
+                const newEnd = new Date(newStart);
+                newEnd.setDate(newEnd.getDate() + durationDays);
+
+                const conflicts = [];
+                for (const task of workerTasks) {
+                    if (!task.workStartDate) continue;
+                    const taskStart = new Date(task.workStartDate);
+                    const taskDuration = getDurationDays(task.resolutionDuration) || 7;
+                    const taskEnd = new Date(taskStart);
+                    taskEnd.setDate(taskEnd.getDate() + taskDuration);
+
+                    // Check overlap: newStart < taskEnd && newEnd > taskStart
+                    if (newStart < taskEnd && newEnd > taskStart) {
+                        conflicts.push({
+                            issueType: task.issueType || 'Task',
+                            startDate: taskStart.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+                            endDate: taskEnd.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                        });
+                    }
+                }
+                return conflicts;
+            };
+
+            // Live conflict check on worker/date/duration change
+            const validateSchedule = () => {
+                const workerSelect = document.getElementById('worker-select');
+                const startDateInput = document.getElementById('start-date');
+                const durationInput = document.getElementById('resolution-duration');
+                const conflictWarning = document.getElementById('conflict-warning');
+                const conflictText = document.getElementById('conflict-text');
+                const submitBtn = document.getElementById('submit-btn');
+
+                const workerId = workerSelect.value;
+                const startDate = startDateInput.value;
+                const duration = durationInput.value;
+
+                if (!workerId || !startDate || !duration) {
+                    conflictWarning.classList.remove('show');
+                    return;
+                }
+
+                const tasks = workerTasksCache[workerId] || [];
+                const durationDays = getDurationDays(duration);
+                const conflicts = checkScheduleConflict(tasks, startDate, durationDays);
+
+                if (conflicts.length > 0) {
+                    const conflictLines = conflicts.map(c =>
+                        `<strong>${c.issueType}</strong>: ${c.startDate} — ${c.endDate}`
+                    ).join('<br>');
+                    conflictText.innerHTML = `<strong>Schedule conflict!</strong> This worker already has tasks during this period:<br>${conflictLines}<br>Please choose a different date or worker.`;
+                    conflictWarning.classList.add('show');
+                    submitBtn.disabled = true;
+                } else {
+                    conflictWarning.classList.remove('show');
+                    submitBtn.disabled = false;
+                }
+            };
+
+            document.getElementById('worker-select')?.addEventListener('change', validateSchedule);
+            document.getElementById('start-date')?.addEventListener('change', validateSchedule);
+            document.getElementById('resolution-duration')?.addEventListener('change', validateSchedule);
+
             // Form submission
             actionForm?.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -870,14 +1074,37 @@
                 const submitBtn = document.getElementById('submit-btn');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = 'Updating...';
+                submitBtn.innerHTML = 'Assigning...';
 
                 const formData = new FormData(actionForm);
+                const workerSelect = document.getElementById('worker-select');
+                const selectedOption = workerSelect.options[workerSelect.selectedIndex];
+
+                if (!workerSelect.value) {
+                    showToast('Please select a worker', true);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    return;
+                }
+
+                const workerName = selectedOption.dataset.name || 'Worker';
+                const workerPhone = selectedOption.dataset.phone || '';
+                const taskCount = parseInt(selectedOption.dataset.taskCount || '0');
+
+                // Double-check max 3 tasks
+                if (taskCount >= 3) {
+                    showToast('This worker already has 3 tasks assigned. Choose another worker.', true);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    return;
+                }
+
                 const actionData = {
-                    officerName: formData.get('officerName'),
-                    officerPhone: formData.get('officerPhone'),
+                    officerName: workerName,
+                    officerPhone: workerPhone,
                     startDate: formData.get('startDate'),
                     resolutionDuration: formData.get('resolutionDuration'),
+                    assignedWorkerId: workerSelect.value,
                     status: 'In Progress'
                 };
 
@@ -900,7 +1127,10 @@
                         await createUpdateNotification(reportId, reportData, actionData, authorityInfo);
 
                         closeActionModal();
-                        showToast('Report status updated to In Progress!');
+                        showToast(`Task assigned to ${workerName} successfully!`);
+
+                        // Invalidate worker task cache for the assigned worker
+                        delete workerTasksCache[workerSelect.value];
 
                         // Refresh reports
                         const user = auth.currentUser;
