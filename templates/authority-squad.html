@@ -548,14 +548,17 @@
                     // Query workers whose supervisorOfficerId matches this officer's UID
                     const workersRef = collection(db, 'users');
                     const q = query(workersRef,
-                        where('role', '==', 'worker'),
                         where('supervisorOfficerId', '==', user.uid)
                     );
                     const snapshot = await getDocs(q);
 
                     allWorkers = [];
-                    snapshot.forEach(doc => {
-                        allWorkers.push({ id: doc.id, ...doc.data() });
+                    snapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        // Filter for workers client-side to avoid needing composite index
+                        if (data.role === 'worker') {
+                            allWorkers.push({ id: docSnap.id, ...data });
+                        }
                     });
 
                     // Update stats

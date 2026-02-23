@@ -211,7 +211,7 @@
                     </div>
 
                     <!-- Assigned Area -->
-                    <div class="detail-card">
+                    <div class="detail-card" id="area-card" style="cursor:pointer;">
                         <div class="detail-icon teal">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor">
@@ -222,8 +222,9 @@
                             </svg>
                         </div>
                         <div class="detail-content">
-                            <div class="detail-label">Assigned Area</div>
-                            <div class="detail-value" id="profile-area">Ward 5 — Sector 14</div>
+                            <div class="detail-label">Assigned Area <span id="area-hint" class="area-setup-hint">Tap to
+                                    set up</span></div>
+                            <div class="detail-value" id="profile-area">Not set</div>
                         </div>
                     </div>
 
@@ -242,63 +243,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Profile Setup Section -->
-            <div class="details-section fade-in-up delay-3" id="setup-section">
-                <div class="details-section-title">Profile Setup</div>
-                <p style="font-size:0.875rem;color:var(--worker-text-muted,#9ca3af);margin-bottom:16px;">Complete your
-                    profile to get assigned to your supervising officer.</p>
-
-                <!-- Step 1: Department -->
-                <div class="setup-step" id="step-department">
-                    <div class="setup-step-label">
-                        <span class="step-num">1</span> Select Department
-                    </div>
-                    <select id="select-department" class="setup-select">
-                        <option value="" disabled selected>Choose your department</option>
-                        <option value="Public Works Department (PWD)">Public Works Department (PWD)</option>
-                        <option value="Solid Waste Management (SWM)">Solid Waste Management (SWM)</option>
-                        <option value="Water Supply & Sewerage Board">Water Supply & Sewerage Board</option>
-                        <option value="Electrical Department">Electrical Department</option>
-                        <option value="Sanitation Department">Sanitation Department</option>
-                        <option value="Road Maintenance">Road Maintenance</option>
-                        <option value="Parks & Gardens">Parks & Gardens</option>
-                        <option value="Field Operations">Field Operations</option>
-                    </select>
-                </div>
-
-                <!-- Step 2: Location -->
-                <div class="setup-step" id="step-location" style="opacity:0.5;pointer-events:none;">
-                    <div class="setup-step-label">
-                        <span class="step-num">2</span> Select Location
-                    </div>
-                    <input type="text" id="input-state" class="setup-input"
-                        placeholder="Enter your state (e.g. Maharashtra)">
-                    <input type="text" id="input-district" class="setup-input"
-                        placeholder="Enter your district (e.g. Pune)" style="margin-top:10px;">
-                </div>
-
-                <!-- Step 3: Select Officer -->
-                <div class="setup-step" id="step-officer" style="opacity:0.5;pointer-events:none;">
-                    <div class="setup-step-label">
-                        <span class="step-num">3</span> Select Supervising Officer
-                    </div>
-                    <div id="officers-list" class="officers-list">
-                        <p style="color:var(--worker-text-muted,#9ca3af);font-size:0.85rem;">Enter your state and
-                            district first to see officers.</p>
-                    </div>
-                </div>
-
-                <!-- Save Button -->
-                <button id="btn-save-profile" class="setup-save-btn" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                        stroke="currentColor" style="width:18px;height:18px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                    Save Profile Setup
-                </button>
-                <p id="save-feedback" style="font-size:0.8rem;margin-top:8px;text-align:center;"></p>
             </div>
 
             <!-- Settings -->
@@ -376,21 +320,227 @@
         </div>
     </main>
 
+    <!-- Setup Modal -->
+    <div id="setup-modal" class="setup-modal-overlay">
+        <div class="setup-modal">
+            <div class="setup-modal-header">
+                <div>
+                    <h3 class="setup-modal-title">Set Up Your Assignment</h3>
+                    <p class="setup-modal-subtitle">Complete each step to get linked with your officer</p>
+                </div>
+                <button id="modal-close" class="setup-modal-close">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" style="width:20px;height:20px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="setup-modal-body">
+                <!-- Step 1 -->
+                <div class="setup-step" id="step-department">
+                    <div class="setup-step-label"><span class="step-num">1</span> Department</div>
+                    <select id="select-department" class="setup-select">
+                        <option value="" disabled selected>Choose your department</option>
+                        <option value="Public Works Department (PWD)">Public Works Department (PWD)</option>
+                        <option value="Solid Waste Management (SWM)">Solid Waste Management (SWM)</option>
+                        <option value="Water Supply & Sewerage Board">Water Supply & Sewerage Board</option>
+                        <option value="Electrical Department">Electrical Department</option>
+                        <option value="Sanitation Department">Sanitation Department</option>
+                        <option value="Road Maintenance">Road Maintenance</option>
+                        <option value="Parks & Gardens">Parks & Gardens</option>
+                        <option value="Field Operations">Field Operations</option>
+                    </select>
+                </div>
+                <!-- Step 2 -->
+                <div class="setup-step locked" id="step-location">
+                    <div class="setup-step-label"><span class="step-num">2</span> Location</div>
+                    <input type="text" id="input-state" class="setup-input" placeholder="State (e.g. Maharashtra)">
+                    <input type="text" id="input-district" class="setup-input" placeholder="District (e.g. Pune)"
+                        style="margin-top:10px;">
+                </div>
+                <!-- Step 3 -->
+                <div class="setup-step locked" id="step-officer">
+                    <div class="setup-step-label"><span class="step-num">3</span> Supervising Officer</div>
+                    <div id="officers-list" class="officers-list">
+                        <p class="hint-text">Fill state and district first</p>
+                    </div>
+                </div>
+            </div>
+            <div class="setup-modal-footer">
+                <button id="btn-cancel-setup" class="btn-modal-cancel">Cancel</button>
+                <button id="btn-save-setup" class="btn-modal-save" disabled>Save & Lock</button>
+            </div>
+        </div>
+    </div>
+
     <style>
-        /* Setup Profile Styles */
+        /* Area hint */
+        .area-setup-hint {
+            font-size: 0.625rem;
+            color: #3b82f6;
+            text-transform: none;
+            letter-spacing: 0;
+            background: rgba(59, 130, 246, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            animation: pulse-hint 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-hint {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .area-setup-hint.hidden {
+            display: none;
+        }
+
+        /* Setup Modal */
+        .setup-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 3000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .setup-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .setup-modal {
+            background: #fff;
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 520px;
+            max-height: 88vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(.22, .68, 0, 1.1);
+        }
+
+        .setup-modal-overlay.show .setup-modal {
+            transform: translateY(0);
+        }
+
+        .setup-modal-header {
+            padding: 24px 24px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .setup-modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .setup-modal-subtitle {
+            font-size: 0.8125rem;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .setup-modal-close {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #6b7280;
+            transition: background 0.2s;
+        }
+
+        .setup-modal-close:hover {
+            background: #e5e7eb;
+        }
+
+        .setup-modal-body {
+            padding: 20px 24px;
+        }
+
+        .setup-modal-footer {
+            padding: 0 24px 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-modal-cancel {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            background: #f3f4f6;
+            color: #6b7280;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-modal-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-modal-save {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .btn-modal-save:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .btn-modal-save:not(:disabled):hover {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Setup Steps (in modal) */
         .setup-step {
-            background: var(--worker-card-bg, #ffffff);
+            background: #f9fafb;
             border-radius: 14px;
             padding: 16px;
             margin-bottom: 12px;
-            border: 1px solid var(--worker-border, #f0f0f0);
+            border: 1px solid #e5e7eb;
             transition: all 0.3s ease;
+        }
+
+        .setup-step.locked {
+            opacity: 0.45;
+            pointer-events: none;
         }
 
         .setup-step-label {
             font-size: 0.875rem;
             font-weight: 600;
-            color: var(--worker-text-primary, #1a1a1a);
+            color: #1a1a1a;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
@@ -414,11 +564,11 @@
         .setup-input {
             width: 100%;
             padding: 12px 14px;
-            border: 1px solid var(--worker-border, #e5e7eb);
+            border: 1px solid #e5e7eb;
             border-radius: 10px;
             font-size: 0.9rem;
-            color: var(--worker-text-primary, #1a1a1a);
-            background: var(--worker-bg, #f9fafb);
+            color: #1a1a1a;
+            background: #fff;
             outline: none;
             transition: border-color 0.2s;
         }
@@ -429,11 +579,17 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
+        .hint-text {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
         .officers-list {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 250px;
+            max-height: 200px;
             overflow-y: auto;
         }
 
@@ -442,7 +598,7 @@
             align-items: center;
             gap: 12px;
             padding: 12px;
-            border: 1.5px solid var(--worker-border, #e5e7eb);
+            border: 1.5px solid #e5e7eb;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s;
@@ -507,32 +663,24 @@
             background: #3b82f6;
         }
 
-        .setup-save-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.25s;
-            margin-top: 16px;
+        /* Locked area card styling */
+        .detail-card.area-locked {
+            cursor: default !important;
         }
 
-        .setup-save-btn:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
+        .detail-card.area-locked .detail-value {
+            color: var(--worker-text-primary, #1a1a1a);
         }
 
-        .setup-save-btn:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        @media (min-width: 640px) {
+            .setup-modal {
+                border-radius: 24px;
+                margin: auto;
+            }
+
+            .setup-modal-overlay {
+                align-items: center;
+            }
         }
     </style>
 
@@ -556,48 +704,40 @@
 
         let currentUserUid = null;
         let selectedOfficerId = null;
+        let profileIsSetUp = false;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Sidebar Toggle
+            // Sidebar
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
             const openSidebarBtn = document.getElementById('open-sidebar-btn');
             const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-
             const openSidebar = () => { sidebar.classList.add('open'); sidebarOverlay.classList.add('show'); document.body.style.overflow = 'hidden'; };
             const closeSidebar = () => { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('show'); document.body.style.overflow = ''; };
-
             openSidebarBtn?.addEventListener('click', openSidebar);
             closeSidebarBtn?.addEventListener('click', closeSidebar);
             sidebarOverlay?.addEventListener('click', closeSidebar);
 
-            // Load profile data
+            // Basic profile display
             const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
             const name = userProfile.fullname || 'Worker';
-
             document.getElementById('profile-name').textContent = name;
             document.getElementById('sidebar-user-name').textContent = name;
-
-            // Set avatar initials
             const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
             document.getElementById('profile-avatar').textContent = initials || 'W';
-
-            // Fill other profile fields from userProfile if available
             if (userProfile.email) document.getElementById('profile-email').textContent = userProfile.email;
             if (userProfile.phone) document.getElementById('profile-phone').textContent = userProfile.phone;
             if (userProfile.department) {
                 document.getElementById('profile-dept').textContent = userProfile.department;
-                document.getElementById('profile-designation').textContent = `Field Worker — ${userProfile.department}`;
+                document.getElementById('profile-designation').textContent = `Field Worker \u2014 ${userProfile.department}`;
             }
 
-            // Toggle switches
+            // Toggles
             document.querySelectorAll('.toggle-switch').forEach(toggle => {
-                toggle.addEventListener('click', () => {
-                    toggle.classList.toggle('active');
-                });
+                toggle.addEventListener('click', () => toggle.classList.toggle('active'));
             });
 
-            // Logout handlers
+            // Logout
             const performLogout = async () => {
                 try { await signOut(auth); } catch (e) { }
                 localStorage.removeItem('isLoggedIn');
@@ -605,80 +745,70 @@
                 localStorage.removeItem('userProfile');
                 window.location.replace('login.html');
             };
-
             document.getElementById('logout-btn')?.addEventListener('click', performLogout);
             document.getElementById('logout-card')?.addEventListener('click', performLogout);
 
-            // ========= PROFILE SETUP FLOW =========
+            // ========= MODAL SETUP FLOW =========
+            const modal = document.getElementById('setup-modal');
+            const areaCard = document.getElementById('area-card');
+            const areaHint = document.getElementById('area-hint');
             const departmentSelect = document.getElementById('select-department');
             const stateInput = document.getElementById('input-state');
             const districtInput = document.getElementById('input-district');
             const stepLocation = document.getElementById('step-location');
             const stepOfficer = document.getElementById('step-officer');
             const officersList = document.getElementById('officers-list');
-            const saveBtn = document.getElementById('btn-save-profile');
-            const saveFeedback = document.getElementById('save-feedback');
+            const saveBtn = document.getElementById('btn-save-setup');
+            const cancelBtn = document.getElementById('btn-cancel-setup');
+            const closeModalBtn = document.getElementById('modal-close');
 
-            // Pre-fill if already set
-            if (userProfile.department) {
-                departmentSelect.value = userProfile.department;
-                stepLocation.style.opacity = '1';
-                stepLocation.style.pointerEvents = 'auto';
+            function openModal() {
+                if (profileIsSetUp) return; // locked!
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
             }
-            if (userProfile.state) stateInput.value = userProfile.state;
-            if (userProfile.district) districtInput.value = userProfile.district;
-            if (userProfile.state && userProfile.district) {
-                stepOfficer.style.opacity = '1';
-                stepOfficer.style.pointerEvents = 'auto';
+            function closeModal() {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
             }
 
-            // Step 1: Department change => enable step 2
+            areaCard.addEventListener('click', openModal);
+            cancelBtn.addEventListener('click', closeModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+
+            // Step flow
             departmentSelect.addEventListener('change', () => {
                 if (departmentSelect.value) {
-                    stepLocation.style.opacity = '1';
-                    stepLocation.style.pointerEvents = 'auto';
+                    stepLocation.classList.remove('locked');
                 }
-                checkSaveReady();
+                checkReady();
             });
 
-            // Step 2: District blur => search officers
             let searchTimeout;
-            districtInput.addEventListener('input', () => {
+            const onLocationInput = () => {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     if (districtInput.value.trim().length >= 2 && stateInput.value.trim().length >= 2) {
-                        stepOfficer.style.opacity = '1';
-                        stepOfficer.style.pointerEvents = 'auto';
+                        stepOfficer.classList.remove('locked');
                         loadOfficers(stateInput.value.trim(), districtInput.value.trim());
                     }
                 }, 600);
-            });
+            };
+            stateInput.addEventListener('input', onLocationInput);
+            districtInput.addEventListener('input', onLocationInput);
 
-            stateInput.addEventListener('input', () => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    if (districtInput.value.trim().length >= 2 && stateInput.value.trim().length >= 2) {
-                        stepOfficer.style.opacity = '1';
-                        stepOfficer.style.pointerEvents = 'auto';
-                        loadOfficers(stateInput.value.trim(), districtInput.value.trim());
-                    }
-                }, 600);
-            });
-
-            // Load officers in a district
             async function loadOfficers(state, district) {
-                officersList.innerHTML = '<p style="color:#9ca3af;font-size:0.85rem;">Searching for officers...</p>';
+                officersList.innerHTML = '<p class="hint-text">Searching for officers...</p>';
                 try {
                     const usersRef = collection(db, 'users');
-                    const q = query(usersRef,
-                        where('role', '==', 'authority')
-                    );
+                    const q = query(usersRef, where('role', '==', 'authority'));
                     const snapshot = await getDocs(q);
                     const officers = [];
-
                     snapshot.forEach(docSnap => {
                         const data = docSnap.data();
-                        // Check if officer's jurisdiction matches
                         const j = data.jurisdiction;
                         if (j && j.district && j.district.toLowerCase() === district.toLowerCase()) {
                             officers.push({ id: docSnap.id, ...data });
@@ -686,7 +816,7 @@
                     });
 
                     if (officers.length === 0) {
-                        officersList.innerHTML = '<p style="color:#9ca3af;font-size:0.85rem;">No officers found in this district. They may not have set up jurisdiction yet.</p>';
+                        officersList.innerHTML = '<p class="hint-text">No officers found in this district yet.</p>';
                         return;
                     }
 
@@ -695,11 +825,11 @@
                         const oInit = oName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
                         const oDept = officer.department || 'General';
                         return `
-                            <div class="officer-option" data-officer-id="${officer.id}" data-officer-name="${oName}">
+                            <div class="officer-option" data-officer-id="${officer.id}">
                                 <div class="officer-avatar">${oInit}</div>
                                 <div class="officer-info">
                                     <div class="officer-name">${oName}</div>
-                                    <div class="officer-dept">${oDept} • ${officer.idCard || ''}</div>
+                                    <div class="officer-dept">${oDept}</div>
                                 </div>
                                 <div class="officer-check">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="white" style="width:14px;height:14px;display:none;">
@@ -710,7 +840,6 @@
                         `;
                     }).join('');
 
-                    // Officer selection
                     officersList.querySelectorAll('.officer-option').forEach(opt => {
                         opt.addEventListener('click', () => {
                             officersList.querySelectorAll('.officer-option').forEach(o => {
@@ -720,85 +849,96 @@
                             opt.classList.add('selected');
                             opt.querySelector('svg').style.display = 'block';
                             selectedOfficerId = opt.dataset.officerId;
-                            checkSaveReady();
+                            checkReady();
                         });
                     });
-
                 } catch (err) {
                     console.error('Error loading officers:', err);
-                    officersList.innerHTML = '<p style="color:#ef4444;font-size:0.85rem;">Error loading officers. Please try again.</p>';
+                    officersList.innerHTML = '<p class="hint-text" style="color:#ef4444;">Error loading officers.</p>';
                 }
             }
 
-            function checkSaveReady() {
-                const ready = departmentSelect.value
-                    && stateInput.value.trim()
-                    && districtInput.value.trim()
-                    && selectedOfficerId;
-                saveBtn.disabled = !ready;
+            function checkReady() {
+                saveBtn.disabled = !(departmentSelect.value && stateInput.value.trim() && districtInput.value.trim() && selectedOfficerId);
             }
 
-            // Save profile
+            // Save
             saveBtn.addEventListener('click', async () => {
                 if (!currentUserUid || saveBtn.disabled) return;
                 saveBtn.disabled = true;
                 saveBtn.textContent = 'Saving...';
-                saveFeedback.textContent = '';
 
                 try {
                     const updateData = {
                         department: departmentSelect.value,
                         state: stateInput.value.trim(),
                         district: districtInput.value.trim(),
-                        supervisorOfficerId: selectedOfficerId
+                        supervisorOfficerId: selectedOfficerId,
+                        profileSetupComplete: true
                     };
-
                     await updateDoc(doc(db, 'users', currentUserUid), updateData);
 
-                    // Update local profile cache
+                    // Update cache
                     const cached = JSON.parse(localStorage.getItem('userProfile')) || {};
                     Object.assign(cached, updateData);
                     localStorage.setItem('userProfile', JSON.stringify(cached));
 
-                    // Update display
+                    // Update UI
                     document.getElementById('profile-dept').textContent = updateData.department;
-                    document.getElementById('profile-designation').textContent = `Field Worker — ${updateData.department}`;
+                    document.getElementById('profile-designation').textContent = `Field Worker \u2014 ${updateData.department}`;
                     document.getElementById('profile-area').textContent = `${updateData.district}, ${updateData.state}`;
-
-                    saveFeedback.textContent = '✓ Profile saved! You now appear on your officer\'s Squad page.';
-                    saveFeedback.style.color = '#22c55e';
-                    saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg> Saved!';
+                    lockArea();
+                    closeModal();
                 } catch (err) {
                     console.error('Save error:', err);
-                    saveFeedback.textContent = '⚠ Failed to save. Please try again.';
-                    saveFeedback.style.color = '#ef4444';
+                    saveBtn.textContent = 'Save & Lock';
                     saveBtn.disabled = false;
-                    saveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg> Save Profile Setup';
+                    alert('Failed to save. Please try again.');
                 }
             });
 
-            // Auth state
+            function lockArea() {
+                profileIsSetUp = true;
+                areaCard.classList.add('area-locked');
+                areaCard.style.cursor = 'default';
+                areaHint.classList.add('hidden');
+            }
+
+            // Auth — fetch fresh data
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     currentUserUid = user.uid;
-                    // Fetch fresh profile from Firestore
                     try {
                         const docSnap = await getDoc(doc(db, 'users', user.uid));
                         if (docSnap.exists()) {
                             const data = docSnap.data();
-                            if (data.department && departmentSelect) {
-                                departmentSelect.value = data.department;
-                                stepLocation.style.opacity = '1';
-                                stepLocation.style.pointerEvents = 'auto';
+
+                            // Update display from Firestore
+                            if (data.department) {
+                                document.getElementById('profile-dept').textContent = data.department;
+                                document.getElementById('profile-designation').textContent = `Field Worker \u2014 ${data.department}`;
                             }
-                            if (data.state) stateInput.value = data.state;
-                            if (data.district) districtInput.value = data.district;
-                            if (data.supervisorOfficerId) selectedOfficerId = data.supervisorOfficerId;
-                            if (data.state && data.district) {
-                                stepOfficer.style.opacity = '1';
-                                stepOfficer.style.pointerEvents = 'auto';
-                                loadOfficers(data.state, data.district);
+                            if (data.idCard) document.getElementById('profile-id').textContent = data.idCard;
+                            if (data.mobile) document.getElementById('profile-phone').textContent = data.mobile;
+
+                            // Check if profile is already set up
+                            if (data.profileSetupComplete && data.supervisorOfficerId) {
+                                const area = [data.district, data.state].filter(Boolean).join(', ');
+                                document.getElementById('profile-area').textContent = area || 'Set';
+                                lockArea();
+                            } else {
+                                document.getElementById('profile-area').textContent = 'Not set';
                             }
+
+                            // Cache
+                            const cached = JSON.parse(localStorage.getItem('userProfile')) || {};
+                            if (data.fullname) cached.fullname = data.fullname;
+                            if (data.department) cached.department = data.department;
+                            if (data.email) cached.email = data.email;
+                            if (data.state) cached.state = data.state;
+                            if (data.district) cached.district = data.district;
+                            if (data.profileSetupComplete) cached.profileSetupComplete = true;
+                            localStorage.setItem('userProfile', JSON.stringify(cached));
                         }
                     } catch (e) { console.error('Profile fetch error:', e); }
                 }
