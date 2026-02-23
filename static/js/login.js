@@ -140,10 +140,12 @@ loginForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    // Determine if input is mobile or email
+    // Determine if input is mobile, employee ID, or email
     let email = inputVal;
     if (!inputVal.includes('@')) {
-        email = `${inputVal}@setu.placeholder.com`;
+        // Could be a mobile number or Employee ID (AW29393, GPWD12345678, etc.)
+        // Convert to placeholder email for Firebase Auth
+        email = `${inputVal.toUpperCase()}@setu.placeholder.com`;
     }
 
     // Show loading state
@@ -182,6 +184,16 @@ loginForm.addEventListener('submit', async (e) => {
                 }
             }
 
+            // Self-heal worker department if missing
+            if (userData.role === 'worker' && !userData.department && userData.idCard) {
+                try {
+                    await updateDoc(docRef, { department: 'Field Operations' });
+                    userData.department = 'Field Operations';
+                } catch (err) {
+                    console.error("Failed to auto-update worker department:", err);
+                }
+            }
+
             // Save info to LocalStorage for quick access
             localStorage.setItem('userProfile', JSON.stringify(userData));
             localStorage.setItem('isLoggedIn', 'true');
@@ -190,6 +202,8 @@ loginForm.addEventListener('submit', async (e) => {
             // Redirect based on Role
             if (userData.role === 'authority') {
                 window.location.href = "authority-dashboard.html";
+            } else if (userData.role === 'worker') {
+                window.location.href = "worker-home.html";
             } else {
                 window.location.href = "index.html";
             }

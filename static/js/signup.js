@@ -184,9 +184,11 @@ function initSignupProcess() {
             validator: (val) => {
                 const citizenRegex = /^\d{12}$/;
                 const officerRegex = /^[A-Z]{4}\d{8}$/;
+                const workerRegex = /^AW\d{5}$/;
                 if (citizenRegex.test(val)) return null;
                 if (officerRegex.test(val)) return null;
-                return 'Enter valid 12-digit Aadhaar OR Emp ID (4 Caps + 8 Nos)';
+                if (workerRegex.test(val)) return null;
+                return 'Enter 12-digit Aadhaar, Officer ID (4 Caps + 8 Nos), or Worker ID (AW + 5 Nos)';
             }
         },
         dob: {
@@ -235,18 +237,98 @@ function initSignupProcess() {
     }
 
     // Attach Input Listeners for real-time validation
+    // ========= SIGNUP ROTATING PLACEHOLDER FOR ID =========
+    const signupPlaceholderTexts = [
+        'Aadhaar Number',
+        'Officer ID (e.g. GPWD12345678)',
+        'Worker ID (e.g. AW29393)'
+    ];
+    let signupPlaceholderIndex = 0;
+    const signupRotatingEl = document.getElementById('signup-rotating-placeholder');
+    const signupIdTypeHint = document.getElementById('signup-id-type-hint');
+
+    if (signupRotatingEl && fields.idCard.el) {
+        function rotateSignupPlaceholder() {
+            if (fields.idCard.el.value.length > 0 || document.activeElement === fields.idCard.el) return;
+            signupRotatingEl.style.opacity = '0';
+            setTimeout(() => {
+                signupPlaceholderIndex = (signupPlaceholderIndex + 1) % signupPlaceholderTexts.length;
+                signupRotatingEl.textContent = signupPlaceholderTexts[signupPlaceholderIndex];
+                signupRotatingEl.style.opacity = '1';
+            }, 400);
+        }
+        setInterval(rotateSignupPlaceholder, 3000);
+
+        fields.idCard.el.addEventListener('focus', () => {
+            signupRotatingEl.style.opacity = '0';
+        });
+        fields.idCard.el.addEventListener('blur', () => {
+            if (fields.idCard.el.value.length === 0) {
+                signupRotatingEl.style.opacity = '1';
+            }
+        });
+    }
+
     Object.keys(fields).forEach(key => {
         if (fields[key].el) {
             fields[key].el.addEventListener('input', (e) => {
-                // Special handling for Aadhaar (idCard)
+                // Special handling for id-card
                 if (key === 'idCard') {
-                    // Force uppercase
-                    e.target.value = e.target.value.toUpperCase();
-                    // Remove non-alphanumeric characters
-                    e.target.value = e.target.value.replace(/[^A-Z0-9]/g, '');
-                    // Limit length (max is 12 for Aadhaar, Officer ID is also 12: 4+8)
-                    if (e.target.value.length > 12) {
-                        e.target.value = e.target.value.slice(0, 12);
+                    let value = e.target.value.toUpperCase();
+
+                    // Hide rotating placeholder
+                    if (signupRotatingEl && value.length > 0) {
+                        signupRotatingEl.style.opacity = '0';
+                    }
+
+                    const startsWithLetter = /^[A-Z]/.test(value);
+                    const startsWithDigit = /^\d/.test(value);
+
+                    if (startsWithLetter) {
+                        if (/^AW/i.test(value)) {
+                            // Worker ID: AW + 5 digits
+                            const prefix = value.substring(0, 2);
+                            let rest = value.substring(2).replace(/[^0-9]/g, '');
+                            if (rest.length > 5) rest = rest.slice(0, 5);
+                            e.target.value = prefix + rest;
+
+                            if (signupIdTypeHint) {
+                                signupIdTypeHint.textContent = '🔧 Worker ID';
+                                signupIdTypeHint.className = 'login-id-hint show worker';
+                            }
+                        } else {
+                            // Officer ID: 4 letters + 8 digits
+                            let letters = value.match(/^[A-Z]*/)?.[0] || '';
+                            if (letters.length > 4) letters = letters.slice(0, 4);
+                            let rest = value.substring(letters.length).replace(/[^0-9]/g, '');
+                            if (letters.length >= 4) {
+                                if (rest.length > 8) rest = rest.slice(0, 8);
+                                e.target.value = letters + rest;
+                            } else {
+                                e.target.value = letters;
+                            }
+
+                            if (signupIdTypeHint) {
+                                signupIdTypeHint.textContent = letters.length < 4 ? '🏛️ Officer ID — enter 4-letter prefix' : '🏛️ Officer ID';
+                                signupIdTypeHint.className = 'login-id-hint show officer';
+                            }
+                        }
+                    } else if (startsWithDigit) {
+                        // Aadhaar: 12 digits only
+                        value = value.replace(/\D/g, '');
+                        if (value.length > 12) value = value.slice(0, 12);
+                        e.target.value = value;
+
+                        if (signupIdTypeHint) {
+                            signupIdTypeHint.textContent = '🪪 Aadhaar Number';
+                            signupIdTypeHint.className = 'login-id-hint show aadhaar';
+                        }
+                    } else {
+                        e.target.value = value.replace(/[^A-Z0-9]/g, '');
+                        if (signupIdTypeHint) {
+                            signupIdTypeHint.textContent = '';
+                            signupIdTypeHint.className = 'login-id-hint';
+                        }
                     }
                 }
                 validateField(key);
@@ -325,7 +407,12 @@ function initSignupProcess() {
         const password = fields.password.el.value;
 
         // Synthesize email placeholder for Firebase Auth (required)
-        const placeholderEmail = `${mobile}@setu.placeholder.com`;
+        // For workers/officers: use Employee ID so they can login with it
+        // For citizens: use mobile number
+        const isEmployeeId = /^[A-Z]{2,4}\d{5,8}$/.test(idCard);
+        const placeholderEmail = isEmployeeId
+            ? `${idCard}@setu.placeholder.com`
+            : `${mobile}@setu.placeholder.com`;
 
         // Visual Feedback
         signupBtn.disabled = true;
@@ -348,7 +435,13 @@ function initSignupProcess() {
             let department = ''; // Default department
 
             const officerRegex = /^[A-Z]{4}\d{8}$/;
-            if (officerRegex.test(idCard)) {
+            const workerRegex = /^AW\d{5}$/;
+
+            if (workerRegex.test(idCard)) {
+                // Worker ID format: AW + 5 digits (e.g. AW29393)
+                role = 'worker';
+                department = 'Field Operations';
+            } else if (officerRegex.test(idCard)) {
                 role = 'authority';
 
                 // Department allocation logic
@@ -391,6 +484,8 @@ function initSignupProcess() {
             // Redirect based on role
             if (role === 'authority') {
                 window.location.href = "authority-dashboard.html";
+            } else if (role === 'worker') {
+                window.location.href = "worker-home.html";
             } else {
                 window.location.href = "index.html";
             }

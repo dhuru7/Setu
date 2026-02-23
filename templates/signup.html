@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../static/css/set1_style.css">
     <!-- Signup Page specific styles -->
     <link rel="stylesheet" href="../static/css/set1_signup.css">
+    <link rel="stylesheet" href="../static/css/set1_login.css">
 </head>
 
 <body>
@@ -70,7 +71,7 @@
                     <!-- Govt ID / Emp ID -->
                     <div class="input-group">
                         <label class="input-label">GOVT ID / EMP ID</label>
-                        <div class="input-wrapper">
+                        <div class="input-wrapper" style="position:relative;">
                             <span class="input-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -85,9 +86,13 @@
                                 </svg>
                             </span>
                             <input type="text" id="id-card" name="id-card" class="custom-input uppercase"
-                                placeholder="AADHAAR OR GOVT. EMPLOYEE ID" required>
+                                placeholder=" " required>
+                            <span id="signup-rotating-placeholder" class="rotating-placeholder"
+                                style="left: calc(20px + 0.75rem + 20px); top:50%; transform:translateY(-50%); position:absolute; color:var(--text-muted,#9ca3af); font-size:0.95rem; pointer-events:none; opacity:1; transition:opacity 0.4s ease; white-space:nowrap;">Aadhaar
+                                Number</span>
                         </div>
                         <span id="id-error" class="error-message"></span>
+                        <span id="signup-id-type-hint" class="login-id-hint"></span>
                     </div>
 
                     <!-- Date of Birth -->
