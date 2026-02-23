@@ -130,24 +130,13 @@
                 <div class="ai-top-title">
                     <span class="ai-top-title-dot"></span>
                     Setu AI
-                    <span style="font-size: 0.6rem; opacity: 0.6; margin-left: 4px; font-weight: 400;">Sarvam-M</span>
                 </div>
-                <div style="display: flex; gap: 4px;">
-                    <button id="ai-settings-btn" class="ai-top-btn" title="API Settings">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" width="20" height="20">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </button>
-                    <button id="ai-back-btn" class="ai-top-btn" title="Back to Search">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" width="22" height="22">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+                <button id="ai-back-btn" class="ai-top-btn" title="Back to Search">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" width="22" height="22">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
             <!-- Chat Messages Area -->
@@ -190,74 +179,7 @@
         </div>
     </div>
 
-    <!-- Sarvam API Key Settings Modal -->
-    <div id="sarvam-key-backdrop"
-        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9998; backdrop-filter:blur(4px);"
-        onclick="closeSarvamKeyModal()"></div>
-    <div id="sarvam-key-modal"
-        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:9999; background:var(--bg-primary, #fff); border-radius:20px; padding:28px 24px; width:min(90vw, 380px); box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="font-size:1.15rem; font-weight:700; color:var(--text-primary, #111);">🔑 Sarvam AI Settings</h3>
-            <button onclick="closeSarvamKeyModal()"
-                style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-secondary, #666); line-height:1;">&times;</button>
-        </div>
-        <p style="font-size:0.82rem; color:var(--text-secondary, #666); margin-bottom:16px; line-height:1.5;">
-            Setu AI is powered by <strong>Sarvam-M</strong>, a fast multilingual Indian language model.
-            Enter your API key below to enable AI features.
-        </p>
-        <label
-            style="font-size:0.75rem; font-weight:600; color:var(--text-secondary, #888); text-transform:uppercase; letter-spacing:0.5px;">API
-            Subscription Key</label>
-        <input type="password" id="sarvam-key-input" placeholder="Enter your Sarvam API key"
-            style="width:100%; padding:12px 14px; border:1.5px solid var(--border-color, #e0e0e0); border-radius:12px; font-size:0.9rem; margin:8px 0 16px; background:var(--bg-secondary, #f5f5f5); color:var(--text-primary, #111); outline:none; transition:border-color 0.2s;"
-            onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='var(--border-color, #e0e0e0)'">
-        <button onclick="saveSarvamKey()" id="sarvam-save-btn"
-            style="width:100%; padding:12px; background:linear-gradient(135deg, #6366f1, #8b5cf6); color:white; border:none; border-radius:12px; font-size:0.9rem; font-weight:600; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s;"
-            onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'"
-            onmouseover="this.style.boxShadow='0 4px 15px rgba(99,102,241,0.4)'"
-            onmouseout="this.style.boxShadow='none'">
-            Save API Key
-        </button>
-        <p
-            style="font-size:0.72rem; color:var(--text-secondary, #999); margin-top:14px; text-align:center; line-height:1.5;">
-            Get your free API key at
-            <a href="https://dashboard.sarvam.ai/" target="_blank" rel="noopener"
-                style="color:#6366f1; text-decoration:none; font-weight:600;">dashboard.sarvam.ai</a>
-        </p>
-    </div>
 
-    <script>
-        function openSarvamKeyModal() {
-            document.getElementById('sarvam-key-backdrop').style.display = 'block';
-            document.getElementById('sarvam-key-modal').style.display = 'block';
-            const input = document.getElementById('sarvam-key-input');
-            const existingKey = localStorage.getItem('sarvamApiKey') || '';
-            input.value = existingKey;
-            setTimeout(() => input.focus(), 100);
-        }
-        function closeSarvamKeyModal() {
-            document.getElementById('sarvam-key-backdrop').style.display = 'none';
-            document.getElementById('sarvam-key-modal').style.display = 'none';
-        }
-        function saveSarvamKey() {
-            const key = document.getElementById('sarvam-key-input').value.trim();
-            if (!key) { alert('Please enter a valid API key.'); return; }
-            localStorage.setItem('sarvamApiKey', key);
-            const btn = document.getElementById('sarvam-save-btn');
-            btn.textContent = '✓ Saved!';
-            btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-            setTimeout(() => {
-                btn.textContent = 'Save API Key';
-                btn.style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
-                closeSarvamKeyModal();
-            }, 1200);
-        }
-        // Hook up settings button when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            const settingsBtn = document.getElementById('ai-settings-btn');
-            if (settingsBtn) settingsBtn.addEventListener('click', openSarvamKeyModal);
-        });
-    </script>
 
     <div id="google_translate_element"></div>
 
