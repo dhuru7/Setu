@@ -41,6 +41,11 @@ let activeFilters = {
     nearby: false
 };
 
+// Highlight report from URL parameter
+const urlParams = new URLSearchParams(window.location.search);
+const highlightReportId = urlParams.get('highlight');
+let highlightFound = false;
+
 // User's location for nearby filter
 let userLat = null;
 let userLng = null;
@@ -406,6 +411,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initial Fetch
     await fetchReports();
 
+    // If we need to highlight a report, try to find it and keep loading if needed
+    if (highlightReportId && !highlightFound) {
+        await scrollToHighlightedReport();
+    }
+
     // Intersection Observer for Infinite Scroll
     const observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && !isFetching && hasMore) {
@@ -488,6 +498,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             feedContainer.insertBefore(fragment, sentinel);
 
+            // Check if the highlighted report was loaded
+            if (highlightReportId && !highlightFound) {
+                const highlightedCard = document.getElementById(`report-${highlightReportId}`);
+                if (highlightedCard) {
+                    highlightFound = true;
+                }
+            }
+
             // Apply filters to new cards if any active
             if (hasActiveFilters()) {
                 applyClientFilters();
@@ -560,6 +578,92 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             card.removeAttribute('data-author-id');
         });
+    }
+
+    // Scroll to and highlight a specific report card
+    function highlightAndScrollToCard(card) {
+        card.style.transition = 'box-shadow 0.5s ease, border-color 0.5s ease';
+        card.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.2)';
+        card.style.borderRadius = '12px';
+        card.style.position = 'relative';
+        card.style.zIndex = '5';
+
+        setTimeout(() => {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 200);
+
+        let pulseCount = 0;
+        const pulseInterval = setInterval(() => {
+            pulseCount++;
+            if (pulseCount % 2 === 0) {
+                card.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.2)';
+            } else {
+                card.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.3), 0 0 10px rgba(59, 130, 246, 0.1)';
+            }
+            if (pulseCount >= 6) {
+                clearInterval(pulseInterval);
+                setTimeout(() => {
+                    card.style.boxShadow = 'none';
+                }, 500);
+            }
+        }, 500);
+
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, '', cleanUrl);
+    }
+
+    async function scrollToHighlightedReport() {
+        const existing = document.getElementById(`report-${highlightReportId}`);
+        if (existing) {
+            highlightFound = true;
+            highlightAndScrollToCard(existing);
+            return;
+        }
+
+        while (hasMore && !highlightFound) {
+            await fetchReports();
+            const card = document.getElementById(`report-${highlightReportId}`);
+            if (card) {
+                highlightFound = true;
+                highlightAndScrollToCard(card);
+                return;
+            }
+        }
+
+        if (!highlightFound) {
+            try {
+                const reportRef = doc(db, 'reports', highlightReportId);
+                const reportSnap = await getDoc(reportRef);
+                if (reportSnap.exists()) {
+                    const reportData = reportSnap.data();
+                    let cachedName = undefined;
+                    let cachedPhoto = undefined;
+                    if (reportData.userId && userCache.has(reportData.userId)) {
+                        const cached = userCache.get(reportData.userId);
+                        cachedName = cached.name;
+                        cachedPhoto = cached.photo;
+                    }
+                    const cardHTML = createReportCardHTML(highlightReportId, reportData, currentUser, {
+                        userName: cachedName,
+                        userPhoto: cachedPhoto
+                    });
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = cardHTML;
+                    const cardElement = tempDiv.firstElementChild;
+                    if (!cachedName && reportData.userId) {
+                        cardElement.setAttribute('data-author-id', reportData.userId);
+                    }
+                    feedContainer.insertBefore(cardElement, feedContainer.firstChild);
+                    if (!cachedName && reportData.userId) {
+                        fetchUsersAndHydrate([reportData.userId]);
+                    }
+                    highlightFound = true;
+                    highlightAndScrollToCard(cardElement);
+                }
+            } catch (e) {
+                console.warn('Could not fetch highlighted report:', e.message);
+            }
+        }
     }
 
     // Generate Skeleton HTML

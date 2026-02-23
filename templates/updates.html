@@ -694,7 +694,7 @@
                                         </div>
                                     </div>
 
-                                    <a href="reportdetail.html?id=${update.id}" class="view-report-btn">
+                                    <a href="reportfeed.html?highlight=${update.id}" class="view-report-btn">
                                         View Report
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
@@ -714,6 +714,40 @@
                 try {
                     const updates = [];
 
+                    // First, fetch reports the user is following to build a set of followed report IDs
+                    let followedReportIds = new Set();
+                    try {
+                        const followedQuery = query(
+                            collection(db, 'reports'),
+                            where('followers', 'array-contains', userId)
+                        );
+                        const followedSnap = await getDocs(followedQuery);
+                        followedSnap.forEach(docSnap => {
+                            followedReportIds.add(docSnap.id);
+                            const data = docSnap.data();
+                            // If this followed report has action/updates, include it
+                            if (data.actionTakenAt || data.status === 'In Progress' || data.status === 'Resolved') {
+                                updates.push({
+                                    id: docSnap.id,
+                                    type: 'followed-report',
+                                    issueType: data.issueType,
+                                    assignedDepartment: data.assignedDepartment || data.department,
+                                    assignedOfficerName: data.assignedOfficerName,
+                                    assignedOfficerPhone: data.assignedOfficerPhone,
+                                    workStartDate: data.workStartDate,
+                                    resolutionDuration: data.resolutionDuration,
+                                    previousStatus: 'Pending',
+                                    status: data.status || 'In Progress',
+                                    actionTakenAt: data.actionTakenAt || data.lastUpdatedAt,
+                                    reportUserId: data.userId,
+                                    isFollowing: true
+                                });
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Could not fetch followed reports:', e.message);
+                    }
+
                     // Method 1: Fetch from notifications collection
                     try {
                         const notificationsQuery = query(
@@ -724,22 +758,31 @@
                         const notifSnap = await getDocs(notificationsQuery);
                         notifSnap.forEach(docSnap => {
                             const data = docSnap.data();
-                            updates.push({
-                                id: data.reportId || docSnap.id,
-                                type: 'notification',
-                                issueType: data.title?.replace('Update on your report: ', '') || 'Report',
-                                assignedDepartment: data.department,
-                                assignedOfficerName: data.actionData?.officerName,
-                                assignedOfficerPhone: data.actionData?.officerPhone,
-                                workStartDate: data.actionData?.startDate,
-                                resolutionDuration: data.actionData?.resolutionDuration,
-                                previousStatus: data.actionData?.previousStatus || 'Pending',
-                                status: data.actionData?.newStatus || 'In Progress',
-                                actionTakenAt: data.createdAt,
-                                reportUserId: userId,
-                                isFollowing: false,
-                                isRead: data.isRead
-                            });
+                            const reportId = data.reportId || docSnap.id;
+                            // Avoid duplicates from followed reports
+                            const exists = updates.some(u => u.id === reportId);
+                            if (!exists) {
+                                updates.push({
+                                    id: reportId,
+                                    type: 'notification',
+                                    issueType: data.title?.replace('Update on your report: ', '') || 'Report',
+                                    assignedDepartment: data.department,
+                                    assignedOfficerName: data.actionData?.officerName,
+                                    assignedOfficerPhone: data.actionData?.officerPhone,
+                                    workStartDate: data.actionData?.startDate,
+                                    resolutionDuration: data.actionData?.resolutionDuration,
+                                    previousStatus: data.actionData?.previousStatus || 'Pending',
+                                    status: data.actionData?.newStatus || 'In Progress',
+                                    actionTakenAt: data.createdAt,
+                                    reportUserId: userId,
+                                    isFollowing: followedReportIds.has(reportId),
+                                    isRead: data.isRead
+                                });
+                            } else {
+                                // Update the existing entry's isFollowing if needed
+                                const existing = updates.find(u => u.id === reportId);
+                                if (existing) existing.isFollowing = existing.isFollowing || followedReportIds.has(reportId);
+                            }
                         });
                     } catch (e) {
                         console.warn('Could not fetch notifications:', e.message);
@@ -758,7 +801,7 @@
                             const data = docSnap.data();
                             // Only include reports that have action taken and aren't already in notifications
                             if ((data.actionTakenAt || data.status === 'In Progress' || data.status === 'Resolved')) {
-                                // Check if we already have this update from notifications
+                                // Check if we already have this update from notifications or followed
                                 const exists = updates.some(u => u.id === docSnap.id);
                                 if (!exists) {
                                     updates.push({
@@ -774,7 +817,7 @@
                                         status: data.status || 'In Progress',
                                         actionTakenAt: data.actionTakenAt || data.lastUpdatedAt,
                                         reportUserId: data.userId,
-                                        isFollowing: false
+                                        isFollowing: followedReportIds.has(docSnap.id)
                                     });
                                 }
                             }
