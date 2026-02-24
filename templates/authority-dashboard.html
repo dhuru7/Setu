@@ -226,6 +226,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { fetchOfficerReports } from "../static/js/authority-utils.js?v=8";
 
         // Firebase config - DO NOT COMMIT API KEY
@@ -285,11 +286,32 @@
                 }
             });
 
-            // Load cached profile data
+            // Load cached profile data first (immediate display)
             const loadCachedProfile = () => {
                 const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
-                if (sidebarUserName) sidebarUserName.textContent = userProfile.fullname || 'Authority';
+                if (sidebarUserName) sidebarUserName.textContent = userProfile.fullname || userProfile.displayName || 'Loading...';
                 if (sidebarUserDept) sidebarUserDept.textContent = userProfile.department || 'General Dept';
+            };
+
+            // Load fresh profile data from Firestore
+            const loadFreshProfile = async (user) => {
+                try {
+                    const db = getFirestore();
+                    const docRef = doc(db, 'users', user.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        // Update localStorage cache with fresh data
+                        const cachedProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                        const merged = { ...cachedProfile, ...userData };
+                        localStorage.setItem('userProfile', JSON.stringify(merged));
+                        // Update UI
+                        if (sidebarUserName) sidebarUserName.textContent = userData.fullname || userData.displayName || user.email || 'Officer';
+                        if (sidebarUserDept) sidebarUserDept.textContent = userData.department || 'General Dept';
+                    }
+                } catch (err) {
+                    console.error('Error loading fresh profile:', err);
+                }
             };
 
             // Get status HTML
@@ -445,6 +467,7 @@
 
             onAuthStateChanged(auth, (user) => {
                 if (user) {
+                    loadFreshProfile(user);
                     loadDashboardData(user);
                 }
             });

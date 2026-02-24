@@ -473,6 +473,163 @@
             width: 14px;
             height: 14px;
         }
+
+        /* ===== AI Sort Button — Black Square Style ===== */
+        .ai-sort-btn {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: box-shadow 0.4s ease, transform 0.2s ease, opacity 0.2s;
+            white-space: nowrap;
+            border: none;
+            background: #0a0a0a;
+            color: #ffffff;
+            letter-spacing: 0.02em;
+            font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .ai-sort-btn:hover:not(:disabled) {
+            background: #1a1a1a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .ai-sort-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .ai-sort-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+            transform: none;
+        }
+
+        /* RGB glow state after AI has sorted */
+        .ai-sort-btn.sorted {
+            background: #0a0a0a;
+            animation: rgb-glow 3s linear infinite;
+        }
+
+        .ai-sort-btn.sorted:disabled {
+            animation: rgb-glow 3s linear infinite;
+            opacity: 1;
+        }
+
+        @keyframes rgb-glow {
+            0% {
+                box-shadow: 0 0 12px 3px rgba(255, 0, 80, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5);
+            }
+
+            16% {
+                box-shadow: 0 0 12px 3px rgba(255, 120, 0, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5);
+            }
+
+            33% {
+                box-shadow: 0 0 12px 3px rgba(255, 230, 0, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 12px 3px rgba(0, 220, 80, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5);
+            }
+
+            66% {
+                box-shadow: 0 0 12px 3px rgba(0, 150, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5);
+            }
+
+            83% {
+                box-shadow: 0 0 12px 3px rgba(160, 0, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 12px 3px rgba(255, 0, 80, 0.7), 0 2px 8px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        .ai-sort-btn-emoji {
+            font-size: 1rem;
+            line-height: 1;
+            display: inline-block;
+        }
+
+        .ai-sort-btn-label {
+            font-size: 0.8125rem;
+            font-weight: 700;
+        }
+
+        /* AI sort loading dots */
+        .ai-sort-dots {
+            font-weight: 700;
+            min-width: 18px;
+            display: inline-block;
+        }
+
+        /* Banner */
+        .ai-sort-banner {
+            background: rgba(10, 10, 10, 0.04);
+            border: 1px solid rgba(10, 10, 10, 0.12);
+            border-radius: 10px;
+            padding: 11px 16px;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: #1a1a1a;
+        }
+
+        .ai-sort-banner.show {
+            display: flex;
+        }
+
+        .ai-sort-banner .ai-sort-banner-emoji {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .ai-sort-banner strong {
+            font-weight: 700;
+        }
+
+        /* Priority badges */
+        .ai-priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.67rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            margin-left: 8px;
+            vertical-align: middle;
+            letter-spacing: 0.03em;
+        }
+
+        .ai-priority-badge.critical {
+            background: rgba(239, 68, 68, 0.13);
+            color: #dc2626;
+        }
+
+        .ai-priority-badge.high {
+            background: rgba(245, 158, 11, 0.13);
+            color: #d97706;
+        }
+
+        .ai-priority-badge.medium {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+        }
+
+        .ai-priority-badge.low {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
     </style>
 </head>
 
@@ -586,12 +743,25 @@
                 <h2 class="section-title">Take Action</h2>
                 <p class="section-subtitle">Review and take action on pending reports in your jurisdiction.</p>
 
-                <!-- Filter Tabs -->
-                <div class="filter-tabs">
-                    <button class="filter-tab active" data-filter="pending">Pending</button>
-                    <button class="filter-tab" data-filter="in-progress">In Progress</button>
-                    <button class="filter-tab" data-filter="resolved">Resolved</button>
-                    <button class="filter-tab" data-filter="all">All Reports</button>
+                <!-- Filter Tabs & AI Sort -->
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;">
+                    <div class="filter-tabs" style="margin-bottom: 0; flex: 1; min-width: 0;">
+                        <button class="filter-tab active" data-filter="pending">Pending</button>
+                        <button class="filter-tab" data-filter="in-progress">In Progress</button>
+                        <button class="filter-tab" data-filter="resolved">Resolved</button>
+                        <button class="filter-tab" data-filter="all">All Reports</button>
+                    </div>
+                    <button id="ai-sort-btn" class="ai-sort-btn" title="Sort reports by priority using Setu AI">
+                        <span class="ai-sort-btn-emoji" id="ai-sort-emoji">🔴</span>
+                        <span class="ai-sort-btn-label" id="ai-sort-label">Sort with Setu AI</span>
+                    </button>
+                </div>
+
+                <!-- AI Sort Banner -->
+                <div id="ai-sort-banner" class="ai-sort-banner">
+                    <span class="ai-sort-banner-emoji">🟢</span>
+                    <span id="ai-sort-banner-text"><strong>AI-sorted order active.</strong> Reports are arranged by
+                        urgency and impact.</span>
                 </div>
             </section>
 
@@ -720,6 +890,130 @@
         let squadWorkers = []; // Cache squad workers
         let workerTasksCache = {}; // Cache worker tasks { workerId: [tasks] }
 
+        // ===== AI SORT STATE =====
+        let aiSortedOrder = null;      // Array of report IDs in AI-sorted order
+        let aiSortedReportIds = null;  // The set of IDs the AI was given (to detect new reports)
+        const AI_SORT_STORAGE_KEY = 'setu_action_center_ai_sort_v1';
+
+        // Sarvam API integration (reuse key from setu-ai.js approach)
+        const SARVAM_API_URL = 'https://api.sarvam.ai/v1/chat/completions';
+        const SARVAM_MODEL = 'sarvam-m';
+        const _fk = [115, 107, 95, 49, 51, 100, 120, 51, 56, 103, 50, 95, 71, 105, 79, 51, 70, 71, 83, 56, 81, 53, 75, 56, 86, 73, 52, 56, 49, 68, 76, 71, 116, 114, 101, 113];
+        const SARVAM_FK = _fk.map(c => String.fromCharCode(c)).join('');
+
+        // Emoji list for cycling animation (same as Setu AI chat)
+        const AI_EMOJIS = ["🔴", "🟥", "🟠", "🟧", "🟡", "🟨", "🟢", "🟩", "🔵", "🟦", "🟣", "🟪", "🟤", "🟫", "⚫", "⬛", "⚪", "⬜"];
+
+        async function callSarvamForSort(reportsData) {
+            const apiKey = SARVAM_FK;
+            const reportSummaries = reportsData.map((r, i) => {
+                const age = r.createdAt ? Math.floor((Date.now() - r.createdAt.seconds * 1000) / (1000 * 60 * 60 * 24)) : 0;
+                const locParts = [
+                    r.location?.full,
+                    r.location?.ward,
+                    r.location?.district,
+                    r.location?.city,
+                    r.location?.state
+                ].filter(Boolean);
+                const loc = locParts.join(', ') || r.address || 'Unknown Location';
+                const upvotes = r.upvotes || r.votes || 0;
+                const desc = (r.description || r.details || '').slice(0, 200);
+                const hasPhoto = r.imageUrl || r.photoURL ? 'Yes' : 'No';
+                const reporterName = r.userName || r.reporterName || 'Citizen';
+                return `${i + 1}. ID:${r.id} | Type:${r.issueType || r.category || 'Issue'} | Location:${loc} | Age:${age}days | Upvotes:${upvotes} | Status:${r.status || 'Pending'} | HasPhoto:${hasPhoto} | Reporter:${reporterName}${desc ? ' | Description: ' + desc : ''}`;
+            }).join('\n');
+
+            const prompt = `You are a civic issue management assistant for Indian municipal authorities. Rank the following citizen-reported civic issues by priority — which should be resolved FIRST to LAST.
+
+Prioritization factors (in order of importance):
+1. Public safety risk: water contamination, sewage overflow, electrical hazards, structural damage — always highest priority
+2. Severity from description: words like "overflowing", "dangerous", "accident", "injured", "flooded" signal high urgency
+3. Days pending: older unresolved issues should be escalated
+4. Public impact (upvotes): more upvotes = more citizens affected
+5. Issue type urgency ranking: Sewage/Drainage > Water supply > Electrical > Road/Pothole > Garbage > Other
+6. Location specificity: issues in populated/central areas may affect more people
+
+Reports:
+${reportSummaries}
+
+Return ONLY a JSON array of report IDs in priority order, from highest to lowest priority. Format: ["id1","id2","id3"]
+Return nothing else — no explanation, no text, just the JSON array.`;
+
+            const response = await fetch(SARVAM_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'api-subscription-key': apiKey,
+                },
+                body: JSON.stringify({
+                    model: SARVAM_MODEL,
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.1,
+                    max_tokens: 1024,
+                }),
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Sarvam API error ${response.status}: ${errText}`);
+            }
+
+            const data = await response.json();
+            const text = data.choices?.[0]?.message?.content?.trim() || '';
+
+            // Extract JSON array from response
+            const match = text.match(/\[.*\]/s);
+            if (!match) throw new Error('AI did not return a valid order array.');
+            const ordered = JSON.parse(match[0]);
+            if (!Array.isArray(ordered)) throw new Error('AI response is not an array.');
+            return ordered;
+        }
+
+        // Save AI sort order to localStorage
+        function saveAiSortOrder(orderedIds, sourceIds) {
+            const payload = { orderedIds, sourceIds };
+            try { localStorage.setItem(AI_SORT_STORAGE_KEY, JSON.stringify(payload)); } catch (e) { }
+        }
+
+        // Load AI sort order from localStorage
+        function loadAiSortOrder() {
+            try {
+                const raw = localStorage.getItem(AI_SORT_STORAGE_KEY);
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch (e) { return null; }
+        }
+
+        // Check if current reports have new IDs not in the saved order
+        function hasNewReports(reports, savedSourceIds) {
+            if (!savedSourceIds) return true;
+            const savedSet = new Set(savedSourceIds);
+            return reports.some(r => !savedSet.has(r.id));
+        }
+
+        // Apply AI sort order to a reports array
+        function applyAiOrder(reports, orderedIds) {
+            const idToReport = new Map(reports.map(r => [r.id, r]));
+            const sorted = [];
+            for (const id of orderedIds) {
+                if (idToReport.has(id)) sorted.push(idToReport.get(id));
+            }
+            // Append any reports not in the AI order at the end
+            for (const r of reports) {
+                if (!orderedIds.includes(r.id)) sorted.push(r);
+            }
+            return sorted;
+        }
+
+        // Get priority label from position
+        function getPriorityLabel(index, total) {
+            const pct = index / total;
+            if (pct < 0.15) return { level: 'critical', label: '🔴 Critical' };
+            if (pct < 0.40) return { level: 'high', label: '🟠 High' };
+            if (pct < 0.70) return { level: 'medium', label: '🔵 Medium' };
+            return { level: 'low', label: '🟢 Low' };
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
             const sidebar = document.getElementById('sidebar');
@@ -771,7 +1065,7 @@
             // Load cached profile data
             const loadCachedProfile = () => {
                 const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
-                if (sidebarUserName) sidebarUserName.textContent = userProfile.fullname || 'Authority';
+                if (sidebarUserName) sidebarUserName.textContent = userProfile.fullname || userProfile.displayName || 'Authority';
                 if (sidebarUserDept) sidebarUserDept.textContent = userProfile.department || 'General Dept';
             };
 
@@ -791,17 +1085,21 @@
                 return 'Pending';
             };
 
-            // Filter reports
+            // Filter reports (respects AI sort order)
             const filterReports = (filter) => {
                 currentFilter = filter;
-                let filtered = allReports;
+                let filtered = aiSortedOrder
+                    ? applyAiOrder(allReports, aiSortedOrder)
+                    : allReports;
 
                 if (filter === 'pending') {
-                    filtered = allReports.filter(r => !r.status || r.status.toLowerCase() === 'submitted' || r.status.toLowerCase() === 'pending');
+                    filtered = filtered.filter(r => !r.status || r.status.toLowerCase() === 'submitted' || r.status.toLowerCase() === 'pending');
                 } else if (filter === 'in-progress') {
-                    filtered = allReports.filter(r => r.status && r.status.toLowerCase() === 'in progress');
+                    filtered = filtered.filter(r => r.status && r.status.toLowerCase() === 'in progress');
                 } else if (filter === 'resolved') {
-                    filtered = allReports.filter(r => r.status && r.status.toLowerCase() === 'resolved');
+                    filtered = filtered.filter(r => r.status && r.status.toLowerCase() === 'resolved');
+                } else {
+                    // 'all' — keep full order
                 }
 
                 renderReports(filtered);
@@ -831,11 +1129,20 @@
                     const statusText = getStatusText(report.status);
                     const isPending = statusClass === 'pending';
 
+                    // AI priority badge (only shown when AI sort is active)
+                    const priorityBadgeHtml = aiSortedOrder
+                        ? (() => {
+                            const posInOrder = aiSortedOrder.indexOf(report.id);
+                            const pos = posInOrder >= 0 ? posInOrder : aiSortedOrder.length + index;
+                            const { level, label } = getPriorityLabel(pos, aiSortedOrder.length || reports.length);
+                            return `<span class="ai-priority-badge ${level}">${label}</span>`;
+                        })()
+                        : '';
                     return `
                         <div class="report-card fade-in-up" style="animation-delay: ${index * 0.05}s;">
                             <div class="report-card-header">
                                 <div class="report-info">
-                                    <div class="report-title">${report.issueType || 'Issue Report'}</div>
+                                    <div class="report-title">${report.issueType || 'Issue Report'}${priorityBadgeHtml}</div>
                                     <div class="report-id">#${report.id.substring(0, 8).toUpperCase()}</div>
                                 </div>
                                 <span class="status-badge ${statusClass}">${statusText}</span>
@@ -887,6 +1194,13 @@
                 });
             };
 
+            // AI Sort DOM elements (declared before loadReports so they're available inside it)
+            const aiSortBtn = document.getElementById('ai-sort-btn');
+            const aiSortLabel = document.getElementById('ai-sort-label');
+            const aiSortEmoji = document.getElementById('ai-sort-emoji');
+            const aiSortBanner = document.getElementById('ai-sort-banner');
+            const aiSortBannerText = document.getElementById('ai-sort-banner-text');
+
             // Load reports
             const loadReports = async (user) => {
                 try {
@@ -904,6 +1218,41 @@
                     `;
 
                     allReports = await fetchOfficerReports(user.uid);
+
+                    // Restore saved AI sort order if it's still valid for these reports
+                    const saved = loadAiSortOrder();
+
+                    if (saved && saved.orderedIds && saved.sourceIds) {
+                        const newReports = hasNewReports(allReports, saved.sourceIds);
+                        if (!newReports) {
+                            // Restore saved AI order — no new reports
+                            aiSortedOrder = saved.orderedIds;
+                            aiSortedReportIds = saved.sourceIds;
+                            aiSortBtn?.classList.add('sorted');
+                            if (aiSortEmoji) aiSortEmoji.textContent = '✅';
+                            if (aiSortLabel) aiSortLabel.textContent = 'AI Sorted';
+                            if (aiSortBtn) aiSortBtn.disabled = true;
+                            if (aiSortBanner) aiSortBanner.classList.add('show');
+                        } else {
+                            // New reports found — prompt user to re-sort (re-enable button)
+                            aiSortedOrder = null;
+                            // Re-enable button so officer can re-sort
+                            if (aiSortBtn) {
+                                aiSortBtn.disabled = false;
+                                aiSortBtn.classList.remove('sorted');
+                                if (aiSortEmoji) aiSortEmoji.textContent = '🔴';
+                                if (aiSortLabel) aiSortLabel.textContent = 'Sort with Setu AI';
+                            }
+                            if (aiSortBanner) {
+                                aiSortBanner.classList.add('show');
+                                if (aiSortBannerText) aiSortBannerText.innerHTML = '⚠️ <strong>New reports detected.</strong> Previous AI sort is outdated. Click "Sort with Setu AI" to re-sort.';
+                                aiSortBanner.style.background = 'rgba(245,158,11,0.07)';
+                                aiSortBanner.style.borderColor = 'rgba(245,158,11,0.3)';
+                                aiSortBanner.style.color = '#92400e';
+                            }
+                        }
+                    }
+
                     filterReports(currentFilter);
 
                 } catch (error) {
@@ -915,6 +1264,81 @@
                     `;
                 }
             };
+
+            // AI Sort button: emoji cycling animation + permanent disable after sort
+            let _aiEmojiInterval = null;
+
+            aiSortBtn?.addEventListener('click', async () => {
+                if (allReports.length === 0) {
+                    showToast('No reports loaded yet. Please wait.', true);
+                    return;
+                }
+
+                // Loading state: disable button, cycle emojis, show dots
+                aiSortBtn.disabled = true;
+                aiSortBtn.classList.remove('sorted');
+                if (aiSortBanner) aiSortBanner.classList.remove('show');
+
+                // Start emoji cycling animation
+                let _emojiIdx = 0;
+                if (aiSortEmoji) aiSortEmoji.textContent = AI_EMOJIS[0];
+                if (_aiEmojiInterval) clearInterval(_aiEmojiInterval);
+                _aiEmojiInterval = setInterval(() => {
+                    _emojiIdx = (_emojiIdx + 1) % AI_EMOJIS.length;
+                    if (aiSortEmoji) aiSortEmoji.textContent = AI_EMOJIS[_emojiIdx];
+                }, 600);
+
+                // Animated dots for label
+                if (aiSortLabel) aiSortLabel.textContent = 'Thinking.';
+                let _dotCount = 1;
+                const _dotsInterval = setInterval(() => {
+                    _dotCount = (_dotCount % 3) + 1;
+                    if (aiSortLabel) aiSortLabel.textContent = 'Thinking' + '.'.repeat(_dotCount);
+                }, 500);
+
+                try {
+                    const orderedIds = await callSarvamForSort(allReports);
+                    const sourceIds = allReports.map(r => r.id);
+
+                    // Save result
+                    saveAiSortOrder(orderedIds, sourceIds);
+                    aiSortedOrder = orderedIds;
+                    aiSortedReportIds = sourceIds;
+
+                    // Stop animation, show ✓ in emoji, update label
+                    clearInterval(_aiEmojiInterval);
+                    clearInterval(_dotsInterval);
+                    if (aiSortEmoji) aiSortEmoji.textContent = '✅';
+                    if (aiSortLabel) aiSortLabel.textContent = 'AI Sorted';
+
+                    // Apply RGB glow and keep disabled (sorted = locked until new reports)
+                    aiSortBtn.classList.add('sorted');
+                    aiSortBtn.disabled = true;
+
+                    // Show banner
+                    if (aiSortBanner) {
+                        aiSortBanner.style.background = '';
+                        aiSortBanner.style.borderColor = '';
+                        aiSortBanner.style.color = '';
+                        aiSortBanner.classList.add('show');
+                    }
+                    if (aiSortBannerText) aiSortBannerText.innerHTML = '🟢 <strong>AI-sorted order active.</strong> Reports are ranked by urgency, description, and impact. Order is saved and will persist until new reports are added.';
+
+                    // Re-render with new order
+                    filterReports(currentFilter);
+                    showToast('Reports sorted by AI priority! 🤖');
+
+                } catch (err) {
+                    console.error('AI sort error:', err);
+                    clearInterval(_aiEmojiInterval);
+                    clearInterval(_dotsInterval);
+                    if (aiSortEmoji) aiSortEmoji.textContent = '🔴';
+                    if (aiSortLabel) aiSortLabel.textContent = 'Sort with Setu AI';
+                    aiSortBtn.disabled = false;
+                    showToast('AI sort failed. Please try again.', true);
+                }
+            });
+
 
             // Filter tab click handlers
             filterTabs.forEach(tab => {
