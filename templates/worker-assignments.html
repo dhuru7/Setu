@@ -448,8 +448,7 @@
                         <p>Tap to take a photo</p>
                         <span>or upload from gallery</span>
                     </div>
-                    <input type="file" id="proof-file-input" accept="image/*" capture="environment"
-                        style="display:none;">
+                    <input type="file" id="proof-file-input" accept="image/*" style="display:none;">
                 </div>
             </div>
             <div class="modal-footer">
@@ -957,7 +956,19 @@
 
             } catch (error) {
                 console.error('Error updating status:', error);
-                showToast('Failed to update. Please try again.', true);
+                let errorMsg = 'Failed to update. Please try again.';
+                if (error.code === 'storage/unauthorized') {
+                    errorMsg = 'Upload not authorized. Please check Firebase Storage rules.';
+                } else if (error.code === 'storage/quota-exceeded') {
+                    errorMsg = 'Storage quota exceeded. Please contact admin.';
+                } else if (error.code === 'storage/retry-limit-exceeded') {
+                    errorMsg = 'Upload timed out. Please check your connection.';
+                } else if (error.code === 'storage/canceled') {
+                    errorMsg = 'Upload was canceled.';
+                } else if (error.message) {
+                    errorMsg = `Error: ${error.message}`;
+                }
+                showToast(errorMsg, true);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Submit Update';

@@ -146,16 +146,16 @@
             <!-- Performance Strip -->
             <div class="performance-strip fade-in-up delay-1">
                 <div class="perf-item">
-                    <div class="perf-value" id="perf-completed">47</div>
+                    <div class="perf-value" id="perf-completed">--</div>
                     <div class="perf-label">Completed</div>
                 </div>
                 <div class="perf-item">
-                    <div class="perf-value" id="perf-rating">4.8</div>
-                    <div class="perf-label">Rating</div>
+                    <div class="perf-value" id="perf-total">--</div>
+                    <div class="perf-label">Total Tasks</div>
                 </div>
                 <div class="perf-item">
-                    <div class="perf-value" id="perf-streak">12</div>
-                    <div class="perf-label">Day Streak</div>
+                    <div class="perf-value" id="perf-pending">--</div>
+                    <div class="perf-label">Pending</div>
                 </div>
             </div>
 
@@ -174,7 +174,7 @@
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Worker ID</div>
-                            <div class="detail-value" id="profile-id">WK-00482</div>
+                            <div class="detail-value" id="profile-id">Loading...</div>
                         </div>
                     </div>
 
@@ -189,7 +189,7 @@
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Phone Number</div>
-                            <div class="detail-value" id="profile-phone">+91 98765 43210</div>
+                            <div class="detail-value" id="profile-phone">Loading...</div>
                         </div>
                     </div>
 
@@ -204,7 +204,7 @@
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Email Address</div>
-                            <div class="detail-value" id="profile-email">worker@setu.gov.in</div>
+                            <div class="detail-value" id="profile-email">Loading...</div>
                         </div>
                     </div>
 
@@ -219,7 +219,7 @@
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Department</div>
-                            <div class="detail-value" id="profile-dept">Public Works</div>
+                            <div class="detail-value" id="profile-dept">Loading...</div>
                         </div>
                     </div>
 
@@ -252,7 +252,7 @@
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Member Since</div>
-                            <div class="detail-value" id="profile-joined">Jan 2024</div>
+                            <div class="detail-value" id="profile-joined">Loading...</div>
                         </div>
                     </div>
                 </div>
@@ -777,6 +777,35 @@
         import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+        // Helper to load performance stats from Firestore
+        async function loadPerformanceStats(uid) {
+            try {
+                const q = query(
+                    collection(db, 'reports'),
+                    where('assignedWorkerId', '==', uid)
+                );
+                const snapshot = await getDocs(q);
+                let total = 0, completed = 0, pending = 0;
+                snapshot.forEach(docSnap => {
+                    total++;
+                    const status = (docSnap.data().status || '').toLowerCase();
+                    if (status === 'resolved' || status === 'completed' || status === 'fixed') {
+                        completed++;
+                    } else {
+                        pending++;
+                    }
+                });
+                document.getElementById('perf-completed').textContent = completed;
+                document.getElementById('perf-total').textContent = total;
+                document.getElementById('perf-pending').textContent = pending;
+            } catch (err) {
+                console.error('Error loading perf stats:', err);
+                document.getElementById('perf-completed').textContent = '0';
+                document.getElementById('perf-total').textContent = '0';
+                document.getElementById('perf-pending').textContent = '0';
+            }
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
             authDomain: "setu-6932f.firebaseapp.com",
@@ -1053,18 +1082,47 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     currentUserUid = user.uid;
+
+                    // Load performance stats
+                    loadPerformanceStats(user.uid);
+
                     try {
                         const docSnap = await getDoc(doc(db, 'users', user.uid));
                         if (docSnap.exists()) {
                             const data = docSnap.data();
 
                             // Update display from Firestore
+                            if (data.fullname) {
+                                document.getElementById('profile-name').textContent = data.fullname;
+                                document.getElementById('sidebar-user-name').textContent = data.fullname;
+                            }
                             if (data.department) {
                                 document.getElementById('profile-dept').textContent = data.department;
                                 document.getElementById('profile-designation').textContent = `Field Worker \u2014 ${data.department}`;
+                            } else {
+                                document.getElementById('profile-dept').textContent = 'Not set';
                             }
-                            if (data.idCard) document.getElementById('profile-id').textContent = data.idCard;
-                            if (data.mobile) document.getElementById('profile-phone').textContent = data.mobile;
+                            document.getElementById('profile-id').textContent = data.idCard || 'Not set';
+                            document.getElementById('profile-phone').textContent = data.mobile || 'Not set';
+                            document.getElementById('profile-email').textContent = data.email || user.email || 'Not set';
+
+                            // Member Since — compute from createdAt
+                            if (data.createdAt) {
+                                let joinDate;
+                                if (data.createdAt.seconds) {
+                                    joinDate = new Date(data.createdAt.seconds * 1000);
+                                } else if (typeof data.createdAt === 'string') {
+                                    joinDate = new Date(data.createdAt);
+                                }
+                                if (joinDate && !isNaN(joinDate)) {
+                                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                    document.getElementById('profile-joined').textContent = `${months[joinDate.getMonth()]} ${joinDate.getFullYear()}`;
+                                } else {
+                                    document.getElementById('profile-joined').textContent = 'Unknown';
+                                }
+                            } else {
+                                document.getElementById('profile-joined').textContent = 'Unknown';
+                            }
 
                             // Load avatar from Firestore
                             if (data.avatar) {
