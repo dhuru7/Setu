@@ -237,6 +237,49 @@ window.handleFollow = async (btn, reportId) => {
     }
 };
 
+// Rating Handler — Citizen star rating for resolved reports
+window.handleRating = async (reportId, score, starEl) => {
+    if (!currentUser) { alert("Please log in to rate."); return; }
+    try {
+        // Immediately update UI
+        const container = document.getElementById(`rating-${reportId}`);
+        if (!container) return;
+        const stars = container.querySelectorAll('.rating-star');
+        stars.forEach(s => {
+            const starVal = parseInt(s.dataset.star);
+            s.textContent = starVal <= score ? '★' : '☆';
+            if (starVal <= score) {
+                s.classList.add('filled');
+                s.style.color = '#f59e0b';
+                s.style.transform = 'scale(1.2)';
+                setTimeout(() => s.style.transform = 'scale(1)', 200);
+            }
+            // Disable clicking
+            s.classList.remove('clickable');
+            s.style.cursor = 'default';
+            s.removeAttribute('onclick');
+        });
+
+        // Show confirmation
+        const confirmEl = document.createElement('span');
+        confirmEl.style.cssText = 'font-size: 0.7rem; color: #10b981; font-weight: 600; margin-left: 6px;';
+        confirmEl.textContent = '✓ Rated!';
+        container.appendChild(confirmEl);
+
+        // Save to Firestore (ratings map: userId -> {score, timestamp})
+        await updateDoc(doc(db, 'reports', reportId), {
+            [`ratings.${currentUser.uid}`]: {
+                score: score,
+                timestamp: Date.now()
+            }
+        });
+
+    } catch (error) {
+        console.error("Error rating:", error);
+        alert("Rating failed. Please try again.");
+    }
+};
+
 // ── Main ────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -471,6 +514,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             for (const docSnapshot of querySnapshot.docs) {
                 const reportData = docSnapshot.data();
+
+                // Auto-hide resolved reports older than 36 hours
+                const RESOLVED_HIDE_HOURS = 36;
+                const isResolvedStatus = (reportData.status || '').toLowerCase() === 'resolved' ||
+                    (reportData.status || '').toLowerCase() === 'completed' ||
+                    (reportData.status || '').toLowerCase() === 'fixed';
+                if (isResolvedStatus && reportData.resolvedAt?.seconds) {
+                    const resolvedTime = reportData.resolvedAt.seconds * 1000;
+                    const hoursSinceResolved = (Date.now() - resolvedTime) / (1000 * 60 * 60);
+                    if (hoursSinceResolved > RESOLVED_HIDE_HOURS) {
+                        continue; // Skip this report — auto-hidden
+                    }
+                }
 
                 let cachedName = undefined;
                 let cachedPhoto = undefined;

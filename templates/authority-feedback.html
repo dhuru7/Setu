@@ -512,25 +512,62 @@
                         </div>
                     `;
 
-                    // Fetch feedback from Firestore
-                    // Note: This assumes there's a 'feedback' collection. If not, we show sample data
+                    const allFeedback = [];
+
+                    // 1. Check the dedicated 'feedback' collection
                     try {
                         const feedbackRef = collection(db, "feedback");
                         const q = query(feedbackRef, orderBy("createdAt", "desc"), limit(20));
                         const querySnapshot = await getDocs(q);
-
-                        const feedbackData = [];
                         querySnapshot.forEach((doc) => {
-                            feedbackData.push({ id: doc.id, ...doc.data() });
+                            allFeedback.push({ id: doc.id, ...doc.data() });
                         });
-
-                        if (feedbackData.length > 0) {
-                            renderFeedback(feedbackData);
-                            calculateStats(feedbackData);
-                            return;
-                        }
                     } catch (e) {
-                        console.log("No feedback collection found, showing placeholder");
+                        console.log("No feedback collection found");
+                    }
+
+                    // 2. Also aggregate inline ratings from resolved reports
+                    try {
+                        const reportsRef = collection(db, "reports");
+                        const rq = query(reportsRef, where("status", "==", "Resolved"), limit(50));
+                        const reportSnap = await getDocs(rq);
+
+                        reportSnap.forEach((docSnap) => {
+                            const report = docSnap.data();
+                            const ratings = report.ratings || {};
+                            for (const [userId, ratingData] of Object.entries(ratings)) {
+                                const score = typeof ratingData === 'object' ? ratingData.score : ratingData;
+                                const ts = typeof ratingData === 'object' ? ratingData.timestamp : null;
+                                // Avoid duplicates if also in feedback collection
+                                const dupKey = `${docSnap.id}_${userId}`;
+                                if (!allFeedback.find(f => f._key === dupKey)) {
+                                    allFeedback.push({
+                                        _key: dupKey,
+                                        rating: score,
+                                        userName: report.userName || 'Citizen',
+                                        location: report.location?.village || report.location?.city || 'Unknown',
+                                        issueType: report.issueType || 'Issue Report',
+                                        reportId: docSnap.id,
+                                        comment: '',
+                                        createdAt: ts ? { seconds: Math.floor(ts / 1000) } : report.resolvedAt || null
+                                    });
+                                }
+                            }
+                        });
+                    } catch (e) {
+                        console.log("Error reading report ratings:", e);
+                    }
+
+                    if (allFeedback.length > 0) {
+                        // Sort by most recent
+                        allFeedback.sort((a, b) => {
+                            const tsA = a.createdAt?.seconds || 0;
+                            const tsB = b.createdAt?.seconds || 0;
+                            return tsB - tsA;
+                        });
+                        renderFeedback(allFeedback);
+                        calculateStats(allFeedback);
+                        return;
                     }
 
                     // Show empty state if no feedback

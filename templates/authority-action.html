@@ -111,9 +111,180 @@
             color: var(--auth-blue);
         }
 
+        .status-badge.pending-verification {
+            background: rgba(168, 85, 247, 0.1);
+            color: #7c3aed;
+        }
+
         .status-badge.resolved {
             background: var(--auth-green-light);
             color: var(--auth-green);
+        }
+
+        /* Verification section on report card */
+        .verification-proof {
+            margin-top: 12px;
+            padding: 14px;
+            background: rgba(168, 85, 247, 0.04);
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            border-radius: 12px;
+        }
+
+        .verification-proof-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #7c3aed;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .verification-proof img {
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .verification-proof img:hover {
+            transform: scale(1.02);
+        }
+
+        .verification-proof-notes {
+            font-size: 0.8rem;
+            color: var(--auth-text-secondary);
+            margin-top: 8px;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .verification-proof-meta {
+            font-size: 0.7rem;
+            color: var(--auth-text-muted);
+            margin-top: 6px;
+        }
+
+        .verify-action-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .verify-action-btn:hover {
+            background: linear-gradient(135deg, #6d28d9, #5b21b6);
+            transform: translateY(-1px);
+        }
+
+        .verify-action-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Verification modal */
+        .verify-modal-proof {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .verify-modal-proof img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 14px;
+            border: 2px solid var(--auth-border);
+        }
+
+        .verify-modal-notes {
+            background: var(--auth-bg);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 20px;
+            font-size: 0.875rem;
+            color: var(--auth-text-secondary);
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .verify-modal-meta {
+            font-size: 0.75rem;
+            color: var(--auth-text-muted);
+            margin-bottom: 20px;
+        }
+
+        .verify-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-approve {
+            flex: 1;
+            padding: 14px;
+            background: var(--auth-green);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-approve:hover {
+            background: #16a34a;
+            transform: translateY(-1px);
+        }
+
+        .btn-approve:disabled {
+            background: var(--auth-text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-reject {
+            flex: 1;
+            padding: 14px;
+            background: rgba(239, 68, 68, 0.08);
+            color: #dc2626;
+            border: 1.5px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-reject:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .btn-reject:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .take-action-btn {
@@ -748,8 +919,9 @@
                     <div class="filter-tabs" style="margin-bottom: 0; flex: 1; min-width: 0;">
                         <button class="filter-tab active" data-filter="pending">Pending</button>
                         <button class="filter-tab" data-filter="in-progress">In Progress</button>
+                        <button class="filter-tab" data-filter="pending-verification">🔍 Verify</button>
                         <button class="filter-tab" data-filter="resolved">Resolved</button>
-                        <button class="filter-tab" data-filter="all">All Reports</button>
+                        <button class="filter-tab" data-filter="all">All</button>
                     </div>
                     <button id="ai-sort-btn" class="ai-sort-btn" title="Sort reports by priority using Setu AI">
                         <span class="ai-sort-btn-emoji" id="ai-sort-emoji">🔴</span>
@@ -857,6 +1029,40 @@
         </div>
     </div>
 
+    <!-- Verification Modal -->
+    <div id="verify-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title">Verify Work</h3>
+                    <p class="modal-subtitle" id="verify-modal-title">Task Verification</p>
+                </div>
+                <button id="verify-modal-close" class="modal-close">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="verify-report-id" value="">
+                <div class="verify-modal-proof" id="verify-proof-container">
+                    <!-- Proof image injected here -->
+                </div>
+                <div class="verify-modal-notes" id="verify-notes-container" style="display:none;"></div>
+                <div class="verify-modal-meta" id="verify-meta-container"></div>
+                <div class="verify-actions">
+                    <button type="button" id="btn-reject" class="btn-reject">
+                        ❌ Reject
+                    </button>
+                    <button type="button" id="btn-approve" class="btn-approve">
+                        ✅ Approve & Resolve
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Success Toast -->
     <div id="toast" class="toast">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -869,7 +1075,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { fetchOfficerReports, updateReportStatus, createUpdateNotification, getReportById, fetchSquadWorkers, fetchWorkerTasks } from "../static/js/authority-utils.js?v=8";
+        import { getFirestore, doc, updateDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { fetchOfficerReports, updateReportStatus, createUpdateNotification, getReportById, fetchSquadWorkers, fetchWorkerTasks } from "../static/js/authority-utils.js?v=9";
 
         // Firebase config - DO NOT COMMIT API KEY
         const firebaseConfig = {
@@ -883,6 +1090,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
         // Store reports globally for filtering
         let allReports = [];
@@ -1072,7 +1280,8 @@ Return nothing else — no explanation, no text, just the JSON array.`;
             // Get status class
             const getStatusClass = (status) => {
                 const s = (status || '').toLowerCase();
-                if (s === 'resolved') return 'resolved';
+                if (s === 'resolved' || s === 'completed' || s === 'fixed') return 'resolved';
+                if (s === 'pending verification') return 'pending-verification';
                 if (s === 'in progress') return 'in-progress';
                 return 'pending';
             };
@@ -1080,7 +1289,8 @@ Return nothing else — no explanation, no text, just the JSON array.`;
             // Get status text
             const getStatusText = (status) => {
                 const s = (status || '').toLowerCase();
-                if (s === 'resolved') return 'Resolved';
+                if (s === 'resolved' || s === 'completed' || s === 'fixed') return 'Resolved';
+                if (s === 'pending verification') return 'Awaiting Verification';
                 if (s === 'in progress') return 'In Progress';
                 return 'Pending';
             };
@@ -1096,8 +1306,10 @@ Return nothing else — no explanation, no text, just the JSON array.`;
                     filtered = filtered.filter(r => !r.status || r.status.toLowerCase() === 'submitted' || r.status.toLowerCase() === 'pending');
                 } else if (filter === 'in-progress') {
                     filtered = filtered.filter(r => r.status && r.status.toLowerCase() === 'in progress');
+                } else if (filter === 'pending-verification') {
+                    filtered = filtered.filter(r => r.status && r.status.toLowerCase() === 'pending verification');
                 } else if (filter === 'resolved') {
-                    filtered = filtered.filter(r => r.status && r.status.toLowerCase() === 'resolved');
+                    filtered = filtered.filter(r => r.status && (r.status.toLowerCase() === 'resolved' || r.status.toLowerCase() === 'completed' || r.status.toLowerCase() === 'fixed'));
                 } else {
                     // 'all' — keep full order
                 }
@@ -1128,6 +1340,7 @@ Return nothing else — no explanation, no text, just the JSON array.`;
                     const statusClass = getStatusClass(report.status);
                     const statusText = getStatusText(report.status);
                     const isPending = statusClass === 'pending';
+                    const isPendingVerification = statusClass === 'pending-verification';
 
                     // AI priority badge (only shown when AI sort is active)
                     const priorityBadgeHtml = aiSortedOrder
@@ -1138,6 +1351,48 @@ Return nothing else — no explanation, no text, just the JSON array.`;
                             return `<span class="ai-priority-badge ${level}">${label}</span>`;
                         })()
                         : '';
+
+                    // Worker proof section (for pending verification)
+                    let proofHtml = '';
+                    if (isPendingVerification && report.workerProofImageUrl) {
+                        const submittedTime = report.workerSubmittedAt?.seconds
+                            ? new Date(report.workerSubmittedAt.seconds * 1000).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+                            : '';
+                        proofHtml = `
+                            <div class="verification-proof">
+                                <div class="verification-proof-label">📸 Worker's Proof Submission</div>
+                                <img src="${report.workerProofImageUrl}" alt="Work proof" onclick="window.open('${report.workerProofImageUrl}', '_blank')">
+                                ${report.workerNotes ? `<div class="verification-proof-notes">"${report.workerNotes}"</div>` : ''}
+                                ${submittedTime ? `<div class="verification-proof-meta">Submitted: ${submittedTime}</div>` : ''}
+                            </div>
+                        `;
+                    }
+
+                    // Action button
+                    let actionBtnHtml = '';
+                    if (isPending) {
+                        actionBtnHtml = `
+                            <button class="take-action-btn" data-report-id="${report.id}" data-report-title="${report.issueType || 'Issue Report'}">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                                Take Action
+                            </button>`;
+                    } else if (isPendingVerification) {
+                        actionBtnHtml = `
+                            <button class="verify-action-btn" data-report-id="${report.id}" data-report-title="${report.issueType || 'Task'}">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Review & Verify
+                            </button>`;
+                    } else {
+                        actionBtnHtml = `
+                            <button class="take-action-btn" disabled>
+                                ${statusClass === 'resolved' ? 'Resolved ✓' : 'Work In Progress'}
+                            </button>`;
+                    }
+
                     return `
                         <div class="report-card fade-in-up" style="animation-delay: ${index * 0.05}s;">
                             <div class="report-card-header">
@@ -1168,28 +1423,27 @@ Return nothing else — no explanation, no text, just the JSON array.`;
                                     ${report.userName || 'Anonymous'}
                                 </div>
                             </div>
-                            ${isPending ? `
-                                <button class="take-action-btn" data-report-id="${report.id}" data-report-title="${report.issueType || 'Issue Report'}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                                    </svg>
-                                    Take Action
-                                </button>
-                            ` : `
-                                <button class="take-action-btn" disabled>
-                                    ${statusClass === 'resolved' ? 'Resolved' : 'Work In Progress'}
-                                </button>
-                            `}
+                            ${proofHtml}
+                            ${actionBtnHtml}
                         </div>
                     `;
                 }).join('');
 
-                // Add click handlers for action buttons
+                // Add click handlers for action buttons (assign)
                 document.querySelectorAll('.take-action-btn:not([disabled])').forEach(btn => {
                     btn.addEventListener('click', () => {
                         const reportId = btn.dataset.reportId;
                         const reportTitle = btn.dataset.reportTitle;
                         openActionModal(reportId, reportTitle);
+                    });
+                });
+
+                // Add click handlers for verify buttons
+                document.querySelectorAll('.verify-action-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const reportId = btn.dataset.reportId;
+                        const reportTitle = btn.dataset.reportTitle;
+                        openVerifyModal(reportId, reportTitle);
                     });
                 });
             };
@@ -1570,6 +1824,181 @@ Return nothing else — no explanation, no text, just the JSON array.`;
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalText;
+                }
+            });
+
+            // ======= VERIFICATION MODAL LOGIC =======
+            const verifyModal = document.getElementById('verify-modal');
+            const verifyModalClose = document.getElementById('verify-modal-close');
+            const verifyProofContainer = document.getElementById('verify-proof-container');
+            const verifyNotesContainer = document.getElementById('verify-notes-container');
+            const verifyMetaContainer = document.getElementById('verify-meta-container');
+            const btnApprove = document.getElementById('btn-approve');
+            const btnReject = document.getElementById('btn-reject');
+            let currentVerifyReportId = null;
+
+            const openVerifyModal = (reportId, reportTitle) => {
+                currentVerifyReportId = reportId;
+                document.getElementById('verify-report-id').value = reportId;
+                document.getElementById('verify-modal-title').textContent = `${reportTitle} — #${reportId.substring(0, 8).toUpperCase()}`;
+
+                // Find the report data
+                const report = allReports.find(r => r.id === reportId);
+                if (!report) return;
+
+                // Show proof image
+                if (report.workerProofImageUrl) {
+                    verifyProofContainer.innerHTML = `<img src="${report.workerProofImageUrl}" alt="Work proof" onclick="window.open('${report.workerProofImageUrl}', '_blank')">`;
+                } else {
+                    verifyProofContainer.innerHTML = `<p style="color: var(--auth-text-muted); text-align: center;">No proof image submitted.</p>`;
+                }
+
+                // Show notes
+                if (report.workerNotes) {
+                    verifyNotesContainer.style.display = 'block';
+                    verifyNotesContainer.innerHTML = `<strong>Worker's Notes:</strong><br>"${report.workerNotes}"`;
+                } else {
+                    verifyNotesContainer.style.display = 'none';
+                }
+
+                // Show meta
+                const submittedTime = report.workerSubmittedAt?.seconds
+                    ? new Date(report.workerSubmittedAt.seconds * 1000).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : 'Unknown';
+                verifyMetaContainer.textContent = `Submitted: ${submittedTime}`;
+
+                // Reset buttons
+                btnApprove.disabled = false;
+                btnReject.disabled = false;
+                btnApprove.textContent = '✅ Approve & Resolve';
+                btnReject.textContent = '❌ Reject';
+
+                verifyModal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeVerifyModal = () => {
+                verifyModal.classList.remove('show');
+                document.body.style.overflow = '';
+                currentVerifyReportId = null;
+            };
+
+            verifyModalClose?.addEventListener('click', closeVerifyModal);
+            verifyModal?.addEventListener('click', (e) => {
+                if (e.target === verifyModal) closeVerifyModal();
+            });
+
+            // Approve — mark as Resolved
+            btnApprove?.addEventListener('click', async () => {
+                if (!currentVerifyReportId) return;
+                btnApprove.disabled = true;
+                btnReject.disabled = true;
+                btnApprove.textContent = 'Approving...';
+
+                try {
+                    const report = allReports.find(r => r.id === currentVerifyReportId);
+                    const officerUid = auth.currentUser?.uid;
+
+                    // Update report status to Resolved
+                    await updateDoc(doc(db, 'reports', currentVerifyReportId), {
+                        status: 'Resolved',
+                        resolvedAt: serverTimestamp(),
+                        resolvedByOfficerId: officerUid,
+                        lastUpdatedAt: serverTimestamp()
+                    });
+
+                    // Notify the report owner (citizen)
+                    if (report?.userId) {
+                        await addDoc(collection(db, 'notifications'), {
+                            recipientId: report.userId,
+                            reportId: currentVerifyReportId,
+                            type: 'report_resolved',
+                            title: `Your report "${report.issueType || 'Issue'}" has been resolved!`,
+                            message: 'The work has been completed and verified by the officer. You can rate the resolution.',
+                            isRead: false,
+                            createdAt: serverTimestamp()
+                        });
+                    }
+
+                    // Notify the worker
+                    if (report?.assignedWorkerId) {
+                        await addDoc(collection(db, 'notifications'), {
+                            recipientId: report.assignedWorkerId,
+                            reportId: currentVerifyReportId,
+                            type: 'task_approved',
+                            title: `Task approved: ${report.issueType || 'Task'}`,
+                            message: 'Your work proof has been verified and approved. Great job!',
+                            isRead: false,
+                            createdAt: serverTimestamp()
+                        });
+                    }
+
+                    closeVerifyModal();
+                    showToast('Report marked as Resolved! ✅');
+
+                    // Refresh
+                    const user = auth.currentUser;
+                    if (user) await loadReports(user);
+
+                } catch (error) {
+                    console.error('Approve error:', error);
+                    showToast('Failed to approve. Please try again.', true);
+                    btnApprove.disabled = false;
+                    btnReject.disabled = false;
+                    btnApprove.textContent = '✅ Approve & Resolve';
+                }
+            });
+
+            // Reject — send back to In Progress
+            btnReject?.addEventListener('click', async () => {
+                if (!currentVerifyReportId) return;
+
+                const reason = prompt('Reason for rejection (optional):');
+                if (reason === null) return; // User cancelled
+
+                btnApprove.disabled = true;
+                btnReject.disabled = true;
+                btnReject.textContent = 'Rejecting...';
+
+                try {
+                    const report = allReports.find(r => r.id === currentVerifyReportId);
+
+                    // Update report — send back to In Progress
+                    await updateDoc(doc(db, 'reports', currentVerifyReportId), {
+                        status: 'In Progress',
+                        workerProofImageUrl: null,
+                        workerNotes: null,
+                        workerSubmittedAt: null,
+                        rejectionReason: reason || 'Proof insufficient — please resubmit.',
+                        lastUpdatedAt: serverTimestamp()
+                    });
+
+                    // Notify the worker
+                    if (report?.assignedWorkerId) {
+                        await addDoc(collection(db, 'notifications'), {
+                            recipientId: report.assignedWorkerId,
+                            reportId: currentVerifyReportId,
+                            type: 'task_rejected',
+                            title: `Proof rejected: ${report.issueType || 'Task'}`,
+                            message: reason || 'Your proof was not approved. Please complete the work and resubmit.',
+                            isRead: false,
+                            createdAt: serverTimestamp()
+                        });
+                    }
+
+                    closeVerifyModal();
+                    showToast('Proof rejected. Worker notified to resubmit.');
+
+                    // Refresh
+                    const user = auth.currentUser;
+                    if (user) await loadReports(user);
+
+                } catch (error) {
+                    console.error('Reject error:', error);
+                    showToast('Failed to reject. Please try again.', true);
+                    btnApprove.disabled = false;
+                    btnReject.disabled = false;
+                    btnReject.textContent = '❌ Reject';
                 }
             });
 
