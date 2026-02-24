@@ -86,6 +86,23 @@
             color: var(--auth-text-muted);
         }
 
+        .feedback-overall-rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .feedback-overall-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+
+        .feedback-overall-label {
+            font-size: 0.75rem;
+            color: var(--auth-text-muted);
+        }
+
         .feedback-rating {
             display: flex;
             align-items: center;
@@ -103,6 +120,53 @@
 
         .feedback-rating .empty {
             color: var(--auth-border);
+        }
+
+        /* Criteria breakdown */
+        .criteria-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            background: var(--auth-bg);
+            border-radius: 10px;
+            margin-bottom: 14px;
+        }
+
+        .criteria-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .criteria-icon-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--auth-text-secondary);
+            min-width: 100px;
+        }
+
+        .criteria-track {
+            flex: 1;
+            height: 6px;
+            background: var(--auth-border);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .criteria-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            transition: width 0.6s ease;
+        }
+
+        .criteria-score {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--auth-text-primary);
+            min-width: 24px;
+            text-align: right;
         }
 
         .feedback-content {
@@ -134,8 +198,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
             padding-top: 12px;
             border-top: 1px solid var(--auth-border);
+        }
+
+        .feedback-meta-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .feedback-date {
@@ -171,6 +243,65 @@
         .feedback-status.negative {
             background: var(--auth-red-light);
             color: var(--auth-red);
+        }
+
+        .proof-view-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: var(--auth-blue-light);
+            color: var(--auth-blue);
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .proof-view-btn:hover {
+            background: var(--auth-blue);
+            color: white;
+        }
+
+        .proof-view-btn svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        /* Proof modal */
+        .proof-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .proof-modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .proof-modal-img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 12px;
+            object-fit: contain;
         }
 
         /* Stats Summary */
@@ -369,7 +500,7 @@
             <div class="feedback-stats fade-in-up">
                 <div class="stats-card">
                     <div class="stats-value positive" id="avg-rating">--</div>
-                    <div class="stats-label">Average Rating</div>
+                    <div class="stats-label">Overall Rating</div>
                 </div>
                 <div class="stats-card">
                     <div class="stats-value" id="total-feedback">--</div>
@@ -377,7 +508,23 @@
                 </div>
                 <div class="stats-card">
                     <div class="stats-value neutral" id="positive-rate">--%</div>
-                    <div class="stats-label">Positive Rate</div>
+                    <div class="stats-label">Satisfaction Rate</div>
+                </div>
+            </div>
+
+            <!-- Criteria Averages -->
+            <div class="feedback-stats fade-in-up" style="margin-top:-8px; margin-bottom:24px;">
+                <div class="stats-card">
+                    <div class="stats-value" id="avg-speed" style="color:#3b82f6;">--</div>
+                    <div class="stats-label">⚡ Speed</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-value" id="avg-quality" style="color:#8b5cf6;">--</div>
+                    <div class="stats-label">🔧 Quality</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-value" id="avg-comms" style="color:#22c55e;">--</div>
+                    <div class="stats-label">💬 Communication</div>
                 </div>
             </div>
 
@@ -399,7 +546,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs, orderBy, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // Firebase config - DO NOT COMMIT API KEY
         const firebaseConfig = {
@@ -428,6 +575,9 @@
             const avgRatingEl = document.getElementById('avg-rating');
             const totalFeedbackEl = document.getElementById('total-feedback');
             const positiveRateEl = document.getElementById('positive-rate');
+            const avgSpeedEl = document.getElementById('avg-speed');
+            const avgQualityEl = document.getElementById('avg-quality');
+            const avgCommsEl = document.getElementById('avg-comms');
 
             // Sidebar Toggle
             const openSidebar = () => {
@@ -598,6 +748,9 @@
                     avgRatingEl.textContent = '--';
                     totalFeedbackEl.textContent = '0';
                     positiveRateEl.textContent = '--%';
+                    if (avgSpeedEl) avgSpeedEl.textContent = '--';
+                    if (avgQualityEl) avgQualityEl.textContent = '--';
+                    if (avgCommsEl) avgCommsEl.textContent = '--';
                     return;
                 }
 
@@ -609,11 +762,49 @@
                 avgRatingEl.textContent = avgRating;
                 totalFeedbackEl.textContent = feedbackData.length;
                 positiveRateEl.textContent = positiveRate + '%';
+
+                // Criteria averages
+                const withSpeed = feedbackData.filter(f => f.speedRating);
+                const withQuality = feedbackData.filter(f => f.qualityRating);
+                const withComms = feedbackData.filter(f => f.communicationRating);
+
+                if (avgSpeedEl) avgSpeedEl.textContent = withSpeed.length
+                    ? (withSpeed.reduce((s, f) => s + f.speedRating, 0) / withSpeed.length).toFixed(1)
+                    : '--';
+                if (avgQualityEl) avgQualityEl.textContent = withQuality.length
+                    ? (withQuality.reduce((s, f) => s + f.qualityRating, 0) / withQuality.length).toFixed(1)
+                    : '--';
+                if (avgCommsEl) avgCommsEl.textContent = withComms.length
+                    ? (withComms.reduce((s, f) => s + f.communicationRating, 0) / withComms.length).toFixed(1)
+                    : '--';
+            };
+
+            // Fetch proof image URL for a report
+            const fetchProofUrl = async (reportId) => {
+                try {
+                    const snap = await getDoc(doc(db, 'reports', reportId));
+                    if (snap.exists()) return snap.data().workerProofImageUrl || '';
+                } catch (e) { }
+                return '';
             };
 
             // Render feedback list
-            const renderFeedback = (feedbackData) => {
-                feedbackList.innerHTML = feedbackData.map((feedback, index) => {
+            const renderFeedback = async (feedbackData) => {
+                // Show loading placeholders first
+                feedbackList.innerHTML = feedbackData.map((_, index) => `
+                    <div class="feedback-card" style="animation-delay: ${index * 0.05}s;">
+                        <div class="loading-skeleton" style="height:20px; width:60%; margin-bottom:8px;"></div>
+                        <div class="loading-skeleton" style="height:14px; width:80%;"></div>
+                    </div>
+                `).join('');
+
+                // Enrich with proof URLs
+                const enriched = await Promise.all(feedbackData.map(async (fb) => ({
+                    ...fb,
+                    proofUrl: fb.reportId ? await fetchProofUrl(fb.reportId) : ''
+                })));
+
+                feedbackList.innerHTML = enriched.map((feedback, index) => {
                     const date = feedback.createdAt
                         ? new Date(feedback.createdAt.seconds * 1000).toLocaleDateString('en-IN', {
                             day: 'numeric',
@@ -624,6 +815,37 @@
 
                     const userInitial = (feedback.userName || 'C')[0].toUpperCase();
                     const rating = feedback.rating || 4;
+                    const speed = feedback.speedRating || 0;
+                    const quality = feedback.qualityRating || 0;
+                    const comms = feedback.communicationRating || 0;
+                    const hasCriteria = speed > 0 || quality > 0 || comms > 0;
+                    const proofUrl = feedback.proofUrl || '';
+
+                    const criteriaHtml = hasCriteria ? `
+                        <div class="criteria-breakdown">
+                            <div class="criteria-item">
+                                <span class="criteria-icon-label">⚡ Speed</span>
+                                <div class="criteria-track"><div class="criteria-fill" style="width:${(speed / 5) * 100}%"></div></div>
+                                <span class="criteria-score">${speed}/5</span>
+                            </div>
+                            <div class="criteria-item">
+                                <span class="criteria-icon-label">🔧 Quality</span>
+                                <div class="criteria-track"><div class="criteria-fill" style="width:${(quality / 5) * 100}%"></div></div>
+                                <span class="criteria-score">${quality}/5</span>
+                            </div>
+                            <div class="criteria-item">
+                                <span class="criteria-icon-label">💬 Communication</span>
+                                <div class="criteria-track"><div class="criteria-fill" style="width:${(comms / 5) * 100}%"></div></div>
+                                <span class="criteria-score">${comms}/5</span>
+                            </div>
+                        </div>
+                    ` : '';
+
+                    const proofBtnHtml = proofUrl ? `
+                        <button class="proof-view-btn" onclick="document.getElementById('auth-proof-modal-img').src='${proofUrl}';document.getElementById('auth-proof-modal').classList.add('show')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" /></svg>
+                            View Proof
+                        </button>` : '';
 
                     return `
                         <div class="feedback-card fade-in-up" style="animation-delay: ${index * 0.05}s;">
@@ -632,11 +854,12 @@
                                     <div class="feedback-avatar">${userInitial}</div>
                                     <div class="feedback-user-info">
                                         <h4>${feedback.userName || 'Citizen'}</h4>
-                                        <span>${feedback.location || 'Unknown Location'}</span>
+                                        <span>${feedback.location || feedback.issueType || 'Unknown'}</span>
                                     </div>
                                 </div>
-                                <div class="feedback-rating">
-                                    ${renderStars(rating)}
+                                <div class="feedback-overall-rating">
+                                    <span class="feedback-overall-score">${rating.toFixed ? rating.toFixed(1) : rating}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fbbf24" width="20" height="20"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" /></svg>
                                 </div>
                             </div>
                             <div class="feedback-content">
@@ -644,16 +867,20 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                     </svg>
-                                    Report: ${feedback.issueType || 'Issue Report'} #${(feedback.reportId || 'UNKNOWN').substring(0, 8).toUpperCase()}
+                                    ${feedback.issueType || 'Issue Report'} — #${(feedback.reportId || 'UNKNOWN').substring(0, 8).toUpperCase()}
                                 </div>
-                                <p class="feedback-text">${feedback.comment || 'No comment provided.'}</p>
+                                ${criteriaHtml}
+                                ${feedback.comment ? `<p class="feedback-text">&ldquo;${feedback.comment}&rdquo;</p>` : ''}
                             </div>
                             <div class="feedback-meta">
-                                <div class="feedback-date">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                                    </svg>
-                                    ${date}
+                                <div class="feedback-meta-left">
+                                    <div class="feedback-date">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                        </svg>
+                                        ${date}
+                                    </div>
+                                    ${proofBtnHtml}
                                 </div>
                                 <span class="feedback-status ${getSentimentClass(rating)}">${getSentimentText(rating)}</span>
                             </div>
@@ -672,6 +899,11 @@
             });
         });
     </script>
+
+    <!-- Proof Image Modal -->
+    <div id="auth-proof-modal" class="proof-modal-overlay" onclick="this.classList.remove('show')">
+        <img id="auth-proof-modal-img" src="" alt="Proof of Resolution" class="proof-modal-img">
+    </div>
 </body>
 
 </html>
