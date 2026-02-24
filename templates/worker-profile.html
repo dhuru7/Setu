@@ -889,30 +889,61 @@
                     alert('Please select an image file.');
                     return;
                 }
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('Image must be under 5MB.');
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Image must be under 10MB.');
                     return;
                 }
 
                 try {
                     avatarUploading.classList.add('show');
 
-                    const storageRef = ref(storage, `profile-pictures/${currentUserUid}`);
-                    await uploadBytes(storageRef, file);
-                    const downloadURL = await getDownloadURL(storageRef);
+                    // Compress image client-side and store as base64 in Firestore
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const img = new Image();
+                        img.src = ev.target.result;
+                        img.onload = async () => {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
 
-                    await updateDoc(doc(db, 'users', currentUserUid), { avatar: downloadURL });
+                            // Resize to max 600px width
+                            const MAX_WIDTH = 600;
+                            let width = img.width;
+                            let height = img.height;
 
-                    // Update avatar UI
-                    const avatarEl = document.getElementById('profile-avatar');
-                    avatarEl.innerHTML = `<img src="${downloadURL}" alt="Profile">`;
+                            if (width > MAX_WIDTH) {
+                                height = height * (MAX_WIDTH / width);
+                                width = MAX_WIDTH;
+                            }
 
-                    // Update cache
-                    const cached = JSON.parse(localStorage.getItem('userProfile')) || {};
-                    cached.avatar = downloadURL;
-                    localStorage.setItem('userProfile', JSON.stringify(cached));
+                            canvas.width = width;
+                            canvas.height = height;
+                            ctx.drawImage(img, 0, 0, width, height);
 
-                    avatarUploading.classList.remove('show');
+                            // Convert to Base64 (JPEG, 0.6 quality)
+                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+
+                            try {
+                                await updateDoc(doc(db, 'users', currentUserUid), { avatar: compressedDataUrl });
+
+                                // Update avatar UI
+                                const avatarEl = document.getElementById('profile-avatar');
+                                avatarEl.innerHTML = `<img src="${compressedDataUrl}" alt="Profile">`;
+
+                                // Update cache
+                                const cached = JSON.parse(localStorage.getItem('userProfile')) || {};
+                                cached.avatar = compressedDataUrl;
+                                localStorage.setItem('userProfile', JSON.stringify(cached));
+
+                                avatarUploading.classList.remove('show');
+                            } catch (err) {
+                                console.error('Upload failed:', err);
+                                avatarUploading.classList.remove('show');
+                                alert('Failed to upload image. Please try again.');
+                            }
+                        };
+                    };
+                    reader.readAsDataURL(file);
                 } catch (err) {
                     console.error('Upload failed:', err);
                     avatarUploading.classList.remove('show');
