@@ -45,13 +45,10 @@ const UI = {
     mainSearchInput: document.getElementById('main-search-input'),
     mainSearchBtn: document.getElementById('main-search-btn'),
     aiEntryCard: document.getElementById('ai-entry-card'),
-    tagBtns: document.querySelectorAll('.tag-btn'),
+    searchHeader: document.getElementById('search-header'),
     recentSearchesList: document.getElementById('recent-searches-list'),
-    standardResultsContainer: document.getElementById('standard-results-container'),
-    searchResultsList: document.getElementById('search-results-list'),
-    closeResultsBtn: document.getElementById('close-results-btn'),
-    tagsSection: document.querySelector('.tags-section'),
-    recentSection: document.querySelector('.recent-section'),
+    searchResultsSection: document.getElementById('search-results-section'),
+    recentSection: document.getElementById('recent-section'),
     aiLogoCircle: document.querySelector('.ai-logo-circle'),
     bottomNav: document.getElementById('bottom-nav'),
 
@@ -92,6 +89,8 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // --- Initialization ---
+let isSearchFocused = false;
+
 document.addEventListener('DOMContentLoaded', () => {
     loadRecentSearches();
     startMainEmojiAnimation();
@@ -105,32 +104,60 @@ document.addEventListener('DOMContentLoaded', () => {
     if (UI.aiHistoryBackdrop) UI.aiHistoryBackdrop.addEventListener('click', closeHistoryPanel);
 
     if (UI.mainSearchBtn) UI.mainSearchBtn.addEventListener('click', executeStandardSearch);
-    if (UI.mainSearchInput) UI.mainSearchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') executeStandardSearch();
-    });
-    if (UI.closeResultsBtn) UI.closeResultsBtn.addEventListener('click', () => {
-        UI.standardResultsContainer.classList.add('hidden');
-        if (UI.tagsSection) UI.tagsSection.style.display = 'block';
-        if (UI.recentSection) UI.recentSection.style.display = 'block';
-        UI.searchResultsList.innerHTML = '';
-        UI.mainSearchInput.value = '';
-    });
-
-    if (UI.tagBtns) UI.tagBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            UI.mainSearchInput.value = btn.dataset.search;
-            executeStandardSearch();
-        });
-    });
-
     if (UI.mainSearchInput) {
+        UI.mainSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') executeStandardSearch();
+        });
+
+        // Focus mode: heading fades, recent searches appear
+        UI.mainSearchInput.addEventListener('focus', () => {
+            if (!isSearchFocused) {
+                isSearchFocused = true;
+                UI.mainView.classList.add('search-focused');
+                // Show recent searches when focusing (only if no results shown)
+                if (!UI.searchResultsSection.classList.contains('visible')) {
+                    loadRecentSearches();
+                }
+            }
+        });
+
+        // On input, if text is entered, hide recents and show live results
         UI.mainSearchInput.addEventListener('input', (e) => {
-            if (e.target.value.trim().length > 0) {
-                if (UI.tagsSection) UI.tagsSection.style.display = 'none';
+            const val = e.target.value.trim();
+            if (val.length === 0) {
+                // Show recents, hide results
+                UI.searchResultsSection.classList.remove('visible');
+                UI.searchResultsSection.innerHTML = '';
+                if (UI.recentSection) UI.recentSection.style.display = 'block';
+            } else {
+                // Hide recents when typing
                 if (UI.recentSection) UI.recentSection.style.display = 'none';
             }
         });
     }
+
+    // Click outside search to unfocus
+    document.addEventListener('click', (e) => {
+        if (isSearchFocused && UI.mainSearchInput) {
+            const mainContainer = UI.mainView;
+            const searchWrapper = UI.mainSearchInput.closest('.search-input-wrapper-1');
+            const recentSec = UI.recentSection;
+            const resultsSection = UI.searchResultsSection;
+
+            // If click is outside search bar, recents, and results
+            const clickedInside = searchWrapper?.contains(e.target) ||
+                recentSec?.contains(e.target) ||
+                resultsSection?.contains(e.target) ||
+                UI.aiEntryCard?.contains(e.target);
+
+            if (!clickedInside && UI.mainSearchInput.value.trim() === '') {
+                isSearchFocused = false;
+                UI.mainView.classList.remove('search-focused');
+                UI.searchResultsSection.classList.remove('visible');
+                UI.searchResultsSection.innerHTML = '';
+            }
+        }
+    });
 
     if (UI.aiSendBtn) UI.aiSendBtn.addEventListener('click', executeAISearch);
     if (UI.aiInput) UI.aiInput.addEventListener('keypress', (e) => {
@@ -685,15 +712,19 @@ function saveRecent(key, item) {
 function loadRecentSearches() {
     if (!UI.recentSearchesList) return;
     const list = getRecent('recentSearches');
+    if (list.length === 0) {
+        UI.recentSearchesList.innerHTML = '<div style="text-align:center; padding: 20px; color: #c7c7cc; font-size: 0.85rem;">No recent searches</div>';
+        return;
+    }
     UI.recentSearchesList.innerHTML = list.map(item => `
-        <div class="recent-item cursor-pointer" onclick="handleRecentClick('${item.text}', 'main')">
+        <div class="recent-item cursor-pointer" onclick="handleRecentClick('${escapeHtml(item.text)}', 'main')">
             <div class="recent-icon-circle">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
             <div class="recent-content">
-                <div class="recent-title">${item.text}</div>
+                <div class="recent-title">${escapeHtml(item.text)}</div>
                 <div class="recent-time">${item.time}</div>
             </div>
             <div class="recent-arrow">
@@ -708,7 +739,6 @@ function loadRecentSearches() {
 window.handleRecentClick = (text, type) => {
     if (type === 'main') {
         UI.mainSearchInput.value = text;
-        if (UI.tagsSection) UI.tagsSection.style.display = 'none';
         if (UI.recentSection) UI.recentSection.style.display = 'none';
         executeStandardSearch();
     }
@@ -718,25 +748,104 @@ async function executeStandardSearch() {
     const queryText = UI.mainSearchInput.value.trim();
     if (!queryText) return;
 
+    // Enter focus mode
+    if (!isSearchFocused) {
+        isSearchFocused = true;
+        UI.mainView.classList.add('search-focused');
+    }
+
     saveRecent('recentSearches', { text: queryText, time: 'Just now' });
-    loadRecentSearches();
 
-    UI.standardResultsContainer.classList.remove('hidden');
-    if (UI.tagsSection) UI.tagsSection.style.display = 'none';
+    // Hide recents, show results section
     if (UI.recentSection) UI.recentSection.style.display = 'none';
+    UI.searchResultsSection.classList.add('visible');
 
-    UI.searchResultsList.innerHTML = '<p class="text-center text-gray-500 py-4">Searching...</p>';
+    // Show loading skeletons
+    UI.searchResultsSection.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            ${[1, 2, 3].map(() => `
+                <div class="search-skeleton">
+                    <div class="skel-img"></div>
+                    <div class="skel-text">
+                        <div class="skel-line" style="width:70%"></div>
+                        <div class="skel-line" style="width:50%"></div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 
     try {
-        const reports = await fetchReports(queryText);
-        if (reports.length === 0) {
-            UI.searchResultsList.innerHTML = '<p class="text-center text-gray-500 py-4">No reports found.</p>';
-        } else {
-            UI.searchResultsList.innerHTML = reports.map(createReportCard).join('');
+        // Fetch both reports and officers in parallel
+        const [reports, officers] = await Promise.all([
+            fetchReports(queryText),
+            fetchOfficers(queryText)
+        ]);
+
+        let html = '';
+
+        // Officers section
+        if (officers.length > 0) {
+            html += '<div class="result-section-label">Officers</div>';
+            html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+            html += officers.map(createOfficerCard).join('');
+            html += '</div>';
         }
+
+        // Reports section
+        if (reports.length > 0) {
+            html += '<div class="result-section-label">Reports</div>';
+            html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+            html += reports.map(createReportCard).join('');
+            html += '</div>';
+        }
+
+        // No results  
+        if (reports.length === 0 && officers.length === 0) {
+            html += `
+                <div class="no-results">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    <h4>No results found</h4>
+                    <p>Try different keywords or let Setu AI help you find what you're looking for.</p>
+                </div>
+            `;
+        }
+
+        // Always add "Search with Setu AI" button
+        html += createAISearchButton(queryText);
+
+        UI.searchResultsSection.innerHTML = html;
+
+        // Bind the AI search button
+        const aiBtn = document.getElementById('search-with-ai-btn');
+        if (aiBtn) {
+            aiBtn.addEventListener('click', () => {
+                const searchQuery = aiBtn.dataset.query;
+                // Switch to AI view and populate the input
+                toggleView('ai');
+                setTimeout(() => {
+                    if (UI.aiInput) {
+                        UI.aiInput.value = searchQuery;
+                        UI.aiInput.focus();
+                    }
+                }, 400);
+            });
+        }
+
     } catch (error) {
-        console.error(error);
-        UI.searchResultsList.innerHTML = '<p class="text-center text-red-500">Error fetching results.</p>';
+        console.error('[Search] Error:', error);
+        UI.searchResultsSection.innerHTML = `
+            <div class="no-results">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <h4>Something went wrong</h4>
+                <p>Please try again or search with Setu AI.</p>
+            </div>
+            ${createAISearchButton(queryText)}
+        `;
     }
 }
 
@@ -1230,38 +1339,55 @@ Use REAL DATA when available. Be accurate, helpful, personalized, and protect us
 
 async function fetchReports(queryText) {
     const qLower = queryText.toLowerCase();
-    console.log('[Search] Searching for:', qLower);
+    const queryWords = qLower.split(/\s+/).filter(w => w.length > 1);
+    console.log('[Search] Searching reports for:', queryWords);
 
     try {
         const reportsRef = collection(db, 'reports');
         let q;
 
         try {
-            q = query(reportsRef, orderBy('createdAt', 'desc'), limit(50));
+            q = query(reportsRef, orderBy('createdAt', 'desc'), limit(100));
         } catch (indexError) {
             console.warn('[Search] Index not available, fetching without order');
-            q = query(reportsRef, limit(50));
+            q = query(reportsRef, limit(100));
         }
 
         const snapshot = await getDocs(q);
         console.log('[Search] Total documents fetched:', snapshot.size);
 
-        const reports = [];
+        const scored = [];
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
-            const searchableText = [
+            const fields = [
                 data.description || '',
                 data.issueType || '',
                 data.location?.full || '',
                 data.location?.city || '',
                 data.location?.area || '',
-                data.status || ''
+                data.location?.district || '',
+                data.location?.state || '',
+                data.status || '',
+                data.assignedDepartment || '',
+                data.department || ''
             ].join(' ').toLowerCase();
 
-            if (searchableText.includes(qLower)) {
-                reports.push({ id: docSnap.id, ...data });
+            // Score: count how many query words match
+            let score = 0;
+            for (const word of queryWords) {
+                if (fields.includes(word)) score++;
+            }
+            // Full-phrase bonus
+            if (fields.includes(qLower)) score += queryWords.length;
+
+            if (score > 0) {
+                scored.push({ score, report: { id: docSnap.id, ...data } });
             }
         });
+
+        // Sort by score descending
+        scored.sort((a, b) => b.score - a.score);
+        const reports = scored.slice(0, 20).map(s => s.report);
 
         console.log('[Search] Matching reports:', reports.length);
         return reports;
@@ -1271,16 +1397,128 @@ async function fetchReports(queryText) {
     }
 }
 
+async function fetchOfficers(queryText) {
+    const qLower = queryText.toLowerCase();
+    const queryWords = qLower.split(/\s+/).filter(w => w.length > 1);
+    console.log('[Search] Searching officers for:', queryWords);
+
+    try {
+        const q = query(collection(db, 'users'), where('role', '==', 'authority'));
+        const snapshot = await getDocs(q);
+
+        const scored = [];
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const fields = [
+                data.fullname || '',
+                data.displayName || '',
+                data.department || '',
+                data.city || '',
+                data.email || '',
+                data.jurisdiction?.state || '',
+                data.jurisdiction?.district || '',
+                data.jurisdiction?.subDistrict || '',
+                (data.jurisdiction?.villages || []).join(' ')
+            ].join(' ').toLowerCase();
+
+            let score = 0;
+            for (const word of queryWords) {
+                if (fields.includes(word)) score++;
+            }
+            if (fields.includes(qLower)) score += queryWords.length;
+
+            if (score > 0) {
+                scored.push({ score, officer: { id: docSnap.id, ...data } });
+            }
+        });
+
+        scored.sort((a, b) => b.score - a.score);
+        console.log('[Search] Matching officers:', scored.length);
+        return scored.slice(0, 10).map(s => s.officer);
+    } catch (e) {
+        console.error('[Search] Officers fetch error:', e);
+        return [];
+    }
+}
+
+function getStatusBadgeClass(status) {
+    const s = (status || '').toLowerCase();
+    if (s === 'submitted') return 'badge-submitted';
+    if (s.includes('progress')) return 'badge-in-progress';
+    if (s === 'resolved') return 'badge-resolved';
+    if (s.includes('pending')) return 'badge-pending';
+    return 'badge-submitted';
+}
+
+function formatSearchDate(ts) {
+    if (!ts) return '';
+    try {
+        const date = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
+        return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    } catch { return ''; }
+}
+
 function createReportCard(c) {
+    const statusBadge = getStatusBadgeClass(c.status);
+    const dateStr = formatSearchDate(c.createdAt);
+    const location = c.location?.full || c.location?.city || c.location?.area || 'Unknown Location';
+    const truncatedLocation = location.length > 45 ? location.substring(0, 42) + '...' : location;
+    const imgSrc = c.imageUrl || '';
+    const imgHtml = imgSrc
+        ? `<img src="${imgSrc}" class="result-card-img" alt="Report" onerror="this.style.display='none'">`
+        : `<div class="result-card-img" style="display:flex;align-items:center;justify-content:center;font-size:1.4rem;">${getIssueEmoji(c.issueType)}</div>`;
+
     return `
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4">
-        <img src="${c.imageUrl || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-lg bg-gray-100 flex-shrink-0">
-        <div class="flex-grow min-w-0">
-            <div class="flex justify-between items-start">
-                <h4 class="font-bold text-gray-900 truncate">${c.issueType}</h4>
-                <span class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">${c.status}</span>
-            </div>
-            <p class="text-sm text-gray-500 truncate mt-1">${c.location?.full || 'Unknown Location'}</p>
+    <div class="result-card">
+        ${imgHtml}
+        <div class="result-card-body">
+            <div class="result-card-title">${escapeHtml(c.issueType || 'Report')}</div>
+            <div class="result-card-sub">${escapeHtml(truncatedLocation)}${dateStr ? ' · ' + dateStr : ''}</div>
         </div>
+        <span class="result-card-badge ${statusBadge}">${escapeHtml(c.status || 'Submitted')}</span>
     </div>`;
+}
+
+function createOfficerCard(o) {
+    const name = o.fullname || o.displayName || 'Officer';
+    const dept = o.department || 'Municipal';
+    const city = o.city || '';
+    const initial = name.charAt(0).toUpperCase();
+
+    return `
+    <div class="result-card">
+        <div class="result-card-img" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:700;font-size:1.2rem;">${initial}</div>
+        <div class="result-card-body">
+            <div class="result-card-title">${escapeHtml(name)}</div>
+            <div class="result-card-sub">${escapeHtml(dept)}${city ? ' · ' + escapeHtml(city) : ''}</div>
+        </div>
+        <span class="result-card-badge badge-officer">Officer</span>
+    </div>`;
+}
+
+function getIssueEmoji(issueType) {
+    const type = (issueType || '').toLowerCase();
+    if (type.includes('pothole') || type.includes('road')) return '🛣️';
+    if (type.includes('light') || type.includes('street')) return '💡';
+    if (type.includes('garbage') || type.includes('waste') || type.includes('dump')) return '🗑️';
+    if (type.includes('water') || type.includes('supply')) return '💧';
+    if (type.includes('sewage') || type.includes('drain')) return '🚰';
+    if (type.includes('traffic') || type.includes('signal')) return '🚦';
+    if (type.includes('park') || type.includes('garden')) return '🌳';
+    if (type.includes('electric') || type.includes('power')) return '⚡';
+    return '📋';
+}
+
+function createAISearchButton(queryText) {
+    return `
+    <button id="search-with-ai-btn" class="ai-search-btn" data-query="${escapeHtml(queryText)}">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+        </svg>
+        <span class="ai-search-btn-text">Search with Setu AI</span>
+        <svg class="ai-search-btn-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+    </button>
+    `;
 }

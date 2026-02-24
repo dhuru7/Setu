@@ -25,7 +25,7 @@
     <!-- Link to the new common stylesheet -->
     <link rel="stylesheet" href="../static/css/set1_style.css">
 
-    <!-- New Search CSS -->
+    <!-- Search CSS -->
     <link rel="stylesheet" href="../static/css/set1_search.css">
     <link rel="stylesheet" href="../static/css/set2_search.css">
     <link rel="stylesheet" href="../static/css/ai_search.css">
@@ -34,6 +34,306 @@
     <link rel="stylesheet" href="../static/css/navigationbar.css">
 
     <script src="../static/js/navigation.js" defer></script>
+
+    <style>
+        /* === Search Focus Mode Transitions === */
+        .search-container-main {
+            transition: padding-top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .search-header-title {
+            transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.4s ease, margin 0.4s ease;
+            max-height: 120px;
+            overflow: hidden;
+        }
+
+        .search-container-main.search-focused .search-header-title {
+            opacity: 0;
+            transform: translateY(-20px);
+            max-height: 0;
+            margin-bottom: 0;
+            pointer-events: none;
+        }
+
+        .search-input-wrapper-1 {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s ease,
+                border-color 0.3s ease;
+        }
+
+        .search-container-main.search-focused .search-input-wrapper-1 {
+            box-shadow: 0 6px 28px rgba(0, 0, 0, 0.12);
+        }
+
+        /* AI entry card transition */
+        .ai-entry-card {
+            transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.35s ease, margin 0.35s ease, padding 0.35s ease;
+            max-height: 100px;
+            overflow: hidden;
+        }
+
+        .search-container-main.search-focused .ai-entry-card {
+            opacity: 0;
+            transform: translateY(-16px);
+            max-height: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            pointer-events: none;
+        }
+
+        /* Recent section in focus mode */
+        .recent-section {
+            transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+            opacity: 0;
+            transform: translateY(12px);
+            pointer-events: none;
+        }
+
+        .search-container-main.search-focused .recent-section {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Search results section */
+        .search-results-section {
+            display: none;
+        }
+
+        .search-results-section.visible {
+            display: block;
+            animation: fadeSlideUp 0.3s ease both;
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Result cards */
+        .result-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            border: 1px solid #f2f2f7;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .result-card:hover {
+            border-color: #e0e0e5;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .result-card-img {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #f5f5f7;
+            flex-shrink: 0;
+        }
+
+        .result-card-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .result-card-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .result-card-sub {
+            font-size: 0.78rem;
+            color: #8e8e93;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .result-card-badge {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .badge-submitted {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-in-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-resolved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-officer {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .result-section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #8e8e93;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+
+        .result-section-label:first-child {
+            margin-top: 0;
+        }
+
+        /* AI Search Button */
+        .ai-search-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            padding: 14px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.25s;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            font-family: 'Inter', sans-serif;
+            margin-top: 16px;
+        }
+
+        .ai-search-btn:hover {
+            box-shadow: 0 6px 28px rgba(102, 126, 234, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .ai-search-btn:active {
+            transform: scale(0.98);
+        }
+
+        .ai-search-btn svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .ai-search-btn-text {
+            flex: 1;
+            text-align: left;
+        }
+
+        .ai-search-btn-arrow {
+            opacity: 0.7;
+        }
+
+        /* Loading skeleton for results */
+        .search-skeleton {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            padding: 14px 16px;
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid #f2f2f7;
+        }
+
+        .search-skeleton .skel-img {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            flex-shrink: 0;
+        }
+
+        .search-skeleton .skel-text {
+            flex: 1;
+        }
+
+        .search-skeleton .skel-line {
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            margin-bottom: 6px;
+        }
+
+        .search-skeleton .skel-line:last-child {
+            margin-bottom: 0;
+            width: 60%;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* No results illustration */
+        .no-results {
+            text-align: center;
+            padding: 32px 16px;
+        }
+
+        .no-results svg {
+            width: 48px;
+            height: 48px;
+            color: #d1d5db;
+            margin: 0 auto 12px;
+        }
+
+        .no-results h4 {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .no-results p {
+            font-size: 0.8rem;
+            color: #8e8e93;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 
 <body
@@ -44,13 +344,14 @@
         <!-- View 1: Main Search Interface -->
         <main id="search-view-main" class="search-container-main">
             <!-- Header -->
-            <h1 class="search-header-title">Start typing <span class="search-header-subtitle">to search...</span>
+            <h1 class="search-header-title" id="search-header">Start typing <span class="search-header-subtitle">to
+                    search...</span>
             </h1>
 
             <!-- Search Bar -->
             <div class="search-input-wrapper-1">
-                <input type="text" id="main-search-input" class="search-input-1" placeholder="Search issues, places..."
-                    autocomplete="off">
+                <input type="text" id="main-search-input" class="search-input-1"
+                    placeholder="Search reports, officers..." autocomplete="off">
                 <button id="main-search-btn" class="search-btn-1">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                         stroke="currentColor" width="20" height="20">
@@ -77,40 +378,17 @@
                 </div>
             </div>
 
-            <!-- Tags -->
-            <div class="tags-section">
-                <div class="tags-label">TAGS</div>
-                <div class="tags-scroll-container">
-                    <button class="tag-btn" data-search="#Potholes">
-                        <span>🔥</span> #Potholes
-                    </button>
-                    <button class="tag-btn" data-search="#StreetLights">
-                        <span>💡</span> #StreetLights
-                    </button>
-                    <button class="tag-btn" data-search="#Garbage">
-                        <span>🚫</span> #Garbage
-                    </button>
-                    <button class="tag-btn" data-search="#WaterSupply">
-                        <span>💧</span> #WaterSupply
-                    </button>
-                </div>
-            </div>
-
-            <!-- Recent -->
-            <div class="recent-section">
+            <!-- Recent Searches (hidden by default, shown on focus) -->
+            <div class="recent-section" id="recent-section">
                 <div class="recent-label">RECENT</div>
                 <div id="recent-searches-list" class="recent-list">
                     <!-- Populated by JS -->
                 </div>
             </div>
 
-            <!-- Standard Search Results (Hidden initially or toggled) -->
-            <div id="standard-results-container" class="mt-8 hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg">Results</h3>
-                    <button id="close-results-btn" class="text-sm text-blue-500">Back</button>
-                </div>
-                <div id="search-results-list" class="space-y-4"></div>
+            <!-- Search Results Section -->
+            <div id="search-results-section" class="search-results-section">
+                <!-- Populated by JS -->
             </div>
         </main>
 
