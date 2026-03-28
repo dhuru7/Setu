@@ -136,205 +136,19 @@
             <!-- Filter Tabs -->
             <div class="filter-tabs fade-in-up delay-2">
                 <button class="filter-tab active" data-filter="all">All <span class="count"
-                        id="count-all">8</span></button>
-                <button class="filter-tab" data-filter="assigned">Assigned <span class="count"
-                        id="count-assigned">3</span></button>
+                        id="count-all">0</span></button>
                 <button class="filter-tab" data-filter="in-progress">In Progress <span class="count"
-                        id="count-progress">2</span></button>
+                        id="count-progress">0</span></button>
                 <button class="filter-tab" data-filter="completed">Completed <span class="count"
-                        id="count-completed">3</span></button>
+                        id="count-completed">0</span></button>
             </div>
 
             <!-- Assignments List -->
             <div id="assignments-list" class="assignments-list">
-                <!-- Assignment 1 — Assigned -->
-                <div class="assignment-card fade-in-up delay-3" data-status="assigned">
-                    <div class="assignment-card-header">
-                        <div class="assignment-type">
-                            <div class="assignment-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="assignment-title">Pothole Repair — MG Road</div>
-                                <div class="assignment-id">#A7F3D2E1</div>
-                            </div>
-                        </div>
-                        <span class="assignment-status assigned">Assigned</span>
-                    </div>
-                    <div class="assignment-details">
-                        <div class="assignment-detail">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                            </svg>
-                            MG Road, Sector 14
-                        </div>
-                        <div class="assignment-detail">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                            </svg>
-                            24 Feb 2026
-                        </div>
-                    </div>
-                    <div class="assignment-description">
-                        Large pothole reported on MG Road near the intersection. Multiple citizens complained about
-                        vehicle damage. Requires immediate patching and asphalt work.
-                    </div>
-                    <div class="assignment-footer">
-                        <div class="assigned-by">
-                            <div class="assigned-by-avatar">RK</div>
-                            Assigned by Rajesh Kumar
-                        </div>
-                        <div class="deadline-tag urgent">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Due Today
-                        </div>
-                    </div>
-                    <button class="update-status-btn" data-task-id="A7F3D2E1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
-                        </svg>
-                        Update Status
-                    </button>
-                </div>
-
-                <!-- Assignment 2 — In Progress -->
-                <div class="assignment-card fade-in-up delay-4" data-status="in-progress">
-                    <div class="assignment-card-header">
-                        <div class="assignment-type">
-                            <div class="assignment-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="assignment-title">Street Light Fix — Block C</div>
-                                <div class="assignment-id">#B4E2C1F8</div>
-                            </div>
-                        </div>
-                        <span class="assignment-status in-progress">In Progress</span>
-                    </div>
-                    <div class="assignment-details">
-                        <div class="assignment-detail">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                            </svg>
-                            Block C, Green Park
-                        </div>
-                        <div class="assignment-detail">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                            </svg>
-                            23 Feb 2026
-                        </div>
-                    </div>
-                    <div class="assignment-description">
-                        Three street lights not working in Block C residential area. Residents report safety concerns
-                        during evening hours.
-                    </div>
-                    <div class="assignment-footer">
-                        <div class="assigned-by">
-                            <div class="assigned-by-avatar">SP</div>
-                            Assigned by Suresh Patel
-                        </div>
-                        <div class="deadline-tag">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Due Tomorrow
-                        </div>
-                    </div>
-                    <button class="update-status-btn" data-task-id="B4E2C1F8">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
-                        </svg>
-                        Update Status
-                    </button>
-                </div>
-
-                <!-- Assignment 3 — Completed -->
-                <div class="assignment-card fade-in-up delay-5" data-status="completed">
-                    <div class="assignment-card-header">
-                        <div class="assignment-type">
-                            <div class="assignment-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="assignment-title">Drain Cleaning — Main Market</div>
-                                <div class="assignment-id">#C9D1A3B7</div>
-                            </div>
-                        </div>
-                        <span class="assignment-status completed">Completed</span>
-                    </div>
-                    <div class="assignment-details">
-                        <div class="assignment-detail">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                            </svg>
-                            Main Market, Ward 5
-                        </div>
-                        <div class="assignment-detail">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                            </svg>
-                            22 Feb 2026
-                        </div>
-                    </div>
-                    <div class="assignment-description">
-                        Blocked drain near the main market causing waterlogging. Successfully cleared debris and
-                        restored drainage flow.
-                    </div>
-                    <div class="assignment-footer">
-                        <div class="assigned-by">
-                            <div class="assigned-by-avatar">AK</div>
-                            Assigned by Amit Khan
-                        </div>
-                        <div class="deadline-tag">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Done
-                        </div>
-                    </div>
+                <!-- Loading State -->
+                <div class="assignment-card" style="text-align:center;padding:32px;">
+                    <p style="color:var(--worker-text-muted,#9ca3af);font-size:0.875rem;">Loading your assignments...
+                    </p>
                 </div>
             </div>
         </div>
@@ -347,7 +161,7 @@
             <div class="modal-header">
                 <div>
                     <h3 class="modal-title">Update Status</h3>
-                    <p class="modal-subtitle" id="modal-task-name">Task #A7F3D2E1</p>
+                    <p class="modal-subtitle" id="modal-task-name">Task #12345</p>
                 </div>
                 <button id="modal-close-btn" class="modal-close">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -357,23 +171,19 @@
                 </button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="modal-report-id">
                 <div class="form-group">
                     <label class="form-label">New Status</label>
                     <div class="status-options">
-                        <label class="status-option" data-value="in-progress">
-                            <input type="radio" name="status" value="in-progress">
+                        <label class="status-option" data-value="In Progress">
+                            <input type="radio" name="status" value="In Progress">
                             <div class="status-dot"></div>
                             <span class="status-option-text">In Progress — Work started</span>
                         </label>
-                        <label class="status-option" data-value="on-hold">
-                            <input type="radio" name="status" value="on-hold">
+                        <label class="status-option" data-value="Resolved">
+                            <input type="radio" name="status" value="Resolved">
                             <div class="status-dot"></div>
-                            <span class="status-option-text">On Hold — Waiting for resources</span>
-                        </label>
-                        <label class="status-option" data-value="completed">
-                            <input type="radio" name="status" value="completed">
-                            <div class="status-dot"></div>
-                            <span class="status-option-text">Completed — Work finished</span>
+                            <span class="status-option-text">Resolved — Work finished</span>
                         </label>
                     </div>
                 </div>
@@ -382,21 +192,6 @@
                     <label class="form-label">Add Notes</label>
                     <textarea class="form-textarea" id="status-notes"
                         placeholder="Describe the work done or any issues faced..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Upload Proof (Optional)</label>
-                    <div class="photo-upload-area" id="photo-upload">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                        </svg>
-                        <p>Tap to take a photo</p>
-                        <span>or upload from gallery</span>
-                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -415,7 +210,27 @@
         <span id="toast-message">Status updated successfully!</span>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
+            authDomain: "setu-6932f.firebaseapp.com",
+            projectId: "setu-6932f",
+            storageBucket: "setu-6932f.firebasestorage.app",
+            messagingSenderId: "1060012410845",
+            appId: "1:1060012410845:web:13da8942457a2d4ed89834"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allTasks = [];
+        let currentFilter = 'all';
+
         document.addEventListener('DOMContentLoaded', () => {
             // Sidebar Toggle
             const sidebar = document.getElementById('sidebar');
@@ -435,45 +250,227 @@
             const sidebarUserName = document.getElementById('sidebar-user-name');
             if (sidebarUserName) sidebarUserName.textContent = userProfile.fullname || 'Worker';
 
-            // Filter Tabs
+            // DOM references
+            const assignmentsList = document.getElementById('assignments-list');
             const filterTabs = document.querySelectorAll('.filter-tab');
-            const cards = document.querySelectorAll('.assignment-card');
-
-            filterTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    filterTabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    const filter = tab.dataset.filter;
-                    cards.forEach(card => {
-                        if (filter === 'all' || card.dataset.status === filter) {
-                            card.style.display = '';
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
-                });
-            });
-
-            // Search
             const searchInput = document.getElementById('search-input');
-            searchInput?.addEventListener('input', () => {
-                const query = searchInput.value.toLowerCase();
-                cards.forEach(card => {
-                    const text = card.textContent.toLowerCase();
-                    card.style.display = text.includes(query) ? '' : 'none';
-                });
-            });
-
-            // Status Modal
             const modal = document.getElementById('status-modal');
             const modalCloseBtn = document.getElementById('modal-close-btn');
             const cancelBtn = document.getElementById('cancel-modal-btn');
             const submitBtn = document.getElementById('submit-status-btn');
             const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
             const statusOptions = document.querySelectorAll('.status-option');
 
-            const openModal = (taskId) => {
-                document.getElementById('modal-task-name').textContent = `Task #${taskId}`;
+            // --- Fetch all tasks assigned to this worker ---
+            const fetchWorkerTasks = async (workerId) => {
+                try {
+                    const q = query(
+                        collection(db, 'reports'),
+                        where('assignedWorkerId', '==', workerId)
+                    );
+                    const snapshot = await getDocs(q);
+                    const tasks = [];
+                    snapshot.forEach(docSnap => {
+                        tasks.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    tasks.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                    return tasks;
+                } catch (error) {
+                    console.error('Error fetching worker tasks:', error);
+                    return [];
+                }
+            };
+
+            // --- Helper: get status class ---
+            const getStatusClass = (status) => {
+                const s = (status || '').toLowerCase();
+                if (s === 'resolved') return 'completed';
+                if (s === 'in progress') return 'in-progress';
+                return 'assigned';
+            };
+
+            const getStatusText = (status) => {
+                const s = (status || '').toLowerCase();
+                if (s === 'resolved') return 'Completed';
+                if (s === 'in progress') return 'In Progress';
+                return 'Assigned';
+            };
+
+            // --- Helper: get due info ---
+            const getDueInfo = (task) => {
+                if (!task.workStartDate || !task.resolutionDuration) return { text: 'No deadline', class: '' };
+                const startDate = new Date(task.workStartDate);
+                const durationDays = parseInt(task.resolutionDuration) || 7;
+                const dueDate = new Date(startDate);
+                dueDate.setDate(dueDate.getDate() + durationDays);
+                const now = new Date();
+                const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+                if (diffDays < 0) return { text: 'Overdue!', class: 'urgent' };
+                if (diffDays === 0) return { text: 'Due Today', class: 'urgent' };
+                if (diffDays === 1) return { text: 'Due Tomorrow', class: '' };
+                return { text: `Due in ${diffDays} days`, class: '' };
+            };
+
+            // --- Update filter counts ---
+            const updateCounts = () => {
+                const total = allTasks.length;
+                const inProgress = allTasks.filter(t => {
+                    const s = (t.status || '').toLowerCase();
+                    return s === 'in progress' || s === 'submitted' || s === 'pending' || s === '';
+                }).length;
+                const completed = allTasks.filter(t => (t.status || '').toLowerCase() === 'resolved').length;
+
+                document.getElementById('count-all').textContent = total;
+                document.getElementById('count-progress').textContent = inProgress;
+                document.getElementById('count-completed').textContent = completed;
+            };
+
+            // --- Render tasks ---
+            const renderTasks = (tasks) => {
+                if (tasks.length === 0) {
+                    assignmentsList.innerHTML = `
+                        <div class="assignment-card" style="text-align:center;padding:40px 24px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:48px;height:48px;color:var(--worker-text-muted,#9ca3af);margin:0 auto 16px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                            </svg>
+                            <p style="color:var(--worker-text-muted,#9ca3af);font-size:0.9rem;font-weight:500;">
+                                ${currentFilter === 'all' ? 'No tasks assigned yet.' : 'No ' + currentFilter + ' tasks.'}
+                            </p>
+                            <p style="color:var(--worker-text-muted,#9ca3af);font-size:0.8rem;margin-top:4px;">
+                                Your supervising officer will assign tasks from the Action Center.
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                assignmentsList.innerHTML = tasks.map((task, index) => {
+                    const statusClass = getStatusClass(task.status);
+                    const statusText = getStatusText(task.status);
+                    const location = [task.location?.full, task.location?.district].filter(Boolean).join(', ') || 'Unknown Location';
+                    const truncLoc = location.length > 35 ? location.substring(0, 35) + '...' : location;
+                    const date = task.createdAt
+                        ? new Date(task.createdAt.seconds * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                        : 'N/A';
+                    const dueInfo = getDueInfo(task);
+                    const assignedBy = task.assignedOfficerName || 'Officer';
+                    const assignedByInitials = assignedBy.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                    const isCompleted = statusClass === 'completed';
+                    const description = task.description || task.issueType || 'No description provided.';
+                    const truncDesc = description.length > 120 ? description.substring(0, 120) + '...' : description;
+
+                    return `
+                        <div class="assignment-card fade-in-up" data-status="${statusClass}" data-id="${task.id}" style="animation-delay: ${index * 0.05}s;">
+                            <div class="assignment-card-header">
+                                <div class="assignment-type">
+                                    <div class="assignment-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="assignment-title">${task.issueType || 'Task'}</div>
+                                        <div class="assignment-id">#${task.id.substring(0, 8).toUpperCase()}</div>
+                                    </div>
+                                </div>
+                                <span class="assignment-status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="assignment-details">
+                                <div class="assignment-detail">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                    </svg>
+                                    ${truncLoc}
+                                </div>
+                                <div class="assignment-detail">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                    </svg>
+                                    ${date}
+                                </div>
+                            </div>
+                            <div class="assignment-description">${truncDesc}</div>
+                            <div class="assignment-footer">
+                                <div class="assigned-by">
+                                    <div class="assigned-by-avatar">${assignedByInitials}</div>
+                                    Assigned by ${assignedBy}
+                                </div>
+                                <div class="deadline-tag ${dueInfo.class}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="${isCompleted ? 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' : 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z'}" />
+                                    </svg>
+                                    ${isCompleted ? 'Done' : dueInfo.text}
+                                </div>
+                            </div>
+                            ${!isCompleted ? `
+                                <button class="update-status-btn" data-task-id="${task.id}" data-task-name="${task.issueType || 'Task'}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+                                    </svg>
+                                    Update Status
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                // Attach click handlers for Update Status buttons
+                document.querySelectorAll('.update-status-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openModal(btn.dataset.taskId, btn.dataset.taskName);
+                    });
+                });
+            };
+
+            // --- Filter logic ---
+            const filterTasks = (filter) => {
+                currentFilter = filter;
+                let filtered = allTasks;
+
+                if (filter === 'in-progress') {
+                    filtered = allTasks.filter(t => {
+                        const s = (t.status || '').toLowerCase();
+                        return s !== 'resolved';
+                    });
+                } else if (filter === 'completed') {
+                    filtered = allTasks.filter(t => (t.status || '').toLowerCase() === 'resolved');
+                }
+
+                // Also apply search
+                const searchQuery = searchInput?.value?.toLowerCase() || '';
+                if (searchQuery) {
+                    filtered = filtered.filter(t => {
+                        const text = [t.issueType, t.location?.full, t.location?.district, t.description, t.id].filter(Boolean).join(' ').toLowerCase();
+                        return text.includes(searchQuery);
+                    });
+                }
+
+                renderTasks(filtered);
+            };
+
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    filterTasks(tab.dataset.filter);
+                });
+            });
+
+            searchInput?.addEventListener('input', () => {
+                filterTasks(currentFilter);
+            });
+
+            // --- Modal ---
+            const openModal = (taskId, taskName) => {
+                document.getElementById('modal-report-id').value = taskId;
+                document.getElementById('modal-task-name').textContent = `${taskName} — #${taskId.substring(0, 8).toUpperCase()}`;
+                statusOptions.forEach(o => o.classList.remove('selected'));
+                document.getElementById('status-notes').value = '';
                 modal.classList.add('show');
                 document.body.style.overflow = 'hidden';
             };
@@ -483,13 +480,6 @@
                 document.body.style.overflow = '';
                 statusOptions.forEach(o => o.classList.remove('selected'));
             };
-
-            document.querySelectorAll('.update-status-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openModal(btn.dataset.taskId);
-                });
-            });
 
             modalCloseBtn?.addEventListener('click', closeModal);
             cancelBtn?.addEventListener('click', closeModal);
@@ -504,22 +494,110 @@
                 });
             });
 
-            // Submit
-            submitBtn?.addEventListener('click', () => {
-                closeModal();
+            // Show toast
+            const showToast = (message, isError = false) => {
+                toastMessage.textContent = message;
+                toast.style.background = isError ? '#ef4444' : '';
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 3000);
+            };
+
+            // --- Submit status update ---
+            submitBtn?.addEventListener('click', async () => {
+                const reportId = document.getElementById('modal-report-id').value;
+                const selectedStatus = document.querySelector('input[name="status"]:checked')?.value;
+                const notes = document.getElementById('status-notes').value.trim();
+
+                if (!selectedStatus) {
+                    showToast('Please select a status.', true);
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+
+                try {
+                    const reportRef = doc(db, 'reports', reportId);
+                    const updateData = {
+                        status: selectedStatus,
+                        lastUpdatedAt: serverTimestamp()
+                    };
+
+                    if (notes) {
+                        updateData.workerNotes = notes;
+                    }
+
+                    if (selectedStatus === 'Resolved') {
+                        updateData.resolvedAt = serverTimestamp();
+                    }
+
+                    await updateDoc(reportRef, updateData);
+
+                    closeModal();
+                    showToast('Status updated successfully!');
+
+                    // Refresh tasks
+                    const user = auth.currentUser;
+                    if (user) {
+                        allTasks = await fetchWorkerTasks(user.uid);
+                        updateCounts();
+                        filterTasks(currentFilter);
+                    }
+                } catch (error) {
+                    console.error('Error updating status:', error);
+                    showToast('Failed to update status. Please try again.', true);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Update';
+                }
             });
 
+            // --- Load assignments ---
+            const loadAssignments = async (user) => {
+                assignmentsList.innerHTML = `
+                    <div class="assignment-card">
+                        <div class="loading-skeleton" style="height:20px;width:60%;margin-bottom:8px;border-radius:8px;background:var(--worker-border,#e5e7eb);animation:pulse 1.5s infinite;"></div>
+                        <div class="loading-skeleton" style="height:16px;width:40%;margin-bottom:16px;border-radius:8px;background:var(--worker-border,#e5e7eb);animation:pulse 1.5s infinite;"></div>
+                        <div class="loading-skeleton" style="height:44px;width:100%;border-radius:8px;background:var(--worker-border,#e5e7eb);animation:pulse 1.5s infinite;"></div>
+                    </div>
+                `;
+
+                allTasks = await fetchWorkerTasks(user.uid);
+                updateCounts();
+                filterTasks(currentFilter);
+            };
+
             // Logout
-            document.getElementById('logout-btn')?.addEventListener('click', () => {
+            document.getElementById('logout-btn')?.addEventListener('click', async () => {
+                try { await signOut(auth); } catch (e) { }
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('userType');
                 localStorage.removeItem('userProfile');
                 window.location.replace('login.html');
             });
+
+            // Auth listener
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    loadAssignments(user);
+                }
+            });
         });
     </script>
+
+    <style>
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
 </body>
 
 </html>

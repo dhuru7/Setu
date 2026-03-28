@@ -118,7 +118,7 @@
         <div id="ai-transition-overlay" class="ai-transition-overlay"></div>
 
         <!-- View 2: AI Chat Interface (Full Screen Chat) -->
-        <main id="search-view-ai" class="search-container-ai">
+        <main id="search-view-ai" class="search-container-ai notranslate">
             <div class="ai-top-bar">
                 <button id="ai-history-btn" class="ai-top-btn" title="Chat History">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -181,7 +181,7 @@
 
 
 
-    <div id="google_translate_element"></div>
+    <div id="google_translate_element" style="display:none;"></div>
 
     <!-- Bottom Navigation -->
     <div id="bottom-nav" class="bottom-nav-container">
@@ -224,7 +224,7 @@
     </div>
 
     <script>
-        function googleTranslateElementInit() { new google.translate.TranslateElement({ pageLanguage: 'en' }, 'google_translate_element'); }
+        function googleTranslateElementInit() { new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,hi,bn,te,mr,ta,ur,gu,kn,ml,pa,or,as,ne', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false }, 'google_translate_element'); }
     </script>
     <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
     <script type="module" src="../static/js/search.js"></script>

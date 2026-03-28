@@ -1,8 +1,8 @@
 // static/js/setu-ai.js
-// Using Sarvam-M AI - Fast, multilingual Indian language model
+// Using Sarvam 30B AI - High-performance multilingual Indian language model
 
 const SARVAM_API_URL = 'https://api.sarvam.ai/v1/chat/completions';
-const SARVAM_MODEL = 'sarvam-m';
+const SARVAM_MODEL = 'sarvam-30b';
 
 // Load API key from gitignored config file (non-blocking)
 let _configKey = '';
@@ -152,9 +152,9 @@ async function callSarvamAPI(messages) {
         body: JSON.stringify({
             model: SARVAM_MODEL,
             messages: messages,
-            temperature: 0.7,
-            top_p: 0.9,
-            max_tokens: 1024,
+            temperature: 0.5,
+            top_p: 0.85,
+            max_tokens: 400,
         }),
     });
 
@@ -168,11 +168,16 @@ async function callSarvamAPI(messages) {
     }
 
     const data = await response.json();
-    console.log("==> [setu-ai] Sarvam-M response:", data);
+    console.log("==> [setu-ai] Sarvam-30B response:", data);
 
     // Extract the response text from Sarvam's OpenAI-compatible response format
     if (data.choices && data.choices.length > 0 && data.choices[0].message) {
-        return data.choices[0].message.content;
+        let content = data.choices[0].message.content;
+        // Strip <think>...</think> reasoning tags that the model sometimes emits
+        content = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+        // Also strip incomplete <think> tags (no closing tag)
+        content = content.replace(/<think>[\s\S]*/gi, '').trim();
+        return content;
     }
 
     throw new Error("Unexpected response format from Sarvam AI.");
@@ -186,7 +191,7 @@ async function callSarvamAPI(messages) {
  */
 export async function generateResponse(prompt, db) {
     try {
-        console.log("==> [setu-ai] Using Sarvam-M AI for:", prompt);
+        console.log("==> [setu-ai] Using Sarvam-30B AI for:", prompt);
 
         const messages = [
             { role: 'system', content: SYSTEM_PROMPT },

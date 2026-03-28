@@ -1185,7 +1185,11 @@ RESPONSE FORMAT (MANDATORY):
 - Leave empty lines between sections.
 - End with a helpful closing line.
 
-RESPONSE LENGTH: Keep responses under 200 words. Be concise and punchy. Do NOT write essays.
+RESPONSE LENGTH: Keep responses under 150 words. Be concise and punchy. Do NOT write essays or long paragraphs.
+
+CRITICAL FORMAT RULES:
+- NEVER output <think> tags or any internal reasoning/chain-of-thought. Only output the final user-facing response.
+- NEVER start your response with "<think>" or any XML-like tags.
 
 RESPONSE RULES:
 1. When database data is provided, ALWAYS give SPECIFIC answers using ACTUAL data from it. NEVER ignore the data.
@@ -1212,7 +1216,7 @@ Use REAL DATA when available. Be accurate, helpful, personalized, and protect us
         userMessage = `${prompt}\n\n[REAL-TIME DATABASE DATA]:\n${contextParts.join('\n')}`;
     }
 
-    console.log('[Setu AI] Sending to Sarvam-M with context length:', userMessage.length);
+    console.log('[Setu AI] Sending to Sarvam-30B with context length:', userMessage.length);
 
     const messages = [
         { role: 'system', content: SETU_AI_PERSONA },
