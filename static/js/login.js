@@ -132,20 +132,23 @@ if (animatedName) {
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const inputVal = document.getElementById('email').value.trim();
+    const rawInput = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
 
-    if (!inputVal || !password) {
+    if (!rawInput || !password) {
         alert("Please fill in all fields");
         return;
     }
 
     // Determine if input is mobile, employee ID, or email
-    let email = inputVal;
-    if (!inputVal.includes('@')) {
-        // Could be a mobile number or Employee ID (AW29393, GPWD12345678, etc.)
-        // Convert to placeholder email for Firebase Auth
-        email = `${inputVal.toUpperCase()}@setu.placeholder.com`;
+    let email = rawInput;
+    if (!rawInput.includes('@')) {
+        // Strip all non-alphanumeric chars (handles +91 prefix added by mobile browsers, spaces, dashes)
+        const cleanedInput = rawInput.replace(/[^A-Za-z0-9]/g, '');
+        // If it's all digits after cleaning (mobile number), keep digits only
+        const isAllDigits = /^\d+$/.test(cleanedInput);
+        const normalizedInput = isAllDigits ? cleanedInput : cleanedInput.toUpperCase();
+        email = `${normalizedInput}@setu.placeholder.com`;
     }
 
     // Show loading state

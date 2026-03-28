@@ -1,6 +1,6 @@
 // js/signup.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // --- 1. FIREBASE SETUP --- DO NOT COMMIT API KEY ---
@@ -427,6 +427,9 @@ function initSignupProcess() {
             // 1. Create User
             const userCredential = await createUserWithEmailAndPassword(auth, placeholderEmail, password);
             const user = userCredential.user;
+
+            // Set displayName on Firebase Auth user object
+            await updateProfile(user, { displayName: fullname });
 
             // 2. Save Data
             // Email is stored as empty string so Profile page prompts user to enter it

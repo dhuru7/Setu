@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script>
+        (function () {
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.replace("login.html");
+            } else {
+                const userType = localStorage.getItem('userType');
+                if (userType !== 'worker') {
+                    window.location.replace(userType === 'authority' ? "authority-dashboard.html" : "index.html");
+                }
+            }
+        })();
+    </script>
+    <title>My Feedback — Setu Worker</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../static/css/worker-home.css">
+
+    <style>
+        /* ─── Page-specific overrides ─── */
+        .worker-content {
+            padding: 24px 20px 40px;
+        }
+
+        /* Stats strip */
+        .fb-stats-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .fb-stats-strip {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fb-stat-card {
+            background: var(--worker-card-bg, #fff);
+            border-radius: 16px;
+            padding: 18px 16px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--worker-border, #e5e7eb);
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .fb-stat-card:nth-child(2) {
+            animation-delay: 0.08s;
+        }
+
+        .fb-stat-card:nth-child(3) {
+            animation-delay: 0.16s;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fb-stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--worker-text-primary, #1a1a1a);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .fb-stat-value.green {
+            color: #22c55e;
+        }
+
+        .fb-stat-value.blue {
+            color: #3b82f6;
+        }
+
+        .fb-stat-value.amber {
+            color: #fbbf24;
+        }
+
+        .fb-stat-label {
+            font-size: 0.8125rem;
+            color: var(--worker-text-muted, #9ca3af);
+            font-weight: 500;
+        }
+
+        /* Criteria averages */
+        .criteria-avg-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 480px) {
+            .criteria-avg-strip {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .crit-card {
+            background: var(--worker-card-bg, #fff);
+            border-radius: 14px;
+            padding: 14px 12px;
+            text-align: center;
+            border: 1px solid var(--worker-border, #e5e7eb);
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .crit-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .crit-card:nth-child(2) {
+            animation-delay: 0.18s;
+        }
+
+        .crit-card:nth-child(3) {
+            animation-delay: 0.26s;
+        }
+
+        .crit-emoji {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .crit-score {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--worker-text-primary, #1a1a1a);
+        }
+
+        .crit-label {
+            font-size: 0.75rem;
+            color: var(--worker-text-muted, #9ca3af);
+            font-weight: 500;
+        }
+
+        /* Section header */
+        .fb-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .fb-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--worker-text-primary, #1a1a1a);
+        }
+
+        .fb-count-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: var(--worker-blue-light, #eff6ff);
+            color: var(--worker-blue, #3b82f6);
+            padding: 3px 10px;
+            border-radius: 99px;
+        }
+
+        /* Feedback cards */
+        .fb-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .fb-card {
+            background: var(--worker-card-bg, #fff);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--worker-border, #e5e7eb);
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .fb-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .fb-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .fb-card-left {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .fb-issue-type {
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: var(--worker-text-primary, #1a1a1a);
+        }
+
+        .fb-report-id {
+            font-size: 0.75rem;
+            color: var(--worker-text-muted, #9ca3af);
+            font-family: monospace;
+        }
+
+        .fb-overall-score {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .fb-score-num {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #fbbf24;
+            line-height: 1;
+        }
+
+        .fb-score-star svg {
+            width: 20px;
+            height: 20px;
+            fill: #fbbf24;
+        }
+
+        /* Criteria bars */
+        .fb-criteria {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding: 12px;
+            background: var(--worker-bg, #f9fafb);
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .fb-crit-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fb-crit-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--worker-text-secondary, #6b7280);
+            min-width: 100px;
+        }
+
+        .fb-crit-track {
+            flex: 1;
+            height: 6px;
+            background: var(--worker-border, #e5e7eb);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .fb-crit-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fb-crit-val {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--worker-text-primary, #1a1a1a);
+            min-width: 24px;
+            text-align: right;
+        }
+
+        /* Comment */
+        .fb-comment {
+            font-size: 0.9rem;
+            color: var(--worker-text-primary, #1a1a1a);
+            line-height: 1.55;
+            font-style: italic;
+            margin-bottom: 12px;
+        }
+
+        /* Card footer */
+        .fb-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid var(--worker-border, #e5e7eb);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .fb-date {
+            font-size: 0.75rem;
+            color: var(--worker-text-muted, #9ca3af);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .fb-date svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .fb-sentiment {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .fb-sentiment.positive {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .fb-sentiment.neutral {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .fb-sentiment.negative {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Proof thumb */
+        .fb-proof-thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid var(--worker-border, #e5e7eb);
+            transition: transform 0.2s;
+        }
+
+        .fb-proof-thumb:hover {
+            transform: scale(1.05);
+        }
+
+        /* Empty & loading */
+        .fb-empty {
+            text-align: center;
+            padding: 52px 20px;
+        }
+
+        .fb-empty-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .fb-empty-title {
+            font-size: 1.0625rem;
+            font-weight: 700;
+            color: var(--worker-text-primary, #1a1a1a);
+            margin-bottom: 6px;
+        }
+
+        .fb-empty-text {
+            font-size: 0.875rem;
+            color: var(--worker-text-muted, #9ca3af);
+        }
+
+        /* Proof image modal */
+        .proof-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.87);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .proof-modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .proof-modal-img {
+            max-width: 100%;
+            max-height: 82vh;
+            border-radius: 14px;
+            object-fit: contain;
+        }
+
+        /* Loading skeleton */
+        .fb-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="worker-portal">
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="worker-sidebar">
+        <div class="sidebar-header">
+            <a href="worker-home.html" class="sidebar-logo">
+                <span class="logo-text">Setu.</span>
+            </a>
+            <button id="close-sidebar-btn" class="sidebar-close" aria-label="Close menu">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="worker-home.html" class="nav-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" />
+                </svg>
+                Home
+            </a>
+            <a href="worker-assignments.html" class="nav-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
+                Assignments
+            </a>
+            <a href="worker-messages.html" class="nav-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+                Messages
+            </a>
+            <a href="worker-feedback.html" class="nav-link active">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                </svg>
+                My Feedback
+            </a>
+            <a href="worker-profile.html" class="nav-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Profile
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-label">Signed in as</div>
+                <div class="user-name" id="sidebar-user-name">Worker</div>
+                <div class="user-role" id="sidebar-user-role">Field Worker</div>
+            </div>
+            <button id="logout-btn" class="logout-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                Log Out
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="worker-main">
+        <!-- Header -->
+        <header class="worker-header">
+            <div class="header-left">
+                <button id="open-sidebar-btn" class="menu-btn" aria-label="Open menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </button>
+                <h1 class="header-title">My Feedback</h1>
+            </div>
+            <div class="header-right"></div>
+        </header>
+
+        <!-- Content -->
+        <div class="worker-content">
+            <!-- Page intro -->
+            <section style="margin-bottom: 20px;">
+                <p style="font-size:0.875rem; color: var(--worker-text-muted,#9ca3af);">Citizen ratings on your resolved
+                    tasks.</p>
+            </section>
+
+            <!-- Overall stats -->
+            <div class="fb-stats-strip" id="stats-strip">
+                <div class="fb-stat-card">
+                    <div class="fb-stat-value amber" id="stat-avg-rating">--</div>
+                    <div class="fb-stat-label">⭐ Avg Rating</div>
+                </div>
+                <div class="fb-stat-card">
+                    <div class="fb-stat-value blue" id="stat-total">--</div>
+                    <div class="fb-stat-label">Total Reviews</div>
+                </div>
+                <div class="fb-stat-card">
+                    <div class="fb-stat-value green" id="stat-positive">--%</div>
+                    <div class="fb-stat-label">Satisfaction</div>
+                </div>
+            </div>
+
+            <!-- Criteria averages -->
+            <div class="criteria-avg-strip">
+                <div class="crit-card">
+                    <span class="crit-emoji">⚡</span>
+                    <div class="crit-score" id="crit-speed">--</div>
+                    <div class="crit-label">Speed</div>
+                </div>
+                <div class="crit-card">
+                    <span class="crit-emoji">🔧</span>
+                    <div class="crit-score" id="crit-quality">--</div>
+                    <div class="crit-label">Quality</div>
+                </div>
+                <div class="crit-card">
+                    <span class="crit-emoji">💬</span>
+                    <div class="crit-score" id="crit-comms">--</div>
+                    <div class="crit-label">Communication</div>
+                </div>
+            </div>
+
+            <!-- Feedback list -->
+            <div class="fb-section-header">
+                <span class="fb-section-title">Reviews Received</span>
+                <span class="fb-count-badge" id="feedback-count">0</span>
+            </div>
+            <div class="fb-list" id="feedback-list">
+                <!-- Skeleton loading -->
+                <div class="fb-card">
+                    <div class="fb-skeleton" style="height:18px; width:55%; margin-bottom:10px;"></div>
+                    <div class="fb-skeleton" style="height:14px; width:80%;"></div>
+                </div>
+                <div class="fb-card">
+                    <div class="fb-skeleton" style="height:18px; width:65%; margin-bottom:10px;"></div>
+                    <div class="fb-skeleton" style="height:14px; width:70%;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Proof Image Modal -->
+    <div id="proof-modal" class="proof-modal-overlay" onclick="this.classList.remove('show')">
+        <img id="proof-modal-img" src="" alt="Proof of Resolution" class="proof-modal-img">
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
+            authDomain: "setu-6932f.firebaseapp.com",
+            projectId: "setu-6932f",
+            storageBucket: "setu-6932f.firebasestorage.app",
+            messagingSenderId: "1060012410845",
+            appId: "1:1060012410845:web:13da8942457a2d4ed89834"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const openSidebarBtn = document.getElementById('open-sidebar-btn');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const sidebarUserName = document.getElementById('sidebar-user-name');
+            const sidebarUserRole = document.getElementById('sidebar-user-role');
+
+            // Sidebar
+            const openSidebar = () => { sidebar.classList.add('open'); sidebarOverlay.classList.add('show'); document.body.style.overflow = 'hidden'; };
+            const closeSidebar = () => { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('show'); document.body.style.overflow = ''; };
+            openSidebarBtn?.addEventListener('click', openSidebar);
+            closeSidebarBtn?.addEventListener('click', closeSidebar);
+            sidebarOverlay?.addEventListener('click', closeSidebar);
+
+            // Logout
+            logoutBtn?.addEventListener('click', async () => {
+                await signOut(auth);
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userType');
+                localStorage.removeItem('userProfile');
+                window.location.replace('login.html');
+            });
+
+            // Load cached profile
+            const profile = JSON.parse(localStorage.getItem('userProfile')) || {};
+            if (sidebarUserName) sidebarUserName.textContent = profile.fullname || 'Worker';
+            if (sidebarUserRole) sidebarUserRole.textContent = profile.role || 'Field Worker';
+
+            // Helpers
+            const getSentimentClass = (r) => r >= 4 ? 'positive' : r >= 3 ? 'neutral' : 'negative';
+            const getSentimentText = (r) => r >= 4 ? 'Satisfied' : r >= 3 ? 'Neutral' : 'Unsatisfied';
+
+            const formatDate = (ts) => {
+                if (!ts) return 'N/A';
+                return new Date(ts.seconds * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+            };
+
+            // Fetch proof image URL for a report
+            const fetchReportProof = async (reportId) => {
+                try {
+                    const snap = await getDoc(doc(db, 'reports', reportId));
+                    if (snap.exists()) return snap.data().workerProofImageUrl || '';
+                } catch (e) { }
+                return '';
+            };
+
+            // Calculate and render stats
+            const renderStats = (feedbacks) => {
+                if (feedbacks.length === 0) {
+                    document.getElementById('stat-avg-rating').textContent = '--';
+                    document.getElementById('stat-total').textContent = '0';
+                    document.getElementById('stat-positive').textContent = '--%';
+                    document.getElementById('crit-speed').textContent = '--';
+                    document.getElementById('crit-quality').textContent = '--';
+                    document.getElementById('crit-comms').textContent = '--';
+                    document.getElementById('feedback-count').textContent = '0';
+                    return;
+                }
+
+                const total = feedbacks.length;
+                const avgRating = (feedbacks.reduce((s, f) => s + (f.rating || 0), 0) / total).toFixed(1);
+                const positiveRate = Math.round((feedbacks.filter(f => (f.rating || 0) >= 4).length / total) * 100);
+
+                const withSpeed = feedbacks.filter(f => f.speedRating);
+                const withQuality = feedbacks.filter(f => f.qualityRating);
+                const withComms = feedbacks.filter(f => f.communicationRating);
+
+                document.getElementById('stat-avg-rating').textContent = avgRating;
+                document.getElementById('stat-total').textContent = total;
+                document.getElementById('stat-positive').textContent = positiveRate + '%';
+                document.getElementById('feedback-count').textContent = total;
+
+                document.getElementById('crit-speed').textContent = withSpeed.length
+                    ? (withSpeed.reduce((s, f) => s + f.speedRating, 0) / withSpeed.length).toFixed(1)
+                    : '--';
+                document.getElementById('crit-quality').textContent = withQuality.length
+                    ? (withQuality.reduce((s, f) => s + f.qualityRating, 0) / withQuality.length).toFixed(1)
+                    : '--';
+                document.getElementById('crit-comms').textContent = withComms.length
+                    ? (withComms.reduce((s, f) => s + f.communicationRating, 0) / withComms.length).toFixed(1)
+                    : '--';
+            };
+
+            // Render feedback list
+            const renderFeedback = async (feedbacks) => {
+                const listEl = document.getElementById('feedback-list');
+
+                if (feedbacks.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="fb-empty">
+                            <div class="fb-empty-icon">⭐</div>
+                            <div class="fb-empty-title">No feedback yet</div>
+                            <div class="fb-empty-text">Feedback from citizens will appear here once your resolved tasks are rated.</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Enrich with proof URLs
+                const enriched = await Promise.all(feedbacks.map(async (fb) => ({
+                    ...fb,
+                    proofUrl: fb.reportId ? await fetchReportProof(fb.reportId) : ''
+                })));
+
+                listEl.innerHTML = enriched.map((fb, idx) => {
+                    const rating = fb.rating || 0;
+                    const speed = fb.speedRating || 0;
+                    const quality = fb.qualityRating || 0;
+                    const comms = fb.communicationRating || 0;
+                    const hasCriteria = speed > 0 || quality > 0 || comms > 0;
+                    const proofUrl = fb.proofUrl || '';
+
+                    const criteriaHtml = hasCriteria ? `
+                        <div class="fb-criteria">
+                            <div class="fb-crit-row">
+                                <span class="fb-crit-label">⚡ Speed</span>
+                                <div class="fb-crit-track"><div class="fb-crit-fill" style="width:${(speed / 5) * 100}%"></div></div>
+                                <span class="fb-crit-val">${speed}/5</span>
+                            </div>
+                            <div class="fb-crit-row">
+                                <span class="fb-crit-label">🔧 Quality</span>
+                                <div class="fb-crit-track"><div class="fb-crit-fill" style="width:${(quality / 5) * 100}%"></div></div>
+                                <span class="fb-crit-val">${quality}/5</span>
+                            </div>
+                            <div class="fb-crit-row">
+                                <span class="fb-crit-label">💬 Communication</span>
+                                <div class="fb-crit-track"><div class="fb-crit-fill" style="width:${(comms / 5) * 100}%"></div></div>
+                                <span class="fb-crit-val">${comms}/5</span>
+                            </div>
+                        </div>
+                    ` : '';
+
+                    const proofHtml = proofUrl ? `
+                        <img src="${proofUrl}" alt="Proof" class="fb-proof-thumb"
+                            onclick="document.getElementById('proof-modal-img').src='${proofUrl}'; document.getElementById('proof-modal').classList.add('show')"
+                            onerror="this.style.display='none'">
+                    ` : '';
+
+                    return `
+                        <div class="fb-card" style="animation-delay: ${idx * 0.06}s;">
+                            <div class="fb-card-header">
+                                <div class="fb-card-left">
+                                    <div class="fb-issue-type">${fb.issueType || 'Issue Report'}</div>
+                                    <div class="fb-report-id">#${(fb.reportId || 'UNKNOWN').substring(0, 8).toUpperCase()}</div>
+                                </div>
+                                <div class="fb-overall-score">
+                                    <span class="fb-score-num">${rating}</span>
+                                    <span class="fb-score-star">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" /></svg>
+                                    </span>
+                                </div>
+                            </div>
+                            ${criteriaHtml}
+                            ${fb.comment ? `<div class="fb-comment">&ldquo;${fb.comment}&rdquo;</div>` : ''}
+                            <div class="fb-card-footer">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <div class="fb-date">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                                        ${formatDate(fb.createdAt)}
+                                    </div>
+                                    ${proofHtml}
+                                </div>
+                                <span class="fb-sentiment ${getSentimentClass(rating)}">${getSentimentText(rating)}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            // Load all feedback for this worker
+            const loadFeedback = async (user) => {
+                try {
+                    const allFeedback = [];
+
+                    // Method 1: feedback collection where workerName matches user's name
+                    const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                    const workerName = userProfile.fullname || user.displayName || '';
+
+                    if (workerName) {
+                        try {
+                            const q = query(
+                                collection(db, 'feedback'),
+                                where('workerName', '==', workerName),
+                                orderBy('createdAt', 'desc'),
+                                limit(30)
+                            );
+                            const snap = await getDocs(q);
+                            snap.forEach(d => allFeedback.push({ id: d.id, ...d.data() }));
+                        } catch (e) {
+                            console.warn('workerName query failed, trying alternate:', e.message);
+                        }
+                    }
+
+                    // Method 2: Fallback — find resolved reports assigned to this worker and match feedback
+                    if (allFeedback.length === 0) {
+                        try {
+                            const reportsQ = query(
+                                collection(db, 'reports'),
+                                where('assignedWorkerId', '==', user.uid)
+                            );
+                            const reportsSnap = await getDocs(reportsQ);
+                            const reportIds = reportsSnap.docs.map(d => d.id);
+
+                            // Fetch feedback for each report (batched in chunks of 10)
+                            for (let i = 0; i < reportIds.length; i += 10) {
+                                const chunk = reportIds.slice(i, i + 10);
+                                if (chunk.length === 0) break;
+                                try {
+                                    const fbQ = query(collection(db, 'feedback'), where('reportId', 'in', chunk));
+                                    const fbSnap = await getDocs(fbQ);
+                                    fbSnap.forEach(d => {
+                                        if (!allFeedback.find(f => f.id === d.id)) {
+                                            allFeedback.push({ id: d.id, ...d.data() });
+                                        }
+                                    });
+                                } catch (e) { /* ignore chunk errors */ }
+                            }
+                        } catch (e) {
+                            console.warn('Fallback feedback fetch failed:', e.message);
+                        }
+                    }
+
+                    // Sort by newest first
+                    allFeedback.sort((a, b) => {
+                        const ta = a.createdAt?.seconds || 0;
+                        const tb = b.createdAt?.seconds || 0;
+                        return tb - ta;
+                    });
+
+                    renderStats(allFeedback);
+                    await renderFeedback(allFeedback);
+
+                } catch (err) {
+                    console.error('Error loading feedback:', err);
+                    document.getElementById('feedback-list').innerHTML = `
+                        <div class="fb-empty">
+                            <div class="fb-empty-icon">⚠️</div>
+                            <div class="fb-empty-title">Could not load feedback</div>
+                            <div class="fb-empty-text">Please try again later.</div>
+                        </div>
+                    `;
+                }
+            };
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    loadFeedback(user);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

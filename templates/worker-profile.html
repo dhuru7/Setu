@@ -69,6 +69,14 @@
                 </svg>
                 Messages
             </a>
+            <a href="worker-feedback.html" class="nav-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                </svg>
+                My Feedback
+            </a>
             <a href="worker-profile.html" class="nav-link active">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor">
@@ -146,16 +154,16 @@
             <!-- Performance Strip -->
             <div class="performance-strip fade-in-up delay-1">
                 <div class="perf-item">
-                    <div class="perf-value" id="perf-completed">47</div>
+                    <div class="perf-value" id="perf-completed">--</div>
                     <div class="perf-label">Completed</div>
                 </div>
                 <div class="perf-item">
-                    <div class="perf-value" id="perf-rating">4.8</div>
-                    <div class="perf-label">Rating</div>
+                    <div class="perf-value" id="perf-total">--</div>
+                    <div class="perf-label">Total Tasks</div>
                 </div>
                 <div class="perf-item">
-                    <div class="perf-value" id="perf-streak">12</div>
-                    <div class="perf-label">Day Streak</div>
+                    <div class="perf-value" id="perf-pending">--</div>
+                    <div class="perf-label">Pending</div>
                 </div>
             </div>
 
@@ -174,7 +182,7 @@
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Worker ID</div>
-                            <div class="detail-value" id="profile-id">WK-00482</div>
+                            <div class="detail-value" id="profile-id">Loading...</div>
                         </div>
                     </div>
 
@@ -189,7 +197,7 @@
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Phone Number</div>
-                            <div class="detail-value" id="profile-phone">+91 98765 43210</div>
+                            <div class="detail-value" id="profile-phone">Loading...</div>
                         </div>
                     </div>
 
@@ -204,7 +212,7 @@
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Email Address</div>
-                            <div class="detail-value" id="profile-email">worker@setu.gov.in</div>
+                            <div class="detail-value" id="profile-email">Loading...</div>
                         </div>
                     </div>
 
@@ -219,7 +227,7 @@
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Department</div>
-                            <div class="detail-value" id="profile-dept">Public Works</div>
+                            <div class="detail-value" id="profile-dept">Loading...</div>
                         </div>
                     </div>
 
@@ -252,7 +260,7 @@
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Member Since</div>
-                            <div class="detail-value" id="profile-joined">Jan 2024</div>
+                            <div class="detail-value" id="profile-joined">Loading...</div>
                         </div>
                     </div>
                 </div>
@@ -777,6 +785,35 @@
         import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+        // Helper to load performance stats from Firestore
+        async function loadPerformanceStats(uid) {
+            try {
+                const q = query(
+                    collection(db, 'reports'),
+                    where('assignedWorkerId', '==', uid)
+                );
+                const snapshot = await getDocs(q);
+                let total = 0, completed = 0, pending = 0;
+                snapshot.forEach(docSnap => {
+                    total++;
+                    const status = (docSnap.data().status || '').toLowerCase();
+                    if (status === 'resolved' || status === 'completed' || status === 'fixed') {
+                        completed++;
+                    } else {
+                        pending++;
+                    }
+                });
+                document.getElementById('perf-completed').textContent = completed;
+                document.getElementById('perf-total').textContent = total;
+                document.getElementById('perf-pending').textContent = pending;
+            } catch (err) {
+                console.error('Error loading perf stats:', err);
+                document.getElementById('perf-completed').textContent = '0';
+                document.getElementById('perf-total').textContent = '0';
+                document.getElementById('perf-pending').textContent = '0';
+            }
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
             authDomain: "setu-6932f.firebaseapp.com",
@@ -860,30 +897,61 @@
                     alert('Please select an image file.');
                     return;
                 }
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('Image must be under 5MB.');
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Image must be under 10MB.');
                     return;
                 }
 
                 try {
                     avatarUploading.classList.add('show');
 
-                    const storageRef = ref(storage, `profile-pictures/${currentUserUid}`);
-                    await uploadBytes(storageRef, file);
-                    const downloadURL = await getDownloadURL(storageRef);
+                    // Compress image client-side and store as base64 in Firestore
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const img = new Image();
+                        img.src = ev.target.result;
+                        img.onload = async () => {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
 
-                    await updateDoc(doc(db, 'users', currentUserUid), { avatar: downloadURL });
+                            // Resize to max 600px width
+                            const MAX_WIDTH = 600;
+                            let width = img.width;
+                            let height = img.height;
 
-                    // Update avatar UI
-                    const avatarEl = document.getElementById('profile-avatar');
-                    avatarEl.innerHTML = `<img src="${downloadURL}" alt="Profile">`;
+                            if (width > MAX_WIDTH) {
+                                height = height * (MAX_WIDTH / width);
+                                width = MAX_WIDTH;
+                            }
 
-                    // Update cache
-                    const cached = JSON.parse(localStorage.getItem('userProfile')) || {};
-                    cached.avatar = downloadURL;
-                    localStorage.setItem('userProfile', JSON.stringify(cached));
+                            canvas.width = width;
+                            canvas.height = height;
+                            ctx.drawImage(img, 0, 0, width, height);
 
-                    avatarUploading.classList.remove('show');
+                            // Convert to Base64 (JPEG, 0.6 quality)
+                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+
+                            try {
+                                await updateDoc(doc(db, 'users', currentUserUid), { avatar: compressedDataUrl });
+
+                                // Update avatar UI
+                                const avatarEl = document.getElementById('profile-avatar');
+                                avatarEl.innerHTML = `<img src="${compressedDataUrl}" alt="Profile">`;
+
+                                // Update cache
+                                const cached = JSON.parse(localStorage.getItem('userProfile')) || {};
+                                cached.avatar = compressedDataUrl;
+                                localStorage.setItem('userProfile', JSON.stringify(cached));
+
+                                avatarUploading.classList.remove('show');
+                            } catch (err) {
+                                console.error('Upload failed:', err);
+                                avatarUploading.classList.remove('show');
+                                alert('Failed to upload image. Please try again.');
+                            }
+                        };
+                    };
+                    reader.readAsDataURL(file);
                 } catch (err) {
                     console.error('Upload failed:', err);
                     avatarUploading.classList.remove('show');
@@ -1053,18 +1121,47 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     currentUserUid = user.uid;
+
+                    // Load performance stats
+                    loadPerformanceStats(user.uid);
+
                     try {
                         const docSnap = await getDoc(doc(db, 'users', user.uid));
                         if (docSnap.exists()) {
                             const data = docSnap.data();
 
                             // Update display from Firestore
+                            if (data.fullname) {
+                                document.getElementById('profile-name').textContent = data.fullname;
+                                document.getElementById('sidebar-user-name').textContent = data.fullname;
+                            }
                             if (data.department) {
                                 document.getElementById('profile-dept').textContent = data.department;
                                 document.getElementById('profile-designation').textContent = `Field Worker \u2014 ${data.department}`;
+                            } else {
+                                document.getElementById('profile-dept').textContent = 'Not set';
                             }
-                            if (data.idCard) document.getElementById('profile-id').textContent = data.idCard;
-                            if (data.mobile) document.getElementById('profile-phone').textContent = data.mobile;
+                            document.getElementById('profile-id').textContent = data.idCard || 'Not set';
+                            document.getElementById('profile-phone').textContent = data.mobile || 'Not set';
+                            document.getElementById('profile-email').textContent = data.email || user.email || 'Not set';
+
+                            // Member Since — compute from createdAt
+                            if (data.createdAt) {
+                                let joinDate;
+                                if (data.createdAt.seconds) {
+                                    joinDate = new Date(data.createdAt.seconds * 1000);
+                                } else if (typeof data.createdAt === 'string') {
+                                    joinDate = new Date(data.createdAt);
+                                }
+                                if (joinDate && !isNaN(joinDate)) {
+                                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                    document.getElementById('profile-joined').textContent = `${months[joinDate.getMonth()]} ${joinDate.getFullYear()}`;
+                                } else {
+                                    document.getElementById('profile-joined').textContent = 'Unknown';
+                                }
+                            } else {
+                                document.getElementById('profile-joined').textContent = 'Unknown';
+                            }
 
                             // Load avatar from Firestore
                             if (data.avatar) {

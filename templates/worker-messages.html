@@ -24,6 +24,188 @@
 
     <link rel="stylesheet" href="../static/css/worker-home.css">
     <link rel="stylesheet" href="../static/css/worker-messages.css">
+
+    <style>
+        /* Notification-specific styles */
+        .notification-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification-card {
+            background: var(--worker-card-bg, #fff);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--worker-border, #e5e7eb);
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .notification-card:hover {
+            border-color: var(--worker-blue, #3b82f6);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .notification-card.unread {
+            background: rgba(59, 130, 246, 0.04);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .notification-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .notification-icon.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .notification-icon.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .notification-icon.warning {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+
+        .notification-icon.verification {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+
+        .notification-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--worker-text-primary, #1a1a1a);
+            margin-bottom: 2px;
+            line-height: 1.3;
+        }
+
+        .notification-message {
+            font-size: 0.8125rem;
+            color: var(--worker-text-secondary, #6b7280);
+            line-height: 1.5;
+        }
+
+        .notification-time {
+            font-size: 0.7rem;
+            color: var(--worker-text-muted, #9ca3af);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .notification-time svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .unread-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3b82f6;
+            flex-shrink: 0;
+            margin-top: 6px;
+        }
+
+        .notifications-empty {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--worker-text-muted, #9ca3af);
+        }
+
+        .notifications-empty svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .notifications-empty h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--worker-text-primary, #1a1a1a);
+            margin-bottom: 4px;
+        }
+
+        .notifications-empty p {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .loading-notifications {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .loading-notification {
+            background: var(--worker-card-bg, #fff);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--worker-border, #e5e7eb);
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .loading-notification .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .mark-all-read-btn {
+            background: none;
+            border: none;
+            color: var(--worker-blue, #3b82f6);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .mark-all-read-btn:hover {
+            background: rgba(59, 130, 246, 0.08);
+        }
+    </style>
 </head>
 
 <body class="worker-portal">
@@ -65,9 +247,9 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                 </svg>
-                Messages
+                Notifications
             </a>
             <a href="worker-profile.html" class="nav-link">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -108,177 +290,243 @@
                             d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
                 </button>
-                <h1 class="header-title">Messages</h1>
+                <h1 class="header-title">Notifications</h1>
             </div>
-            <div class="header-right"></div>
+            <div class="header-right">
+                <button class="mark-all-read-btn" id="mark-all-read-btn" style="display:none;">Mark all read</button>
+            </div>
         </header>
 
         <!-- Content -->
         <div class="worker-content">
-            <!-- Conversation List View -->
-            <div id="conversation-list-view">
-                <div class="conversation-header fade-in-up">
-                    <h2>Conversations</h2>
-                    <p>Stay in touch with your officers and team.</p>
-                </div>
-
-                <!-- Search -->
-                <div class="search-bar fade-in-up delay-1" style="margin-bottom:16px">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                    </svg>
-                    <input type="text" id="search-conversations" placeholder="Search conversations...">
-                </div>
-
-                <!-- Conversations -->
-                <div class="conversation-list">
-                    <!-- Conversation 1 — Unread -->
-                    <div class="conversation-item unread fade-in-up delay-2" data-chat="officer-rajesh">
-                        <div class="conversation-avatar officer">RK</div>
-                        <div class="conversation-content">
-                            <div class="conversation-name">
-                                Rajesh Kumar
-                                <span class="conversation-time">2m ago</span>
-                            </div>
-                            <div class="conversation-preview">
-                                <span>Please prioritize the MG Road pothole repair today.</span>
-                                <span class="unread-badge">2</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Conversation 2 -->
-                    <div class="conversation-item fade-in-up delay-3" data-chat="officer-suresh">
-                        <div class="conversation-avatar officer">SP</div>
-                        <div class="conversation-content">
-                            <div class="conversation-name">
-                                Suresh Patel
-                                <span class="conversation-time">1h ago</span>
-                            </div>
-                            <div class="conversation-preview">
-                                <span>Street light parts have been dispatched to your location.</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Conversation 3 — System -->
-                    <div class="conversation-item fade-in-up delay-4" data-chat="system">
-                        <div class="conversation-avatar system">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" width="20" height="20">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                            </svg>
-                        </div>
-                        <div class="conversation-content">
-                            <div class="conversation-name">
-                                System Notifications
-                                <span class="conversation-time">3h ago</span>
-                            </div>
-                            <div class="conversation-preview">
-                                <span>New assignment: Drain Cleaning at Main Market has been added.</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Conversation 4 — Team -->
-                    <div class="conversation-item fade-in-up delay-5" data-chat="team">
-                        <div class="conversation-avatar team">TM</div>
-                        <div class="conversation-content">
-                            <div class="conversation-name">
-                                Team — Ward 5
-                                <span class="conversation-time">Yesterday</span>
-                            </div>
-                            <div class="conversation-preview">
-                                <span>Great work on the drainage task. Keep it up team!</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="conversation-header fade-in-up">
+                <h2>Your Notifications</h2>
+                <p>Updates about your tasks and assignments.</p>
             </div>
 
-            <!-- Chat View (hidden by default) -->
-            <div id="chat-view" class="chat-container">
-                <!-- Chat Header -->
-                <div class="chat-header">
-                    <button id="chat-back-btn" class="chat-back-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                        </svg>
-                    </button>
-                    <div class="chat-user-info">
-                        <div class="chat-user-name" id="chat-partner-name">Rajesh Kumar</div>
-                        <div class="chat-user-status">Online</div>
-                    </div>
-                </div>
+            <!-- Search -->
+            <div class="search-bar fade-in-up delay-1" style="margin-bottom:16px">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <input type="text" id="search-notifications" placeholder="Search notifications...">
+            </div>
 
-                <!-- Messages -->
-                <div class="chat-messages" id="chat-messages">
-                    <div class="message-date">Today</div>
-
-                    <div class="message system">
-                        Task #A7F3D2E1 assigned to you by Rajesh Kumar
-                    </div>
-
-                    <div class="message received">
-                        <div>Good morning. The pothole on MG Road needs urgent attention. Multiple complaints have come
-                            in.</div>
-                        <div class="message-time">9:15 AM</div>
-                    </div>
-
-                    <div class="message sent">
-                        <div>Good morning sir. I'll head there right away. Do we have the asphalt material ready?</div>
-                        <div class="message-time">9:18 AM</div>
-                    </div>
-
-                    <div class="message received">
-                        <div>Yes, the materials have been dispatched from the warehouse. Should reach by 10 AM.</div>
-                        <div class="message-time">9:20 AM</div>
-                    </div>
-
-                    <div class="message sent">
-                        <div>Perfect, I'll start the preliminary work and wait for the materials. Will update once done.
+            <!-- Notifications List -->
+            <div id="notifications-list" class="notification-list fade-in-up delay-2">
+                <!-- Loading skeletons -->
+                <div class="loading-notifications">
+                    <div class="loading-notification">
+                        <div class="skeleton" style="width:42px;height:42px;flex-shrink:0;border-radius:12px;"></div>
+                        <div style="flex:1;">
+                            <div class="skeleton" style="height:14px;width:70%;margin-bottom:6px;"></div>
+                            <div class="skeleton" style="height:12px;width:90%;"></div>
                         </div>
-                        <div class="message-time">9:22 AM</div>
                     </div>
-
-                    <div class="message received">
-                        <div>Please prioritize the MG Road pothole repair today. The commissioner is monitoring this one
-                            closely.</div>
-                        <div class="message-time">11:45 AM</div>
+                    <div class="loading-notification">
+                        <div class="skeleton" style="width:42px;height:42px;flex-shrink:0;border-radius:12px;"></div>
+                        <div style="flex:1;">
+                            <div class="skeleton" style="height:14px;width:60%;margin-bottom:6px;"></div>
+                            <div class="skeleton" style="height:12px;width:80%;"></div>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Input -->
-                <div class="chat-input-area">
-                    <div class="chat-input-wrapper">
-                        <button class="chat-attach-btn" title="Attach file">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
-                            </svg>
-                        </button>
-                        <textarea class="chat-input" id="chat-input" placeholder="Type a message..."
-                            rows="1"></textarea>
+                    <div class="loading-notification">
+                        <div class="skeleton" style="width:42px;height:42px;flex-shrink:0;border-radius:12px;"></div>
+                        <div style="flex:1;">
+                            <div class="skeleton" style="height:14px;width:55%;margin-bottom:6px;"></div>
+                            <div class="skeleton" style="height:12px;width:75%;"></div>
+                        </div>
                     </div>
-                    <button class="chat-send-btn" id="chat-send-btn" title="Send">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                        </svg>
-                    </button>
                 </div>
             </div>
         </div>
     </main>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, doc, updateDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
+            authDomain: "setu-6932f.firebaseapp.com",
+            projectId: "setu-6932f",
+            storageBucket: "setu-6932f.firebasestorage.app",
+            messagingSenderId: "1060012410845",
+            appId: "1:1060012410845:web:13da8942457a2d4ed89834"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allNotifications = [];
+
+        function timeAgo(date) {
+            if (!date) return '';
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+            if (seconds < 2592000) return Math.floor(seconds / 86400) + 'd ago';
+            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        }
+
+        function getNotificationIcon(type) {
+            switch (type) {
+                case 'task_assigned':
+                case 'assignment':
+                    return {
+                        class: 'info',
+                        svg: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />'
+                    };
+                case 'status_update':
+                    return {
+                        class: 'warning',
+                        svg: '<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />'
+                    };
+                case 'pending_verification':
+                    return {
+                        class: 'verification',
+                        svg: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />'
+                    };
+                case 'resolved':
+                case 'completed':
+                    return {
+                        class: 'success',
+                        svg: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'
+                    };
+                default:
+                    return {
+                        class: 'info',
+                        svg: '<path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />'
+                    };
+            }
+        }
+
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notifications-list');
+            const markAllBtn = document.getElementById('mark-all-read-btn');
+
+            if (notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="notifications-empty">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                        </svg>
+                        <h3>No notifications yet</h3>
+                        <p>You'll receive notifications about task assignments, status updates, and verifications here.</p>
+                    </div>
+                `;
+                markAllBtn.style.display = 'none';
+                return;
+            }
+
+            const hasUnread = notifications.some(n => !n.isRead);
+            markAllBtn.style.display = hasUnread ? '' : 'none';
+
+            container.innerHTML = notifications.map((notif, index) => {
+                const icon = getNotificationIcon(notif.type);
+                const createdDate = notif.createdAt?.seconds
+                    ? new Date(notif.createdAt.seconds * 1000)
+                    : (notif.createdAt ? new Date(notif.createdAt) : null);
+                const timeText = timeAgo(createdDate);
+
+                return `
+                    <div class="notification-card ${notif.isRead ? '' : 'unread'} fade-in-up" 
+                         style="animation-delay: ${index * 0.04}s;"
+                         data-id="${notif.id}"
+                         data-report-id="${notif.reportId || ''}">
+                        <div class="notification-icon ${icon.class}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                ${icon.svg}
+                            </svg>
+                        </div>
+                        <div class="notification-body">
+                            <div class="notification-title">${notif.title || 'Notification'}</div>
+                            <div class="notification-message">${notif.message || ''}</div>
+                            <div class="notification-time">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                ${timeText}
+                            </div>
+                        </div>
+                        ${!notif.isRead ? '<div class="unread-dot"></div>' : ''}
+                    </div>
+                `;
+            }).join('');
+
+            // Click events — mark as read and navigate
+            container.querySelectorAll('.notification-card').forEach(card => {
+                card.addEventListener('click', async () => {
+                    const id = card.dataset.id;
+                    const reportId = card.dataset.reportId;
+
+                    // Mark as read
+                    if (card.classList.contains('unread')) {
+                        try {
+                            await updateDoc(doc(db, 'notifications', id), { isRead: true });
+                            card.classList.remove('unread');
+                            card.querySelector('.unread-dot')?.remove();
+
+                            // Update in local array
+                            const notif = allNotifications.find(n => n.id === id);
+                            if (notif) notif.isRead = true;
+
+                            // Hide mark all button if no more unread
+                            if (!allNotifications.some(n => !n.isRead)) {
+                                document.getElementById('mark-all-read-btn').style.display = 'none';
+                            }
+                        } catch (err) {
+                            console.error('Error marking as read:', err);
+                        }
+                    }
+
+                    // Navigate to assignments if there's a report ID
+                    if (reportId) {
+                        window.location.href = 'worker-assignments.html';
+                    }
+                });
+            });
+        }
+
+        async function loadNotifications(uid) {
+            try {
+                const q = query(
+                    collection(db, 'notifications'),
+                    where('recipientId', '==', uid)
+                );
+                const snapshot = await getDocs(q);
+                allNotifications = [];
+                snapshot.forEach(docSnap => {
+                    allNotifications.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                // Sort by createdAt descending
+                allNotifications.sort((a, b) => {
+                    const aSeconds = a.createdAt?.seconds || 0;
+                    const bSeconds = b.createdAt?.seconds || 0;
+                    return bSeconds - aSeconds;
+                });
+
+                renderNotifications(allNotifications);
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                document.getElementById('notifications-list').innerHTML = `
+                    <div class="notifications-empty">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        <h3>Failed to load</h3>
+                        <p>Could not fetch your notifications. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // Sidebar Toggle
             const sidebar = document.getElementById('sidebar');
@@ -298,91 +546,46 @@
             const sidebarUserName = document.getElementById('sidebar-user-name');
             if (sidebarUserName) sidebarUserName.textContent = userProfile.fullname || 'Worker';
 
-            // Views
-            const listView = document.getElementById('conversation-list-view');
-            const chatView = document.getElementById('chat-view');
-            const chatBackBtn = document.getElementById('chat-back-btn');
-
-            // Open chat
-            document.querySelectorAll('.conversation-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const chatId = item.dataset.chat;
-                    const name = item.querySelector('.conversation-name').childNodes[0].textContent.trim();
-
-                    document.getElementById('chat-partner-name').textContent = name;
-                    item.classList.remove('unread');
-
-                    listView.style.display = 'none';
-                    chatView.classList.add('active');
-
-                    // Scroll to bottom
-                    const messagesEl = document.getElementById('chat-messages');
-                    messagesEl.scrollTop = messagesEl.scrollHeight;
-                });
+            // Search
+            const searchInput = document.getElementById('search-notifications');
+            searchInput?.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                const filtered = allNotifications.filter(n =>
+                    (n.title || '').toLowerCase().includes(query) ||
+                    (n.message || '').toLowerCase().includes(query)
+                );
+                renderNotifications(filtered);
             });
 
-            // Back to list
-            chatBackBtn?.addEventListener('click', () => {
-                chatView.classList.remove('active');
-                listView.style.display = '';
-            });
-
-            // Send message
-            const chatInput = document.getElementById('chat-input');
-            const chatSendBtn = document.getElementById('chat-send-btn');
-            const chatMessages = document.getElementById('chat-messages');
-
-            const sendMessage = () => {
-                const text = chatInput.value.trim();
-                if (!text) return;
-
-                const msg = document.createElement('div');
-                msg.className = 'message sent';
-
-                const now = new Date();
-                const time = now.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
-
-                msg.innerHTML = `
-                    <div>${text}</div>
-                    <div class="message-time">${time}</div>
-                `;
-                chatMessages.appendChild(msg);
-                chatInput.value = '';
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                chatInput.style.height = 'auto';
-            };
-
-            chatSendBtn?.addEventListener('click', sendMessage);
-            chatInput?.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
+            // Mark all as read
+            document.getElementById('mark-all-read-btn')?.addEventListener('click', async () => {
+                const unreadNotifs = allNotifications.filter(n => !n.isRead);
+                try {
+                    await Promise.all(unreadNotifs.map(n =>
+                        updateDoc(doc(db, 'notifications', n.id), { isRead: true })
+                    ));
+                    allNotifications.forEach(n => n.isRead = true);
+                    renderNotifications(allNotifications);
+                } catch (err) {
+                    console.error('Error marking all as read:', err);
                 }
             });
 
-            // Auto-resize textarea
-            chatInput?.addEventListener('input', () => {
-                chatInput.style.height = 'auto';
-                chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
-            });
-
-            // Search conversations
-            const searchInput = document.getElementById('search-conversations');
-            searchInput?.addEventListener('input', () => {
-                const query = searchInput.value.toLowerCase();
-                document.querySelectorAll('.conversation-item').forEach(item => {
-                    const text = item.textContent.toLowerCase();
-                    item.style.display = text.includes(query) ? '' : 'none';
-                });
-            });
-
             // Logout
-            document.getElementById('logout-btn')?.addEventListener('click', () => {
+            document.getElementById('logout-btn')?.addEventListener('click', async () => {
+                try { await signOut(auth); } catch (e) { }
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('userType');
                 localStorage.removeItem('userProfile');
                 window.location.replace('login.html');
             });
+        });
+
+        // Auth state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loadNotifications(user.uid);
+            }
         });
     </script>
 </body>

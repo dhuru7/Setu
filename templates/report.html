@@ -363,6 +363,26 @@
             <button id="close-voicemail-soon-modal-btn" class="btn btn-primary w-full !py-3">Got it</button>
         </div>
     </div>
+    <!-- Spam/Fake Report Detection Modal -->
+    <div id="spam-detected-modal"
+        class="report-modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm hidden opacity-0">
+        <div
+            class="modal-box bg-[var(--bg-secondary)] rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-95">
+            <div class="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
+                <svg class="w-12 h-12 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285zm0 13.036h.008v.008H12v-.008z" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-[var(--text-primary)]">Report Rejected</h2>
+            <p id="spam-reason-text" class="text-[var(--text-muted)] mt-2 mb-2" style="font-size: 0.9rem;">Our AI detected issues with your report.</p>
+            <div id="spam-reasons-list" style="text-align:left; background: rgba(239,68,68,0.08); border-radius: 0.75rem; padding: 0.75rem 1rem; margin-bottom: 1.25rem;">
+            </div>
+            <p class="text-[var(--text-muted)] mb-4" style="font-size: 0.8rem;">Please review your report and ensure the image, description, and address are genuine and relevant to the issue.</p>
+            <button id="close-spam-modal-btn" class="btn btn-primary w-full !py-3">Review My Report</button>
+        </div>
+    </div>
     <div id="google_translate_element" style="display:none;"></div>
 
     <script type="module">
@@ -370,6 +390,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // 1b. Import Report Validator (Fake Report Detection)
+        import { validateReport } from "../static/js/report-validator.js";
 
         // 2. Firebase config - DO NOT COMMIT API KEY
         const firebaseConfig = {
@@ -596,6 +619,19 @@
                 const btn = UI.submitBtn;
                 if (!btn) return;
 
+                // Spam modal UI references
+                const spamModal = document.getElementById('spam-detected-modal');
+                const spamReasonsList = document.getElementById('spam-reasons-list');
+                const closeSpamBtn = document.getElementById('close-spam-modal-btn');
+                if (closeSpamBtn) {
+                    closeSpamBtn.addEventListener('click', () => {
+                        hideModal(spamModal);
+                        // Go back to step 2 (description) for review
+                        currentStep = 2;
+                        showStep(currentStep);
+                    });
+                }
+
                 btn.addEventListener('click', async () => {
                     if (!currentUser) { alert("You must be logged in!"); return; }
                     if (btn.classList.contains('loading')) return;
@@ -603,10 +639,50 @@
                     // Store original content
                     const originalHTML = btn.innerHTML;
 
-                    // 1. LOADING STATE
+                    // 1. LOADING STATE — AI Validation Phase
                     btn.classList.add('loading');
-                    btn.innerHTML = '<div class="loading-spinner"></div> Submitting...';
+                    btn.innerHTML = '<div class="loading-spinner"></div> Verifying report...';
                     btn.disabled = true;
+
+                    // --- FAKE REPORT DETECTION ---
+                    try {
+                        console.log('[Report] Running AI-powered fake report detection...');
+                        const validationResult = await validateReport(
+                            reportData.issue,
+                            reportData.description,
+                            reportData.location,
+                            reportData.image
+                        );
+
+                        if (validationResult.isSpam) {
+                            console.warn('[Report] SPAM DETECTED:', validationResult);
+
+                            // Show spam rejection modal
+                            if (spamReasonsList) {
+                                spamReasonsList.innerHTML = validationResult.reasons.map(r =>
+                                    `<div style="display:flex;align-items:flex-start;gap:0.5rem;margin-bottom:0.5rem;font-size:0.85rem;color:var(--text-secondary,#374151);">
+                                        <span style="color:#ef4444;flex-shrink:0;">✕</span>
+                                        <span>${r}</span>
+                                    </div>`
+                                ).join('');
+                            }
+
+                            btn.classList.remove('loading');
+                            btn.innerHTML = originalHTML;
+                            btn.disabled = false;
+
+                            showModal(spamModal);
+                            return; // DO NOT SUBMIT
+                        }
+
+                        console.log('[Report] Validation passed. Submitting to Firestore...');
+                    } catch (valError) {
+                        // If validation fails, still allow submission (fail-open)
+                        console.warn('[Report] Validation error (proceeding with submission):', valError);
+                    }
+
+                    // 2. SUBMISSION PHASE
+                    btn.innerHTML = '<div class="loading-spinner"></div> Submitting...';
 
                     // --- FIRESTORE SUBMISSION ---
                     try {
@@ -627,13 +703,14 @@
                             authorityName: authority.name,
                             assignedDepartment: assignedDept,
                             status: "Pending",
+                            validated: true,
                             votes: 0,
                             votedBy: [],
                             followers: [],
                             createdAt: serverTimestamp()
                         });
 
-                        // 2. SUCCESS STATE
+                        // 3. SUCCESS STATE
                         btn.classList.remove('loading');
                         btn.classList.add('success');
                         btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:1.125rem;height:1.125rem"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg> Submitted!';
