@@ -38,7 +38,7 @@ const userCache = new Map();
 let activeFilters = {
     status: null,
     issueType: null,
-    nearby: true  // DEFAULT: Show only reports within 10km
+    nearby: false
 };
 
 // Highlight report from URL parameter
@@ -441,22 +441,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ── Feed Loading ────────────────────────────
-
-    // Auto-detect location for default 10km filter
-    const nearbyChip = document.getElementById('nearby-chip');
-    if (nearbyChip) nearbyChip.classList.add('selected');  // Pre-select the chip
-    const autoLoc = await getUserLocation();
-    if (autoLoc) {
-        userLat = autoLoc.lat;
-        userLng = autoLoc.lng;
-        console.log('[ReportFeed] Auto-detected location for 10km filter:', userLat, userLng);
-    } else {
-        // Location not available — disable nearby filter silently
-        console.warn('[ReportFeed] Location unavailable, disabling nearby filter');
-        activeFilters.nearby = false;
-        if (nearbyChip) nearbyChip.classList.remove('selected');
-    }
-    updateFilterBadge();
 
     // Clear initial content
     feedContainer.innerHTML = '';
