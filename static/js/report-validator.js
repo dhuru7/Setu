@@ -193,9 +193,8 @@ Respond ONLY with a JSON object (no markdown, no explanation):
 }
 
 /**
- * AI-powered image relevance check using Sarvam-30B
- * Since Sarvam doesn't support direct image input in chat, we analyze the image metadata
- * and use heuristic + AI description matching
+ * True Vision AI-powered image relevance check using Google Gemini 1.5 Flash
+ * Directly analyzes the image conceptually for fake reports and irrelevance.
  * Returns { isRelevant: boolean, confidence: number, reason: string }
  */
 export async function validateImageRelevance(issueType, imageBase64) {
@@ -205,180 +204,76 @@ export async function validateImageRelevance(issueType, imageBase64) {
             return { isRelevant: false, confidence: 1.0, reason: 'No valid image provided' };
         }
 
-        // 2. Check image size (too small = likely placeholder/icon)
-        const sizeKB = Math.round((imageBase64.length * 3) / 4 / 1024);
-        if (sizeKB < 5) {
-            return { isRelevant: false, confidence: 0.8, reason: 'Image is too small — likely not a real photo' };
-        }
+        // 2. Extract Base64 and MimeType
+        const mimeType = imageBase64.split(';')[0].split(':')[1];
+        const base64Data = imageBase64.split(',')[1];
 
-        // 3. Analyze image properties via canvas
-        const imageAnalysis = await analyzeImageProperties(imageBase64);
+        // 3. Setup Gemini Payload
+        const GEMINI_API_KEY = "AIzaSyBf9iL64B2i7J9NQYHzHISajMItQ_QLVlA";
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-        // 4. AI analysis of image characteristics
-        const apiKey = _getApiKey();
-        if (!apiKey) {
-            return { isRelevant: true, confidence: 0, reason: 'Cannot verify — no API key' };
-        }
+        const prompt = `You are the lead vision moderator for 'Setu', a civic issue reporting app. A user reported an issue categorized as: "${issueType}".
+        
+Look carefully at the provided image. Does this image genuinely look like a photo of a "${issueType}"?
+Identify if this is SPAM or FAKE. Red flags for spam:
+- It's a selfie or heavily focuses on a person's face.
+- It's a random screenshot of a phone screen or text.
+- It's a meme, a cartoon, or heavily digitally altered.
+- It shows an indoor setting (like a bedroom) when the issue is clearly outdoor ("Broken Roads").
+- It is completely pitch black or a solid color.
 
-        const prompt = `You are an image relevance checker for a civic complaint app called Setu. A user reported an issue of type "${issueType}".
+Reply ONLY with a raw JSON object (absolutely no markdown, no \`\`\`json block, no extra text):
+{"isRelevant": true, "confidence": 0.9, "reason": "brief explanation"}`;
 
-IMAGE ANALYSIS DATA:
-- Image dimensions: ${imageAnalysis.width}x${imageAnalysis.height}
-- Dominant colors: ${imageAnalysis.dominantColors}
-- Brightness level: ${imageAnalysis.brightness}
-- Is mostly single color: ${imageAnalysis.isSolidColor}
-- Has face-like features (high skin-tone ratio): ${imageAnalysis.hasSkinTones}
-- Image complexity (edge density): ${imageAnalysis.complexity}
-
-Based on this analysis, determine if this image is LIKELY a genuine photo of a "${issueType}" issue, or if it's likely FAKE/IRRELEVANT (e.g., selfie, screenshot, solid color, random image, meme).
-
-Respond ONLY with JSON (no markdown):
-{"isRelevant": true/false, "confidence": 0.0-1.0, "reason": "brief explanation"}`;
-
-        const response = await fetch(SARVAM_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: SARVAM_MODEL,
-                messages: [{ role: 'user', content: prompt }],
+        const payload = {
+            contents: [{
+                parts: [
+                    { text: prompt },
+                    {
+                        inline_data: {
+                            mime_type: mimeType,
+                            data: base64Data
+                        }
+                    }
+                ]
+            }],
+            generationConfig: {
                 temperature: 0.1,
-                max_tokens: 150,
-            }),
+                maxOutputTokens: 150,
+                responseMimeType: "application/json"
+            }
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
-            return { isRelevant: true, confidence: 0, reason: 'Image validation unavailable' };
+            console.warn('[report-validator] Gemini Vision API error:', response.status);
+            return { isRelevant: true, confidence: 0, reason: 'Vision validation unavailable' };
         }
 
         const data = await response.json();
-        let content = data.choices?.[0]?.message?.content || '';
-        content = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-        content = content.replace(/<think>[\s\S]*/gi, '').trim();
-
+        let content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        
         try {
-            const jsonMatch = content.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                const result = JSON.parse(jsonMatch[0]);
-                return {
-                    isRelevant: !!result.isRelevant,
-                    confidence: parseFloat(result.confidence) || 0,
-                    reason: result.reason || 'No reason provided'
-                };
-            }
+            const result = JSON.parse(content);
+            return {
+                isRelevant: !!result.isRelevant,
+                confidence: parseFloat(result.confidence) || 0,
+                reason: result.reason || 'No specific reason provided'
+            };
         } catch (parseErr) {
-            console.warn('[report-validator] Failed to parse image AI response');
+            console.warn('[report-validator] Failed to parse Gemini response:', content);
+            return { isRelevant: true, confidence: 0, reason: 'Could not parse response' };
         }
-
-        return { isRelevant: true, confidence: 0, reason: 'Could not determine' };
 
     } catch (error) {
         console.error('[report-validator] Image validation error:', error);
-        return { isRelevant: true, confidence: 0, reason: 'Validation error' };
+        return { isRelevant: true, confidence: 0, reason: 'Validation error: ' + error.message };
     }
-}
-
-/**
- * Analyze image properties from base64 using Canvas API
- * Extracts: dominant colors, brightness, skin tone ratio, edge density, dimensions
- */
-function analyzeImageProperties(imageBase64) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            // Use smaller size for performance
-            const maxSize = 100;
-            const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-            canvas.width = Math.round(img.width * scale);
-            canvas.height = Math.round(img.height * scale);
-
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const pixels = imageData.data;
-
-            let totalR = 0, totalG = 0, totalB = 0;
-            let skinPixels = 0;
-            let colorBuckets = {};
-            const totalPixels = canvas.width * canvas.height;
-
-            for (let i = 0; i < pixels.length; i += 4) {
-                const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
-
-                totalR += r; totalG += g; totalB += b;
-
-                // Skin tone detection (simplified RGB range)
-                if (r > 95 && g > 40 && b > 20 &&
-                    r > g && r > b &&
-                    (r - g) > 15 && (r - b) > 15 &&
-                    Math.abs(r - g) < 100) {
-                    skinPixels++;
-                }
-
-                // Color bucketing (reduce to 4-bit per channel)
-                const bucket = `${Math.floor(r / 64)},${Math.floor(g / 64)},${Math.floor(b / 64)}`;
-                colorBuckets[bucket] = (colorBuckets[bucket] || 0) + 1;
-            }
-
-            const avgR = Math.round(totalR / totalPixels);
-            const avgG = Math.round(totalG / totalPixels);
-            const avgB = Math.round(totalB / totalPixels);
-            const brightness = Math.round((avgR * 0.299 + avgG * 0.587 + avgB * 0.114));
-
-            // Determine dominant colors
-            const sortedBuckets = Object.entries(colorBuckets).sort((a, b) => b[1] - a[1]);
-            const topColors = sortedBuckets.slice(0, 3).map(([color, count]) => {
-                const [r, g, b] = color.split(',').map(Number);
-                const pct = Math.round((count / totalPixels) * 100);
-                return `rgb(${r * 64},${g * 64},${b * 64}) ${pct}%`;
-            });
-
-            // Check if mostly solid color
-            const topColorPct = sortedBuckets[0] ? (sortedBuckets[0][1] / totalPixels) : 0;
-            const isSolidColor = topColorPct > 0.7;
-
-            // Edge detection (simple Sobel-like)
-            let edgeCount = 0;
-            for (let y = 1; y < canvas.height - 1; y++) {
-                for (let x = 1; x < canvas.width - 1; x++) {
-                    const idx = (y * canvas.width + x) * 4;
-                    const idxRight = idx + 4;
-                    const idxDown = idx + canvas.width * 4;
-
-                    const gx = Math.abs(pixels[idx] - pixels[idxRight]);
-                    const gy = Math.abs(pixels[idx] - pixels[idxDown]);
-                    if (gx + gy > 30) edgeCount++;
-                }
-            }
-            const complexity = Math.round((edgeCount / totalPixels) * 100);
-
-            const skinRatio = Math.round((skinPixels / totalPixels) * 100);
-
-            resolve({
-                width: img.width,
-                height: img.height,
-                dominantColors: topColors.join(', '),
-                brightness: brightness < 50 ? 'very dark' : brightness < 100 ? 'dark' : brightness < 160 ? 'medium' : brightness < 210 ? 'bright' : 'very bright',
-                isSolidColor: isSolidColor,
-                hasSkinTones: skinRatio > 30,
-                complexity: complexity < 10 ? 'very low (likely solid/gradient)' : complexity < 25 ? 'low' : complexity < 50 ? 'medium' : 'high (detailed photo)'
-            });
-        };
-
-        img.onerror = () => {
-            resolve({
-                width: 0, height: 0, dominantColors: 'unknown',
-                brightness: 'unknown', isSolidColor: false,
-                hasSkinTones: false, complexity: 'unknown'
-            });
-        };
-
-        img.src = imageBase64;
-    });
 }
 
 /**
