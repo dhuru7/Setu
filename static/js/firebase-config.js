@@ -3,13 +3,15 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 // Firebase Configuration - DO NOT COMMIT THIS FILE
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
-    authDomain: "setu-6932f.firebaseapp.com",
-    projectId: "setu-6932f",
-    storageBucket: "setu-6932f.firebasestorage.app",
-    messagingSenderId: "1060012410845",
-    appId: "1:1060012410845:web:13da8942457a2d4ed89834"
+    apiKey: "AIzaSyCnYn--IBcrm1Wpuz5h1nkURCEtPyYHcQI",
+    authDomain: "setu-9cb94.firebaseapp.com",
+    projectId: "setu-9cb94",
+    storageBucket: "setu-9cb94.firebasestorage.app",
+    messagingSenderId: "255854071148",
+    appId: "1:255854071148:web:5a195b0f22a5074d69f749",
+    measurementId: "G-3YNVBDKFFB"
 };
 
 // Initialize Firebase
