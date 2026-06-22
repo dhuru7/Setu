@@ -566,6 +566,9 @@ body.authority-dashboard {
     border: 1px solid var(--auth-border);
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
 .assignment-card:hover {

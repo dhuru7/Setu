@@ -1,6 +1,9 @@
 # Firebase config with API key
 static/js/firebase-config.js
 
+# Sarvam AI API key
+static/js/ai-config.js
+
 # Environment files
 .env
 .env.local

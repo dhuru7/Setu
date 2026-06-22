@@ -54,6 +54,51 @@ function getDepartment(issueType) {
     return 'Municipal Corporation';
 }
 
+function buildRatingSection(reportId, data, currentUser) {
+    const ratings = data.ratings || {};
+    const ratingValues = Object.values(ratings);
+    const avgRating = ratingValues.length > 0
+        ? (ratingValues.reduce((sum, r) => sum + (r.score || r), 0) / ratingValues.length).toFixed(1)
+        : null;
+    const userRating = currentUser ? (ratings[currentUser.uid]?.score || ratings[currentUser.uid] || 0) : 0;
+    const hasRated = userRating > 0;
+
+    // If user is the report owner or has already rated, show existing rating
+    const isOwner = currentUser && data.userId === currentUser.uid;
+
+    let starsHtml = '';
+    for (let i = 1; i <= 5; i++) {
+        const filled = i <= userRating;
+        const clickable = !hasRated && currentUser && !isOwner;
+        starsHtml += `
+            <span class="rating-star ${filled ? 'filled' : ''} ${clickable ? 'clickable' : ''}"
+                  data-star="${i}"
+                  data-report-id="${reportId}"
+                  ${clickable ? `onclick="handleRating('${reportId}', ${i}, this)"` : ''}
+                  style="cursor: ${clickable ? 'pointer' : 'default'}; font-size: 1.3rem; transition: transform 0.15s, color 0.15s;">
+                ${filled ? '★' : '☆'}
+            </span>`;
+    }
+
+    const avgHtml = avgRating
+        ? `<span class="rating-avg" style="font-size: 0.75rem; color: #6b7280; margin-left: 8px;">
+             ${avgRating} avg · ${ratingValues.length} rating${ratingValues.length === 1 ? '' : 's'}
+           </span>`
+        : '';
+
+    const messageHtml = hasRated
+        ? `<span style="font-size: 0.7rem; color: #10b981; font-weight: 600;">✓ You rated this</span>`
+        : (isOwner ? '' : `<span style="font-size: 0.7rem; color: #6b7280;">Rate this resolution</span>`);
+
+    return `
+        <div class="rating-section" id="rating-${reportId}" style="margin-top: 10px; padding: 10px 12px; background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.12); border-radius: 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 2px;">${starsHtml}</div>
+            ${avgHtml}
+            ${messageHtml}
+        </div>
+    `;
+}
+
 export function createReportCardHTML(reportId, data, currentUser, options = {}) {
     const {
         isOwnReport = false,
@@ -75,7 +120,8 @@ export function createReportCardHTML(reportId, data, currentUser, options = {}) 
     let statusRaw = data.status || 'Pending';
     statusRaw = statusRaw.charAt(0).toUpperCase() + statusRaw.slice(1);
     let statusClass = 'pending';
-    if (statusRaw === 'Resolved' || statusRaw === 'Fixed') statusClass = 'resolved';
+    if (statusRaw === 'Resolved' || statusRaw === 'Fixed' || statusRaw === 'Completed') statusClass = 'resolved';
+    else if (statusRaw === 'Pending Verification' || statusRaw === 'Pending verification') statusClass = 'pending-verification';
     else if (statusRaw === 'In Progress' || statusRaw === 'In progress') statusClass = 'in-progress';
 
     const rawDescription = data.description || 'No description provided.';
@@ -202,6 +248,8 @@ export function createReportCardHTML(reportId, data, currentUser, options = {}) 
                         <span class="card-footer-value">${department}</span>
                     </div>
                 </div>
+
+                ${statusClass === 'resolved' ? buildRatingSection(reportId, data, currentUser) : ''}
 
                 <!-- Swipe Hint (mobile) -->
                 <div class="swipe-instruction">

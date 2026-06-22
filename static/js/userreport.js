@@ -98,6 +98,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             let html = '';
 
             docs.forEach((data) => {
+                // Check if spam/unvalidated
+                if (data.validated === false || data.status === 'Spam') return;
+
                 // Check deletion (48h)
                 const dateObj = data.createdAt ? new Date(data.createdAt.seconds * 1000) : new Date();
                 const hoursDiff = Math.abs(new Date() - dateObj) / 36e5;

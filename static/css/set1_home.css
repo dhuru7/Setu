@@ -32,6 +32,16 @@ body {
     /* Increased for "little scroll" effect */
 }
 
+/* --- Google Translate Bar Override --- */
+.skiptranslate,
+.goog-te-banner-frame {
+    display: none !important;
+}
+
+body {
+    top: 0 !important;
+}
+
 /* Header - "Global Bar" Style */
 .header {
     display: flex;

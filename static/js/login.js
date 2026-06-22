@@ -132,18 +132,23 @@ if (animatedName) {
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const inputVal = document.getElementById('email').value.trim();
+    const rawInput = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
 
-    if (!inputVal || !password) {
+    if (!rawInput || !password) {
         alert("Please fill in all fields");
         return;
     }
 
-    // Determine if input is mobile or email
-    let email = inputVal;
-    if (!inputVal.includes('@')) {
-        email = `${inputVal}@setu.placeholder.com`;
+    // Determine if input is mobile, employee ID, or email
+    let email = rawInput;
+    if (!rawInput.includes('@')) {
+        // Strip all non-alphanumeric chars (handles +91 prefix added by mobile browsers, spaces, dashes)
+        const cleanedInput = rawInput.replace(/[^A-Za-z0-9]/g, '');
+        // If it's all digits after cleaning (mobile number), keep digits only
+        const isAllDigits = /^\d+$/.test(cleanedInput);
+        const normalizedInput = isAllDigits ? cleanedInput : cleanedInput.toUpperCase();
+        email = `${normalizedInput}@setu.placeholder.com`;
     }
 
     // Show loading state
@@ -182,6 +187,16 @@ loginForm.addEventListener('submit', async (e) => {
                 }
             }
 
+            // Self-heal worker department if missing
+            if (userData.role === 'worker' && !userData.department && userData.idCard) {
+                try {
+                    await updateDoc(docRef, { department: 'Field Operations' });
+                    userData.department = 'Field Operations';
+                } catch (err) {
+                    console.error("Failed to auto-update worker department:", err);
+                }
+            }
+
             // Save info to LocalStorage for quick access
             localStorage.setItem('userProfile', JSON.stringify(userData));
             localStorage.setItem('isLoggedIn', 'true');
@@ -190,6 +205,8 @@ loginForm.addEventListener('submit', async (e) => {
             // Redirect based on Role
             if (userData.role === 'authority') {
                 window.location.href = "authority-dashboard.html";
+            } else if (userData.role === 'worker') {
+                window.location.href = "worker-home.html";
             } else {
                 window.location.href = "index.html";
             }

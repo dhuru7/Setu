@@ -42,7 +42,7 @@
 
             <!-- Login Form -->
             <form id="login-form" class="login-form" novalidate>
-                <!-- Mobile Number Field -->
+                <!-- Mobile Number / Employee ID Field -->
                 <div class="login-input-group">
                     <div class="login-input-label-row">
                         <label class="login-input-label" for="email">Mobile Number</label>
@@ -53,8 +53,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
-                        <input type="tel" id="email" class="login-input" placeholder="Mobile Number" required
-                            maxlength="10" pattern="[0-9]{10}" inputmode="numeric">
+                        <input type="tel" id="email" class="login-input" placeholder="Enter your 10-digit mobile number"
+                            required maxlength="10" autocomplete="username">
                     </div>
                     <p id="email-error" class="login-error-message"></p>
                 </div>
@@ -138,35 +138,34 @@
                 eyeClosed.classList.toggle('hidden');
             });
 
-            // Mobile Number Validation - Only allow 10 digits
+            // Mobile Number Validation
             const mobileInput = document.getElementById('email');
             const mobileError = document.getElementById('email-error');
 
             mobileInput.addEventListener('input', function (e) {
-                // Remove any non-digit characters
+                // Digits only for mobile number
                 let value = e.target.value.replace(/\D/g, '');
-
-                // Limit to 10 digits
                 if (value.length > 10) {
                     value = value.slice(0, 10);
                 }
-
                 e.target.value = value;
 
-                // Show validation feedback
                 if (value.length > 0 && value.length < 10) {
                     mobileError.textContent = `Enter ${10 - value.length} more digit(s)`;
                     mobileError.classList.add('show');
+                    mobileError.style.color = '';
                 } else if (value.length === 10) {
-                    mobileError.textContent = '';
-                    mobileError.classList.remove('show');
+                    mobileError.textContent = '✓ Valid Mobile Number';
+                    mobileError.classList.add('show');
+                    mobileError.style.color = '#22c55e';
                 } else {
                     mobileError.textContent = '';
                     mobileError.classList.remove('show');
+                    mobileError.style.color = '';
                 }
             });
 
-            // Prevent non-numeric key presses
+            // Only allow digits
             mobileInput.addEventListener('keypress', function (e) {
                 if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
                     e.preventDefault();

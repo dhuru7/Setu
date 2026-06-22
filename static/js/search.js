@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where, orderBy, limit, doc, getDoc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { generateResponse, clearKey } from "./setu-ai.js";
+import { generateResponse, clearKey, callSarvamAPI, getSarvamApiKey } from "./setu-ai.js";
 
 // --- Firebase Config --- DO NOT COMMIT API KEY ---
 const firebaseConfig = {
@@ -45,13 +45,10 @@ const UI = {
     mainSearchInput: document.getElementById('main-search-input'),
     mainSearchBtn: document.getElementById('main-search-btn'),
     aiEntryCard: document.getElementById('ai-entry-card'),
-    tagBtns: document.querySelectorAll('.tag-btn'),
+    searchHeader: document.getElementById('search-header'),
     recentSearchesList: document.getElementById('recent-searches-list'),
-    standardResultsContainer: document.getElementById('standard-results-container'),
-    searchResultsList: document.getElementById('search-results-list'),
-    closeResultsBtn: document.getElementById('close-results-btn'),
-    tagsSection: document.querySelector('.tags-section'),
-    recentSection: document.querySelector('.recent-section'),
+    searchResultsSection: document.getElementById('search-results-section'),
+    recentSection: document.getElementById('recent-section'),
     aiLogoCircle: document.querySelector('.ai-logo-circle'),
     bottomNav: document.getElementById('bottom-nav'),
 
@@ -92,6 +89,8 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // --- Initialization ---
+let isSearchFocused = false;
+
 document.addEventListener('DOMContentLoaded', () => {
     loadRecentSearches();
     startMainEmojiAnimation();
@@ -105,32 +104,60 @@ document.addEventListener('DOMContentLoaded', () => {
     if (UI.aiHistoryBackdrop) UI.aiHistoryBackdrop.addEventListener('click', closeHistoryPanel);
 
     if (UI.mainSearchBtn) UI.mainSearchBtn.addEventListener('click', executeStandardSearch);
-    if (UI.mainSearchInput) UI.mainSearchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') executeStandardSearch();
-    });
-    if (UI.closeResultsBtn) UI.closeResultsBtn.addEventListener('click', () => {
-        UI.standardResultsContainer.classList.add('hidden');
-        if (UI.tagsSection) UI.tagsSection.style.display = 'block';
-        if (UI.recentSection) UI.recentSection.style.display = 'block';
-        UI.searchResultsList.innerHTML = '';
-        UI.mainSearchInput.value = '';
-    });
-
-    if (UI.tagBtns) UI.tagBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            UI.mainSearchInput.value = btn.dataset.search;
-            executeStandardSearch();
-        });
-    });
-
     if (UI.mainSearchInput) {
+        UI.mainSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') executeStandardSearch();
+        });
+
+        // Focus mode: heading fades, recent searches appear
+        UI.mainSearchInput.addEventListener('focus', () => {
+            if (!isSearchFocused) {
+                isSearchFocused = true;
+                UI.mainView.classList.add('search-focused');
+                // Show recent searches when focusing (only if no results shown)
+                if (!UI.searchResultsSection.classList.contains('visible')) {
+                    loadRecentSearches();
+                }
+            }
+        });
+
+        // On input, if text is entered, hide recents and show live results
         UI.mainSearchInput.addEventListener('input', (e) => {
-            if (e.target.value.trim().length > 0) {
-                if (UI.tagsSection) UI.tagsSection.style.display = 'none';
+            const val = e.target.value.trim();
+            if (val.length === 0) {
+                // Show recents, hide results
+                UI.searchResultsSection.classList.remove('visible');
+                UI.searchResultsSection.innerHTML = '';
+                if (UI.recentSection) UI.recentSection.style.display = 'block';
+            } else {
+                // Hide recents when typing
                 if (UI.recentSection) UI.recentSection.style.display = 'none';
             }
         });
     }
+
+    // Click outside search to unfocus
+    document.addEventListener('click', (e) => {
+        if (isSearchFocused && UI.mainSearchInput) {
+            const mainContainer = UI.mainView;
+            const searchWrapper = UI.mainSearchInput.closest('.search-input-wrapper-1');
+            const recentSec = UI.recentSection;
+            const resultsSection = UI.searchResultsSection;
+
+            // If click is outside search bar, recents, and results
+            const clickedInside = searchWrapper?.contains(e.target) ||
+                recentSec?.contains(e.target) ||
+                resultsSection?.contains(e.target) ||
+                UI.aiEntryCard?.contains(e.target);
+
+            if (!clickedInside && UI.mainSearchInput.value.trim() === '') {
+                isSearchFocused = false;
+                UI.mainView.classList.remove('search-focused');
+                UI.searchResultsSection.classList.remove('visible');
+                UI.searchResultsSection.innerHTML = '';
+            }
+        }
+    });
 
     if (UI.aiSendBtn) UI.aiSendBtn.addEventListener('click', executeAISearch);
     if (UI.aiInput) UI.aiInput.addEventListener('keypress', (e) => {
@@ -685,15 +712,19 @@ function saveRecent(key, item) {
 function loadRecentSearches() {
     if (!UI.recentSearchesList) return;
     const list = getRecent('recentSearches');
+    if (list.length === 0) {
+        UI.recentSearchesList.innerHTML = '<div style="text-align:center; padding: 20px; color: #c7c7cc; font-size: 0.85rem;">No recent searches</div>';
+        return;
+    }
     UI.recentSearchesList.innerHTML = list.map(item => `
-        <div class="recent-item cursor-pointer" onclick="handleRecentClick('${item.text}', 'main')">
+        <div class="recent-item cursor-pointer" onclick="handleRecentClick('${escapeHtml(item.text)}', 'main')">
             <div class="recent-icon-circle">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
             <div class="recent-content">
-                <div class="recent-title">${item.text}</div>
+                <div class="recent-title">${escapeHtml(item.text)}</div>
                 <div class="recent-time">${item.time}</div>
             </div>
             <div class="recent-arrow">
@@ -708,7 +739,6 @@ function loadRecentSearches() {
 window.handleRecentClick = (text, type) => {
     if (type === 'main') {
         UI.mainSearchInput.value = text;
-        if (UI.tagsSection) UI.tagsSection.style.display = 'none';
         if (UI.recentSection) UI.recentSection.style.display = 'none';
         executeStandardSearch();
     }
@@ -718,25 +748,104 @@ async function executeStandardSearch() {
     const queryText = UI.mainSearchInput.value.trim();
     if (!queryText) return;
 
+    // Enter focus mode
+    if (!isSearchFocused) {
+        isSearchFocused = true;
+        UI.mainView.classList.add('search-focused');
+    }
+
     saveRecent('recentSearches', { text: queryText, time: 'Just now' });
-    loadRecentSearches();
 
-    UI.standardResultsContainer.classList.remove('hidden');
-    if (UI.tagsSection) UI.tagsSection.style.display = 'none';
+    // Hide recents, show results section
     if (UI.recentSection) UI.recentSection.style.display = 'none';
+    UI.searchResultsSection.classList.add('visible');
 
-    UI.searchResultsList.innerHTML = '<p class="text-center text-gray-500 py-4">Searching...</p>';
+    // Show loading skeletons
+    UI.searchResultsSection.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            ${[1, 2, 3].map(() => `
+                <div class="search-skeleton">
+                    <div class="skel-img"></div>
+                    <div class="skel-text">
+                        <div class="skel-line" style="width:70%"></div>
+                        <div class="skel-line" style="width:50%"></div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 
     try {
-        const reports = await fetchReports(queryText);
-        if (reports.length === 0) {
-            UI.searchResultsList.innerHTML = '<p class="text-center text-gray-500 py-4">No reports found.</p>';
-        } else {
-            UI.searchResultsList.innerHTML = reports.map(createReportCard).join('');
+        // Fetch both reports and officers in parallel
+        const [reports, officers] = await Promise.all([
+            fetchReports(queryText),
+            fetchOfficers(queryText)
+        ]);
+
+        let html = '';
+
+        // Officers section
+        if (officers.length > 0) {
+            html += '<div class="result-section-label">Officers</div>';
+            html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+            html += officers.map(createOfficerCard).join('');
+            html += '</div>';
         }
+
+        // Reports section
+        if (reports.length > 0) {
+            html += '<div class="result-section-label">Reports</div>';
+            html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+            html += reports.map(createReportCard).join('');
+            html += '</div>';
+        }
+
+        // No results  
+        if (reports.length === 0 && officers.length === 0) {
+            html += `
+                <div class="no-results">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    <h4>No results found</h4>
+                    <p>Try different keywords or let Setu AI help you find what you're looking for.</p>
+                </div>
+            `;
+        }
+
+        // Always add "Search with Setu AI" button
+        html += createAISearchButton(queryText);
+
+        UI.searchResultsSection.innerHTML = html;
+
+        // Bind the AI search button
+        const aiBtn = document.getElementById('search-with-ai-btn');
+        if (aiBtn) {
+            aiBtn.addEventListener('click', () => {
+                const searchQuery = aiBtn.dataset.query;
+                // Switch to AI view and populate the input
+                toggleView('ai');
+                setTimeout(() => {
+                    if (UI.aiInput) {
+                        UI.aiInput.value = searchQuery;
+                        UI.aiInput.focus();
+                    }
+                }, 400);
+            });
+        }
+
     } catch (error) {
-        console.error(error);
-        UI.searchResultsList.innerHTML = '<p class="text-center text-red-500">Error fetching results.</p>';
+        console.error('[Search] Error:', error);
+        UI.searchResultsSection.innerHTML = `
+            <div class="no-results">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <h4>Something went wrong</h4>
+                <p>Please try again or search with Setu AI.</p>
+            </div>
+            ${createAISearchButton(queryText)}
+        `;
     }
 }
 
@@ -773,6 +882,13 @@ function detectQueryIntent(prompt) {
     if (/\b(my report|my complaint|my issue|my submission|i reported|i submitted|i filed|did i|have i)\b/i.test(lower)) {
         intents.needsData = true; intents.types.push('my_reports');
     }
+    // Detect update/status queries — also fetch officer info and notifications
+    if (/\b(update|updates|any update|latest update|what.*(happen|update|progress|going on)|status update|news on|follow.?up|action taken|work start|work began|resolution|when.*(fix|resolv|complet|start)|is.*(being|anyone|officer).*(work|handl|look|assign))\b/i.test(lower)) {
+        intents.needsData = true;
+        if (!intents.types.includes('report_updates')) intents.types.push('report_updates');
+        if (!intents.types.includes('my_reports')) intents.types.push('my_reports');
+        if (!intents.types.includes('officer_info')) intents.types.push('officer_info');
+    }
     if ((/\b(status|progress|update|resolved|pending|submitted|in progress|detail|info|check|show|find|get|fetch|look|search|any|what|which|where|list|tell)\b/i.test(lower) &&
         /\b(report|complaint|issue|problem|case|ticket)\b/i.test(lower)) || issueKw.some(k => lower.includes(k))) {
         intents.needsData = true;
@@ -782,8 +898,9 @@ function detectQueryIntent(prompt) {
         intents.needsData = true;
         if (!intents.types.includes('report_lookup')) intents.types.push('report_lookup');
     }
-    if (/\b(officer|authority|authorities|department|who.*(handl|assign|responsible|work)|assign.*(to|officer)|in\s*charge|municipal|corporation|nagar|panchayat)\b/i.test(lower)) {
-        intents.needsData = true; intents.types.push('officer_info');
+    if (/\b(officer|authority|authorities|department|who.*(handl|assign|responsible|work)|assign.*(to|officer)|in\s*charge|municipal|corporation|nagar|panchayat|jurisdiction)\b/i.test(lower)) {
+        intents.needsData = true;
+        if (!intents.types.includes('officer_info')) intents.types.push('officer_info');
     }
     if (/\b(how many|count|total|statistic|stats|number of|pending report|resolved report|summary|overview|data|analytics|trend)\b/i.test(lower)) {
         intents.needsData = true; intents.types.push('stats');
@@ -814,7 +931,7 @@ function formatAITimestamp(ts) {
 }
 
 async function fetchRelevantData(intent) {
-    const result = { myReports: [], reports: [], officers: [], stats: null, currentUser: null, userCity: '' };
+    const result = { myReports: [], reports: [], officers: [], stats: null, currentUser: null, userCity: '', notifications: [] };
 
     // Use cached user or try to get from auth
     const user = currentFirebaseUser || auth.currentUser;
@@ -871,10 +988,47 @@ async function fetchRelevantData(intent) {
                     id: d.id, issueType: r.issueType || 'Unknown', description: (r.description || '').substring(0, 120),
                     status: r.status || 'Unknown', location: r.location?.full || r.location?.city || 'Unknown',
                     city: r.location?.city || '', createdAt: formatAITimestamp(r.createdAt),
-                    department: r.assignedDepartment || r.department || 'Not assigned'
+                    department: r.assignedDepartment || r.department || 'Not assigned',
+                    assignedOfficerName: r.assignedOfficerName || '',
+                    assignedOfficerPhone: r.assignedOfficerPhone || '',
+                    workStartDate: r.workStartDate || '',
+                    resolutionDuration: r.resolutionDuration || '',
+                    actionTakenAt: formatAITimestamp(r.actionTakenAt),
+                    lastUpdatedAt: formatAITimestamp(r.lastUpdatedAt)
                 });
             });
         } catch (e) { console.warn('[AI] My reports fetch failed:', e.message); }
+    }
+
+    // Fetch notifications for the user (report updates from officers)
+    if (intent.types.includes('report_updates') && user) {
+        try {
+            const nq = query(collection(db, 'notifications'), where('recipientId', '==', user.uid));
+            const nsnap = await getDocs(nq);
+            nsnap.forEach(d => {
+                const n = d.data();
+                result.notifications.push({
+                    reportId: n.reportId || '',
+                    type: n.type || '',
+                    title: n.title || '',
+                    message: n.message || '',
+                    officerName: n.actionData?.officerName || '',
+                    officerPhone: n.actionData?.officerPhone || '',
+                    startDate: n.actionData?.startDate || '',
+                    resolutionDuration: n.actionData?.resolutionDuration || '',
+                    previousStatus: n.actionData?.previousStatus || '',
+                    newStatus: n.actionData?.newStatus || '',
+                    department: n.department || '',
+                    createdAt: formatAITimestamp(n.createdAt),
+                    isRead: n.isRead || false
+                });
+            });
+            // Sort newest first
+            result.notifications.sort((a, b) => {
+                const at = a.createdAt || ''; const bt = b.createdAt || '';
+                return bt.localeCompare(at);
+            });
+        } catch (e) { console.warn('[AI] Notifications fetch failed:', e.message); }
     }
 
     if (intent.types.includes('report_lookup') || intent.types.includes('stats') || intent.types.includes('area_reports')) {
@@ -898,8 +1052,14 @@ async function fetchRelevantData(intent) {
                     id: r.id, issueType: r.issueType || 'Unknown', description: (r.description || '').substring(0, 120),
                     status: r.status || 'Unknown', location: r.location?.full || r.location?.city || 'Unknown',
                     city: r.location?.city || '', area: r.location?.area || '', district: r.location?.district || '',
+                    state: r.location?.state || '',
                     createdAt: formatAITimestamp(r.createdAt), department: r.assignedDepartment || r.department || 'Not assigned',
-                    reporterName: nameMap[r.userId] || 'Anonymous'
+                    reporterName: nameMap[r.userId] || 'Anonymous',
+                    assignedOfficerName: r.assignedOfficerName || '',
+                    workStartDate: r.workStartDate || '',
+                    resolutionDuration: r.resolutionDuration || '',
+                    actionTakenAt: formatAITimestamp(r.actionTakenAt),
+                    lastUpdatedAt: formatAITimestamp(r.lastUpdatedAt)
                 });
             });
         } catch (e) { console.warn('[AI] Reports fetch failed:', e.message); }
@@ -911,7 +1071,7 @@ async function fetchRelevantData(intent) {
             const snap = await getDocs(q);
             snap.forEach(d => {
                 const u = d.data();
-                const o = { name: u.fullname || 'Unknown', department: u.department || 'Not specified', city: u.city || 'Not specified' };
+                const o = { name: u.fullname || 'Unknown', department: u.department || 'Not specified', city: u.city || 'Not specified', phone: u.phone || '' };
                 if (u.jurisdiction) {
                     o.state = u.jurisdiction.state || ''; o.district = u.jurisdiction.district || '';
                     o.subDistrict = u.jurisdiction.subDistrict || ''; o.villages = (u.jurisdiction.villages || []).join(', ');
@@ -944,7 +1104,28 @@ function buildDataContext(data, intent) {
         ctx += `\n--- THIS USER'S OWN REPORTS (${data.myReports.length}) ---\n`;
         data.myReports.forEach((r, i) => {
             ctx += `${i + 1}. [${r.issueType}] Status: ${r.status} | Location: ${r.location} | Date: ${r.createdAt} | Dept: ${r.department}`;
+            if (r.assignedOfficerName) ctx += ` | Assigned Officer: ${r.assignedOfficerName}`;
+            if (r.workStartDate) ctx += ` | Work Start: ${r.workStartDate}`;
+            if (r.resolutionDuration) ctx += ` | Est. Resolution: ${r.resolutionDuration}`;
+            if (r.actionTakenAt && r.actionTakenAt !== 'Unknown date') ctx += ` | Action Taken On: ${r.actionTakenAt}`;
+            if (r.lastUpdatedAt && r.lastUpdatedAt !== 'Unknown date') ctx += ` | Last Updated: ${r.lastUpdatedAt}`;
             if (r.description) ctx += ` | Info: ${r.description}`;
+            ctx += '\n';
+        });
+    }
+
+    // Include notifications / updates for the user
+    if (data.notifications && data.notifications.length > 0) {
+        ctx += `\n--- REPORT UPDATES & NOTIFICATIONS (${data.notifications.length}) ---\n`;
+        data.notifications.slice(0, 15).forEach((n, i) => {
+            ctx += `${i + 1}. ${n.title}`;
+            if (n.message) ctx += ` — ${n.message}`;
+            if (n.officerName) ctx += ` | Officer: ${n.officerName}`;
+            if (n.department) ctx += ` | Dept: ${n.department}`;
+            if (n.startDate) ctx += ` | Work Start: ${n.startDate}`;
+            if (n.resolutionDuration) ctx += ` | Est. Resolution: ${n.resolutionDuration}`;
+            if (n.previousStatus && n.newStatus) ctx += ` | Status Change: ${n.previousStatus} → ${n.newStatus}`;
+            ctx += ` | Date: ${n.createdAt}`;
             ctx += '\n';
         });
     }
@@ -961,6 +1142,10 @@ function buildDataContext(data, intent) {
             ctx += `\n--- ALL REPORTS IN SYSTEM (${show.length} of ${reps.length}) ---\n`;
             show.forEach((r, i) => {
                 ctx += `${i + 1}. [${r.issueType}] Status: ${r.status} | Location: ${r.location} | Date: ${r.createdAt} | By: ${r.reporterName} | Dept: ${r.department}`;
+                if (r.assignedOfficerName) ctx += ` | Assigned Officer: ${r.assignedOfficerName}`;
+                if (r.workStartDate) ctx += ` | Work Start: ${r.workStartDate}`;
+                if (r.resolutionDuration) ctx += ` | Est. Resolution: ${r.resolutionDuration}`;
+                if (r.lastUpdatedAt && r.lastUpdatedAt !== 'Unknown date') ctx += ` | Last Updated: ${r.lastUpdatedAt}`;
                 if (r.description) ctx += ` | Info: ${r.description}`;
                 ctx += '\n';
             });
@@ -969,13 +1154,13 @@ function buildDataContext(data, intent) {
     }
 
     if (data.officers.length > 0) {
-        ctx += `\n--- OFFICERS (${data.officers.length}) ---\n`;
+        ctx += `\n--- OFFICERS / AUTHORITIES (${data.officers.length}) ---\n`;
         data.officers.forEach((o, i) => {
             ctx += `${i + 1}. ${o.name} | Dept: ${o.department} | City: ${o.city}`;
             if (o.state) ctx += ` | State: ${o.state}`;
             if (o.district) ctx += ` | District: ${o.district}`;
             if (o.subDistrict) ctx += ` | Sub-Dist: ${o.subDistrict}`;
-            if (o.villages) ctx += ` | Villages: ${o.villages}`;
+            if (o.villages) ctx += ` | Villages/Jurisdiction: ${o.villages}`;
             ctx += '\n';
         });
     }
@@ -992,9 +1177,9 @@ function buildDataContext(data, intent) {
 // ===== END RAG HELPERS =====
 
 async function askSetuAI(prompt) {
-    if (typeof puter === 'undefined') {
+    if (!getSarvamApiKey()) {
         removeThinkingBubble();
-        throw new Error("AI Service not ready. Please refresh the page.");
+        throw new Error("Sarvam API key not set. Please add your API key in Profile settings.");
     }
 
     // ALWAYS detect intent and try to fetch data
@@ -1074,11 +1259,20 @@ YOU HAVE REAL-TIME DATABASE ACCESS. When database data is provided after "[REAL-
 
 IMPORTANT DATA INSTRUCTIONS:
 - The data sections labeled "--- THIS USER'S OWN REPORTS ---" contain the logged-in user's personal reports. USE THEM when they ask about "my reports".
+- The data sections labeled "--- REPORT UPDATES & NOTIFICATIONS ---" contain status updates from officers/authorities, including which officer was assigned, when work started, and estimated resolution time. USE THEM when the user asks about updates or progress.
 - The data sections labeled "--- ALL REPORTS IN SYSTEM ---" contain all public reports. USE THEM when they ask about any reports, issues, or civic problems.
-- The data sections labeled "--- OFFICERS ---" contain authority/officer details. USE THEM when asked about officers or departments.
+- The data sections labeled "--- OFFICERS / AUTHORITIES ---" contain authority/officer details including their JURISDICTION (state, district, sub-district, villages). USE THEM when asked about officers, departments, or who is in charge of an area.
 - The data sections labeled "--- STATISTICS ---" contain aggregate numbers. USE THEM when asked about counts, totals, or stats.
 - If a specific report/issue is asked about, SEARCH through the provided data and pick matching entries.
 - If the data section says "No matching reports found", then say so honestly.
+
+OFFICER & UPDATE RESPONSE RULES:
+- When a report has an "Assigned Officer" field, ALWAYS tell the user the officer's name.
+- When a report has "Work Start" or "Est. Resolution", share those dates/timelines.
+- When the user asks "any updates?", check BOTH their report statuses AND the notifications section for detailed update info.
+- When the user asks about the officer handling their report, check: 1) The "Assigned Officer" field in their reports, 2) The notifications for officer assignment info, 3) The "OFFICERS / AUTHORITIES" section to find jurisdiction-matching officers (match by report location vs officer's jurisdiction district/villages).
+- If no officer has been assigned yet (Assigned Officer is empty), tell the user honestly: the report is still pending assignment, and mention which department it falls under.
+- If an officer's jurisdiction matches the report's location, you can tell the user that this officer is responsible for their area.
 
 STRICT PRIVACY RULES:
 1. CITIZENS: Only mention their NAME when saying who reported an issue. NEVER reveal phone, email, DOB, Aadhaar, or ID numbers.
@@ -1100,16 +1294,21 @@ RESPONSE FORMAT (MANDATORY):
 - Leave empty lines between sections.
 - End with a helpful closing line.
 
-RESPONSE LENGTH: Keep responses under 150 words. Be concise and punchy. Do NOT write essays.
+RESPONSE LENGTH: Keep responses under 150 words. Be concise and punchy. Do NOT write essays or long paragraphs.
+
+CRITICAL FORMAT RULES:
+- NEVER output <think> tags or any internal reasoning/chain-of-thought. Only output the final user-facing response.
+- NEVER start your response with "<think>" or any XML-like tags.
 
 RESPONSE RULES:
 1. When database data is provided, ALWAYS give SPECIFIC answers using ACTUAL data from it. NEVER ignore the data.
 2. ALWAYS use bullet points or numbered lists.
 3. Be friendly, warm, and concise.
-4. Statuses: "Submitted" = pending, "In Progress" = being worked on, "Resolved" = fixed.
+4. Statuses: "Submitted" = pending review/assignment, "In Progress" = officer assigned and working on it, "Resolved" = fixed.
 5. If no matching data, say so honestly and suggest alternatives.
 6. If asked about unrelated topics, redirect politely in 1-2 sentences.
 7. When no database data is provided, answer from general Setu knowledge.
+8. When user asks for updates, provide: current status, assigned officer (if any), work start date (if set), estimated resolution time (if available), and which department is handling it.
 
 SETU PLATFORM KNOWLEDGE:
 ${SETU_KNOWLEDGE}
@@ -1126,14 +1325,14 @@ Use REAL DATA when available. Be accurate, helpful, personalized, and protect us
         userMessage = `${prompt}\n\n[REAL-TIME DATABASE DATA]:\n${contextParts.join('\n')}`;
     }
 
-    console.log('[Setu AI] Sending to AI with context length:', userMessage.length);
+    console.log('[Setu AI] Sending to Sarvam-30B with context length:', userMessage.length);
 
-    const response = await puter.ai.chat([
+    const messages = [
         { role: 'system', content: SETU_AI_PERSONA },
         { role: 'user', content: userMessage }
-    ]);
+    ];
 
-    let text = response?.message?.content || response?.content || JSON.stringify(response);
+    const text = await callSarvamAPI(messages);
 
     removeThinkingBubble();
     saveMessageToChat(currentChatId, 'ai', text);
@@ -1144,38 +1343,55 @@ Use REAL DATA when available. Be accurate, helpful, personalized, and protect us
 
 async function fetchReports(queryText) {
     const qLower = queryText.toLowerCase();
-    console.log('[Search] Searching for:', qLower);
+    const queryWords = qLower.split(/\s+/).filter(w => w.length > 1);
+    console.log('[Search] Searching reports for:', queryWords);
 
     try {
         const reportsRef = collection(db, 'reports');
         let q;
 
         try {
-            q = query(reportsRef, orderBy('createdAt', 'desc'), limit(50));
+            q = query(reportsRef, orderBy('createdAt', 'desc'), limit(100));
         } catch (indexError) {
             console.warn('[Search] Index not available, fetching without order');
-            q = query(reportsRef, limit(50));
+            q = query(reportsRef, limit(100));
         }
 
         const snapshot = await getDocs(q);
         console.log('[Search] Total documents fetched:', snapshot.size);
 
-        const reports = [];
+        const scored = [];
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
-            const searchableText = [
+            const fields = [
                 data.description || '',
                 data.issueType || '',
                 data.location?.full || '',
                 data.location?.city || '',
                 data.location?.area || '',
-                data.status || ''
+                data.location?.district || '',
+                data.location?.state || '',
+                data.status || '',
+                data.assignedDepartment || '',
+                data.department || ''
             ].join(' ').toLowerCase();
 
-            if (searchableText.includes(qLower)) {
-                reports.push({ id: docSnap.id, ...data });
+            // Score: count how many query words match
+            let score = 0;
+            for (const word of queryWords) {
+                if (fields.includes(word)) score++;
+            }
+            // Full-phrase bonus
+            if (fields.includes(qLower)) score += queryWords.length;
+
+            if (score > 0) {
+                scored.push({ score, report: { id: docSnap.id, ...data } });
             }
         });
+
+        // Sort by score descending
+        scored.sort((a, b) => b.score - a.score);
+        const reports = scored.slice(0, 20).map(s => s.report);
 
         console.log('[Search] Matching reports:', reports.length);
         return reports;
@@ -1185,16 +1401,128 @@ async function fetchReports(queryText) {
     }
 }
 
+async function fetchOfficers(queryText) {
+    const qLower = queryText.toLowerCase();
+    const queryWords = qLower.split(/\s+/).filter(w => w.length > 1);
+    console.log('[Search] Searching officers for:', queryWords);
+
+    try {
+        const q = query(collection(db, 'users'), where('role', '==', 'authority'));
+        const snapshot = await getDocs(q);
+
+        const scored = [];
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const fields = [
+                data.fullname || '',
+                data.displayName || '',
+                data.department || '',
+                data.city || '',
+                data.email || '',
+                data.jurisdiction?.state || '',
+                data.jurisdiction?.district || '',
+                data.jurisdiction?.subDistrict || '',
+                (data.jurisdiction?.villages || []).join(' ')
+            ].join(' ').toLowerCase();
+
+            let score = 0;
+            for (const word of queryWords) {
+                if (fields.includes(word)) score++;
+            }
+            if (fields.includes(qLower)) score += queryWords.length;
+
+            if (score > 0) {
+                scored.push({ score, officer: { id: docSnap.id, ...data } });
+            }
+        });
+
+        scored.sort((a, b) => b.score - a.score);
+        console.log('[Search] Matching officers:', scored.length);
+        return scored.slice(0, 10).map(s => s.officer);
+    } catch (e) {
+        console.error('[Search] Officers fetch error:', e);
+        return [];
+    }
+}
+
+function getStatusBadgeClass(status) {
+    const s = (status || '').toLowerCase();
+    if (s === 'submitted') return 'badge-submitted';
+    if (s.includes('progress')) return 'badge-in-progress';
+    if (s === 'resolved') return 'badge-resolved';
+    if (s.includes('pending')) return 'badge-pending';
+    return 'badge-submitted';
+}
+
+function formatSearchDate(ts) {
+    if (!ts) return '';
+    try {
+        const date = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
+        return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    } catch { return ''; }
+}
+
 function createReportCard(c) {
+    const statusBadge = getStatusBadgeClass(c.status);
+    const dateStr = formatSearchDate(c.createdAt);
+    const location = c.location?.full || c.location?.city || c.location?.area || 'Unknown Location';
+    const truncatedLocation = location.length > 45 ? location.substring(0, 42) + '...' : location;
+    const imgSrc = c.imageUrl || '';
+    const imgHtml = imgSrc
+        ? `<img src="${imgSrc}" class="result-card-img" alt="Report" onerror="this.style.display='none'">`
+        : `<div class="result-card-img" style="display:flex;align-items:center;justify-content:center;font-size:1.4rem;">${getIssueEmoji(c.issueType)}</div>`;
+
     return `
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4">
-        <img src="${c.imageUrl || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-lg bg-gray-100 flex-shrink-0">
-        <div class="flex-grow min-w-0">
-            <div class="flex justify-between items-start">
-                <h4 class="font-bold text-gray-900 truncate">${c.issueType}</h4>
-                <span class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">${c.status}</span>
-            </div>
-            <p class="text-sm text-gray-500 truncate mt-1">${c.location?.full || 'Unknown Location'}</p>
+    <div class="result-card">
+        ${imgHtml}
+        <div class="result-card-body">
+            <div class="result-card-title">${escapeHtml(c.issueType || 'Report')}</div>
+            <div class="result-card-sub">${escapeHtml(truncatedLocation)}${dateStr ? ' · ' + dateStr : ''}</div>
         </div>
+        <span class="result-card-badge ${statusBadge}">${escapeHtml(c.status || 'Submitted')}</span>
     </div>`;
+}
+
+function createOfficerCard(o) {
+    const name = o.fullname || o.displayName || 'Officer';
+    const dept = o.department || 'Municipal';
+    const city = o.city || '';
+    const initial = name.charAt(0).toUpperCase();
+
+    return `
+    <div class="result-card">
+        <div class="result-card-img" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:700;font-size:1.2rem;">${initial}</div>
+        <div class="result-card-body">
+            <div class="result-card-title">${escapeHtml(name)}</div>
+            <div class="result-card-sub">${escapeHtml(dept)}${city ? ' · ' + escapeHtml(city) : ''}</div>
+        </div>
+        <span class="result-card-badge badge-officer">Officer</span>
+    </div>`;
+}
+
+function getIssueEmoji(issueType) {
+    const type = (issueType || '').toLowerCase();
+    if (type.includes('pothole') || type.includes('road')) return '🛣️';
+    if (type.includes('light') || type.includes('street')) return '💡';
+    if (type.includes('garbage') || type.includes('waste') || type.includes('dump')) return '🗑️';
+    if (type.includes('water') || type.includes('supply')) return '💧';
+    if (type.includes('sewage') || type.includes('drain')) return '🚰';
+    if (type.includes('traffic') || type.includes('signal')) return '🚦';
+    if (type.includes('park') || type.includes('garden')) return '🌳';
+    if (type.includes('electric') || type.includes('power')) return '⚡';
+    return '📋';
+}
+
+function createAISearchButton(queryText) {
+    return `
+    <button id="search-with-ai-btn" class="ai-search-btn" data-query="${escapeHtml(queryText)}">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+        </svg>
+        <span class="ai-search-btn-text">Search with Setu AI</span>
+        <svg class="ai-search-btn-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+    </button>
+    `;
 }

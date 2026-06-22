@@ -351,6 +351,35 @@
     background-color: #3b82f6;
 }
 
+.status-pill.pending-verification {
+    background-color: rgba(232, 222, 248, 0.92);
+    color: #6d28d9;
+}
+
+.status-pill.pending-verification .status-dot {
+    background-color: #7c3aed;
+}
+
+/* ── Rating Section ────────────────────────── */
+.rating-section {
+    padding: 0.5rem 1rem;
+}
+
+.rating-star {
+    color: #d1d5db;
+    user-select: none;
+    transition: color 0.15s, transform 0.15s;
+}
+
+.rating-star.filled {
+    color: #f59e0b;
+}
+
+.rating-star.clickable:hover {
+    color: #f59e0b;
+    transform: scale(1.25);
+}
+
 /* ── Title + Follow Row ─────────────────────── */
 .card-title-row {
     display: flex;

@@ -467,3 +467,63 @@ body.login-page {
 .login-signup-text {
     animation: fadeInUp 0.4s ease-out 0.6s both;
 }
+
+/* ============ ROTATING PLACEHOLDER ============ */
+.login-input-wrapper {
+    position: relative;
+}
+
+.rotating-placeholder {
+    position: absolute;
+    left: calc(20px + 0.75rem + 20px);
+    /* icon width + margin + padding */
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 400;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 60px);
+}
+
+/* ============ ID TYPE HINT ============ */
+.login-id-hint {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 6px;
+    margin-left: 0.25rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: none;
+    width: fit-content;
+    animation: fadeInUp 0.25s ease-out;
+}
+
+.login-id-hint.show {
+    display: inline-block;
+}
+
+.login-id-hint.worker {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.login-id-hint.officer {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.login-id-hint.mobile {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.login-id-hint.aadhaar {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
