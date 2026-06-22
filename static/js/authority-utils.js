@@ -1,20 +1,7 @@
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { auth, db } from "./firebase-config.js";
 import { getFirestore, collection, getDocs, doc, getDoc, query, where, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// Firebase Config - DO NOT COMMIT API KEY
-const firebaseConfig = {
-    apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
-    authDomain: "setu-6932f.firebaseapp.com",
-    projectId: "setu-6932f",
-    storageBucket: "setu-6932f.firebasestorage.app",
-    messagingSenderId: "1060012410845",
-    appId: "1:1060012410845:web:13da8942457a2d4ed89834"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 // --- HELPER: Jurisdiction Match ---
 function isReportInJurisdiction(report, officerJurisdiction) {

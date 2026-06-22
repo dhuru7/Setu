@@ -1,9 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
 
-// Firebase Configuration - DO NOT COMMIT THIS FILE
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCnYn--IBcrm1Wpuz5h1nkURCEtPyYHcQI",
     authDomain: "setu-9cb94.firebaseapp.com",
@@ -18,5 +18,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-export { auth, db };
+export { app, auth, db, storage };

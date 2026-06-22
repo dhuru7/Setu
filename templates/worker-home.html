@@ -196,31 +196,9 @@
                 </div>
 
                 <div id="priority-tasks" class="task-list">
-<<<<<<< HEAD
                     <!-- Dynamic content loaded by JS -->
                     <div class="task-card" style="text-align:center;padding:32px;">
                         <p style="color:var(--worker-text-muted,#9ca3af);font-size:0.875rem;">Loading your tasks...</p>
-=======
-                    <!-- Loading skeleton -->
-                    <div class="task-card" style="opacity:0.5;">
-                        <div class="task-card-header">
-                            <div class="task-info">
-                                <div class="task-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg></div>
-                                <div>
-                                    <div class="task-title"
-                                        style="background:#e5e7eb;height:14px;width:160px;border-radius:6px;">&nbsp;
-                                    </div>
-                                    <div class="task-id"
-                                        style="background:#f3f4f6;height:10px;width:80px;border-radius:4px;margin-top:4px;">
-                                        &nbsp;</div>
-                                </div>
-                            </div>
-                        </div>
->>>>>>> 0b2de1096cf6f9d21d0d10cc4ecc83a8f7db7726
                     </div>
                 </div>
             </section>
@@ -280,25 +258,10 @@
     </main>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { auth, db } from "../static/js/firebase-config.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
-            authDomain: "setu-6932f.firebaseapp.com",
-            projectId: "setu-6932f",
-            storageBucket: "setu-6932f.firebasestorage.app",
-            messagingSenderId: "1060012410845",
-            appId: "1:1060012410845:web:13da8942457a2d4ed89834"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-<<<<<<< HEAD
-=======
         function getStatusKey(status) {
             const s = (status || '').toLowerCase();
             if (s === 'resolved' || s === 'completed' || s === 'fixed') return 'completed';
@@ -307,7 +270,6 @@
         }
 
         function getPriorityClass(task) {
-            // Determine priority based on deadline urgency
             if (!task.workStartDate || !task.resolutionDuration) return 'medium';
             const durationDays = { '1-day': 1, '2-days': 2, '3-days': 3, '1-week': 7, '2-weeks': 14, '1-month': 30 }[task.resolutionDuration] || 7;
             const deadlineDate = new Date(task.workStartDate);
@@ -331,7 +293,6 @@
 
         function renderPriorityTasks(tasks) {
             const container = document.getElementById('priority-tasks');
-            // Filter to active (non-resolved, non-submitted) tasks and take top 3
             const activeTasks = tasks.filter(t => {
                 const key = getStatusKey(t.status);
                 return key === 'pending';
@@ -365,17 +326,17 @@
                                 <div class="task-icon ${priority === 'high' ? 'urgent' : ''}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor">
-                                        ${priority === 'high'
-                        ? '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />'
-                        : '<path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17l-5.385 3.347A.75.75 0 015 17.845V5.655a.75.75 0 011.035-.672l5.385 3.347a.75.75 0 010 1.272l-5.385 3.347z" />'}
+                                        \${priority === 'high'
+                                            ? '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />'
+                                            : '<path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17l-5.385 3.347A.75.75 0 015 17.845V5.655a.75.75 0 011.035-.672l5.385 3.347a.75.75 0 010 1.272l-5.385 3.347z" />'}
                                     </svg>
                                 </div>
                                 <div>
-                                    <div class="task-title">${issueType} — ${locationText.length > 20 ? locationText.substring(0, 20) + '...' : locationText}</div>
-                                    <div class="task-id">#${taskIdShort}</div>
+                                    <div class="task-title">\${issueType} — \${locationText.length > 20 ? locationText.substring(0, 20) + '...' : locationText}</div>
+                                    <div class="task-id">#\${taskIdShort}</div>
                                 </div>
                             </div>
-                            <span class="task-priority ${priority}">${priority.charAt(0).toUpperCase() + priority.slice(1)}</span>
+                            <span class="task-priority \${priority}">\${priority.charAt(0).toUpperCase() + priority.slice(1)}</span>
                         </div>
                         <div class="task-meta">
                             <div class="task-meta-item">
@@ -386,7 +347,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                                 </svg>
-                                ${locationText.length > 25 ? locationText.substring(0, 25) + '...' : locationText}
+                                \${locationText.length > 25 ? locationText.substring(0, 25) + '...' : locationText}
                             </div>
                             <div class="task-meta-item">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -394,7 +355,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                ${dueText}
+                                \${dueText}
                             </div>
                         </div>
                     </a>
@@ -416,7 +377,7 @@
             requestAnimationFrame(animate);
         }
 
-        async function loadWorkerData(uid) {
+        async function loadWorkerDashboard(uid) {
             try {
                 const q = query(
                     collection(db, 'reports'),
@@ -451,7 +412,7 @@
                     animateNumber(effEl, efficiency);
                     // Re-add the % after animation
                     setTimeout(() => {
-                        effEl.innerHTML = `${efficiency}<span style="font-size:.875rem;color:var(--worker-text-muted)">%</span>`;
+                        effEl.innerHTML = `\${efficiency}<span style="font-size:.875rem;color:var(--worker-text-muted)">%</span>`;
                     }, 650);
                 }
 
@@ -474,7 +435,6 @@
             }
         }
 
->>>>>>> 0b2de1096cf6f9d21d0d10cc4ecc83a8f7db7726
         document.addEventListener('DOMContentLoaded', () => {
             // Sidebar Toggle
             const sidebar = document.getElementById('sidebar');

@@ -1,5 +1,4 @@
-# Firebase config with API key
-static/js/firebase-config.js
+# Firebase config with API key - committed for static Vercel deployment
 
 # Sarvam AI API key
 static/js/ai-config.js

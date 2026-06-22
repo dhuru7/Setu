@@ -1,21 +1,7 @@
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { auth, db } from "./firebase-config.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-// --- Firebase Setup --- DO NOT COMMIT API KEY ---
-const firebaseConfig = {
-    apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
-    authDomain: "setu-6932f.firebaseapp.com",
-    projectId: "setu-6932f",
-    storageBucket: "setu-6932f.firebasestorage.app",
-    messagingSenderId: "1060012410845",
-    appId: "1:1060012410845:web:13da8942457a2d4ed89834"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 document.addEventListener('DOMContentLoaded', () => {
 

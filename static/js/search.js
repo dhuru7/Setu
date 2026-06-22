@@ -1,21 +1,8 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { auth, db } from "./firebase-config.js";
 import { getFirestore, collection, getDocs, query, where, orderBy, limit, doc, getDoc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { generateResponse, clearKey, callSarvamAPI, getSarvamApiKey } from "./setu-ai.js";
 
-// --- Firebase Config --- DO NOT COMMIT API KEY ---
-const firebaseConfig = {
-    apiKey: "AIzaSyD5MCFaYzkNhXQj1NKVmft680wgGu0Me8E",
-    authDomain: "setu-6932f.firebaseapp.com",
-    projectId: "setu-6932f",
-    storageBucket: "setu-6932f.firebasestorage.app",
-    messagingSenderId: "1060012410845",
-    appId: "1:1060012410845:web:13da8942457a2d4ed89834"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
 
 // --- Constants & State ---
 const MAX_RESULTS = 50;
