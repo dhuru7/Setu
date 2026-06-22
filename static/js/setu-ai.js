@@ -139,24 +139,41 @@ Remember: You represent Setu. Stay on-topic, be accurate, and only share informa
  */
 async function callSarvamAPI(messages) {
     const apiKey = getSarvamApiKey();
-    if (!apiKey) {
-        throw new Error("Sarvam API key not set. Please add your API key in Profile settings.");
-    }
+    const payload = {
+        model: SARVAM_MODEL,
+        messages: messages,
+        temperature: 0.5,
+        top_p: 0.85,
+        max_tokens: 400,
+    };
 
-    const response = await fetch(SARVAM_API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'api-subscription-key': apiKey,
-        },
-        body: JSON.stringify({
-            model: SARVAM_MODEL,
-            messages: messages,
-            temperature: 0.5,
-            top_p: 0.85,
-            max_tokens: 400,
-        }),
-    });
+    let response;
+    try {
+        response = await fetch('/api/sarvam', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload),
+        });
+        if (response.status === 404) {
+            throw new Error('Serverless function not found (local static hosting)');
+        }
+    } catch (serverlessErr) {
+        console.log('[setu-ai] Serverless endpoint not available, falling back to client-side API call');
+        if (!apiKey) {
+            throw new Error("Sarvam API key not set. Please add your API key in Profile settings.");
+        }
+
+        response = await fetch(SARVAM_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'api-subscription-key': apiKey,
+            },
+            body: JSON.stringify(payload),
+        });
+    }
 
     if (!response.ok) {
         const errorText = await response.text();

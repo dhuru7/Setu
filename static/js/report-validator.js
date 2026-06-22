@@ -120,11 +120,6 @@ export function validateAddress(location) {
 export async function validateWithAI(issueType, description, location) {
     try {
         const apiKey = _getApiKey();
-        if (!apiKey) {
-            console.warn('[report-validator] No API key available, skipping AI validation');
-            return { isSpam: false, confidence: 0, reason: 'API key not available' };
-        }
-
         const prompt = `You are a spam detection system for a civic complaint portal called Setu. Analyze this report and determine if it is GENUINE or SPAM/FAKE.
 
 REPORT DETAILS:
@@ -142,19 +137,44 @@ SPAM INDICATORS to check:
 Respond ONLY with a JSON object (no markdown, no explanation):
 {"isSpam": true/false, "confidence": 0.0-1.0, "reason": "brief explanation"}`;
 
-        const response = await fetch(SARVAM_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: SARVAM_MODEL,
-                messages: [{ role: 'user', content: prompt }],
-                temperature: 0.1,
-                max_tokens: 150,
-            }),
-        });
+        let response;
+        try {
+            response = await fetch('/api/sarvam', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: SARVAM_MODEL,
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.1,
+                    max_tokens: 150,
+                }),
+            });
+            if (response.status === 404) {
+                throw new Error('Serverless function not found (local static hosting)');
+            }
+        } catch (serverlessErr) {
+            console.log('[report-validator] Serverless endpoint not available, falling back to client-side API call');
+            if (!apiKey) {
+                console.warn('[report-validator] No API key available, skipping AI validation');
+                return { isSpam: false, confidence: 0, reason: 'API key not available' };
+            }
+
+            response = await fetch(SARVAM_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: SARVAM_MODEL,
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.1,
+                    max_tokens: 150,
+                }),
+            });
+        }
 
         if (!response.ok) {
             console.warn('[report-validator] AI validation failed:', response.status);
@@ -208,12 +228,23 @@ export async function validateImageRelevance(issueType, imageBase64) {
         const mimeType = imageBase64.split(';')[0].split(':')[1];
         const base64Data = imageBase64.split(',')[1];
 
-        // 3. Setup Gemini Payload
-        const GEMINI_API_KEY = "AIzaSyBf9iL64B2i7J9NQYHzHISajMItQ_QLVlA";
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        let response;
+        try {
+            response = await fetch('/api/gemini-validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ issueType, imageBase64 })
+            });
+            if (response.status === 404) {
+                throw new Error('Serverless function not found (local static hosting)');
+            }
+        } catch (serverlessErr) {
+            console.log('[report-validator] Serverless endpoint not available, falling back to client-side API call');
+            const GEMINI_API_KEY = "AIzaSyBf9iL64B2i7J9NQYHzHISajMItQ_QLVlA";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-        const prompt = `You are the lead vision moderator for 'Setu', a civic issue reporting app. A user reported an issue categorized as: "${issueType}".
-        
+            const prompt = `You are the lead vision moderator for 'Setu', a civic issue reporting app. A user reported an issue categorized as: "${issueType}".
+            
 Look carefully at the provided image. Does this image genuinely look like a photo of a "${issueType}"?
 Identify if this is SPAM or FAKE. Red flags for spam:
 - It's a selfie or heavily focuses on a person's face.
@@ -225,30 +256,31 @@ Identify if this is SPAM or FAKE. Red flags for spam:
 Reply ONLY with a raw JSON object (absolutely no markdown, no \`\`\`json block, no extra text):
 {"isRelevant": true, "confidence": 0.9, "reason": "brief explanation"}`;
 
-        const payload = {
-            contents: [{
-                parts: [
-                    { text: prompt },
-                    {
-                        inline_data: {
-                            mime_type: mimeType,
-                            data: base64Data
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        {
+                            inline_data: {
+                                mime_type: mimeType,
+                                data: base64Data
+                            }
                         }
-                    }
-                ]
-            }],
-            generationConfig: {
-                temperature: 0.1,
-                maxOutputTokens: 150,
-                responseMimeType: "application/json"
-            }
-        };
+                    ]
+                }],
+                generationConfig: {
+                    temperature: 0.1,
+                    maxOutputTokens: 150,
+                    responseMimeType: "application/json"
+                }
+            };
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+            response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        }
 
         if (!response.ok) {
             console.warn('[report-validator] Gemini Vision API error:', response.status);
